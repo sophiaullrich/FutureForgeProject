@@ -3,6 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import { Link, useLocation } from 'react-router-dom'; // useLocation to check active link
 import './NavigationBar.css'; 
 import logo from './assets/gobearlogo.png';
+import { IoSettingsOutline } from 'react-icons/io5';
 
 function NavigationBar() {
   const location = useLocation(); // Hook to get current path
@@ -62,8 +63,7 @@ function NavigationBar() {
       </nav>
 
       <div className="navbar-footer">
-        {/* Placeholder for the settings icon */}
-        <span role="img" aria-label="settings">⚙️</span>
+        <IoSettingsOutline size={45} color="#F3E7D3"/>
       </div>
     </div>
   );
