@@ -1,0 +1,53 @@
+.tasks-content-area {
+  background-color: #F3E7D3;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  margin-left: 20px;
+  width: 800px;
+  height: 600px;
+}
+
+.tabs-container {
+  display: flex;
+  border-bottom: 2px solid #22336A;
+  margin-bottom: 20px;
+}
+
+.tab-item {
+  width: 267px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #F5EBE0;
+  color: #22336A;
+  font-family: "SF Pro Rounded", Arial, sans-serif; 
+  font-size: 16px;
+  font-weight: bold;
+  border: 1px solid #22336A;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-item:first-child {
+  border-top-right-radius: 0;
+}
+.tab-item:last-child {
+  border-top-left-radius: 0;
+  border-left: none;
+}
+
+.tab-item.active-tab {
+  background-color: #22336A;
+  color: #F3E7D3;
+  border-color: #22336A;
+}
+
+.tab-item:not(.active-tab):hover {
+  background-color: #e0d5c4;
+}

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import './TasksPage.css'; 
 
 const tasksData = [
     {
@@ -23,7 +24,7 @@ const tasksData = [
         done: false
     },
         {
-        id: 1,
+        id: 4,
         name: 'Firebase Authentication Setup',
         due: {month: 'JUN', day: '28'},
         team: 'Team 3',
@@ -35,12 +36,12 @@ export default function  TasksPage(){
     const [activeTab, setActiveTab] = useState('myTasks');
 
     return (
-        <div className="tasks-page">
-            <div className="tabs">
+        <div>
+            <div className="tabs-container">
                 <button className={activeTab === 'myTasks' ? 'tab-active' : 'tab'} onClick={()=>setActiveTab('myTasks')}>My Tasks</button>
                 <button className={activeTab === 'teamTasks' ? 'tab-active' : 'tab'} onClick={()=>setActiveTab('teamTasks')}>Team Tasks</button>
             </div>
-            <div className='task-table'>
+            <div className='tasks-content-area'>
                 <div className='task-header'>
                     <span>Done?</span>
                     <span>Task Name</span>
