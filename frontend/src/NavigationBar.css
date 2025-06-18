@@ -1,0 +1,120 @@
+.navbar-container {
+  width: 307px; /* Fixed width of the navbar */
+  background-color: #252B2F;
+  padding: 20px;
+  display: flex;
+  flex-direction: column; /* Stack header, nav, footer vertically */
+  justify-content: space-between; /* Pushes footer to bottom */
+  height: 100%; /* Take full height of app-container */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow on the edge */
+}
+
+.navbar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 76px; /* Space below header */
+  color: #F3E7D3; 
+}
+
+.navbar-header .logo {
+  width: 138px;
+  height: 50px;
+  margin-left: 68px;
+}
+
+.navbar-bg {
+  width: 270px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #F3E7D3;
+  margin-top: 16px;
+  margin-left: 19px;
+}
+
+.navbar-nav {
+  position: relative; /* For positioning the animated line */
+}
+
+.navbar-nav .line {
+  width: 4px;
+  height: 40px; /* same height as your link container */
+  background: #AB1C36;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 2px;
+  transition: top 851ms cubic-bezier(0.34, 1.56, 0.64, 1); /* custom spring mimic */
+}
+
+.navbar-nav ul {
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-nav li {
+  margin-bottom: 24px; /* Space between links */
+  position: relative;
+}
+
+.navbar-nav li:hover {
+  opacity: 0.2;
+}
+
+.navbar-nav li.active {
+  opacity: 1;
+}
+
+.navbar-nav a {
+  display: block; /* Make the whole area clickable */
+  text-decoration: none;
+  padding: 10px 15px;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  color: #F5EBE0; /* Light beige text */
+  position: relative;
+}
+
+.navbar-nav a:hover {
+  cursor: pointer;
+}
+
+/* Animated underline */
+.navbar-nav .line {
+  width: 2px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: #F5EBE0; 
+  transition: all 851ms cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Custom spring animation matching Figma settings */
+  /* 
+    Custom spring approximation:
+    - 851ms duration
+    - 85 stiffness, 14.1 damping, 1 mass translates roughly to cubic-bezier(0.68, -0.55, 0.265, 1.55)
+    - This creates a bouncy, spring-like effect
+  */
+}
+
+.navbar-footer {
+  text-align: center;
+  margin-top: auto; /* Pushes it to the bottom */
+  padding-top: 20px;
+  font-size: 28px; /* Adjust icon size */
+  color: #F3E7D3; /* Light beige for icon */
+  cursor: pointer;
+} 
+
+.underline-line {
+  position: absolute;
+  background-color: #F3E7D3;
+  height: 3px;
+  width: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 2px;
+  z-index: 1;
+  transition: 
+    top 851ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 851ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
