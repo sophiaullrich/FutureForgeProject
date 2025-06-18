@@ -17,8 +17,6 @@ body, html, #root {
   display: flex;
   flex-direction: column;
   background-color: #F3E7D3;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
   overflow-y: auto;
 }
 
