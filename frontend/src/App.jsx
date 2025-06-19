@@ -39,6 +39,8 @@ import TasksPage from './TasksPage.jsx';
 import TeamsPage from './TeamsPage.jsx';
 import NavigationBar from './NavigationBar.jsx'; 
 import './App.css'; // <--- Ensure your main app CSS is imported
+import { IoNotificationsOutline, IoNotifications } from "react-icons/io5";
+import { IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
 
 function App() {
   return (
@@ -46,18 +48,7 @@ function App() {
       <NavigationBar /> 
 
       <div className="main-content-area"> {/* Contains header, tabs, and page content */}
-        <header className="app-header"> {/* Top section next to the navbar */}
-          <div className="top-nav-links">
-          </div>
-          <div className="header-icons"> {/* Bell and user profile icons */}
-            {/* Placeholder for bell icon */}
-            <span role="img" aria-label="notifications">🔔</span>
-            {/* Placeholder for user profile icon - move to bottom */}
-            <span role="img" aria-label="user profile">👤</span> 
-          </div>
-        </header>
-
-        {/* This is where your routed content (TasksPage, TeamsPage, etc.) will render */}
+        {/* Routed content (TasksPage, TeamsPage, etc.) will render here */}
         <div className="page-content-wrapper">
           <Routes>
             <Route path="/" element={<h1>Welcome to your Dashboard!</h1>} />
@@ -67,6 +58,15 @@ function App() {
           </Routes>
         </div>
       </div>
+
+      {/* Notifications Icon */}
+        <div className='notif-icon'>
+          <IoNotificationsOutline size={45}/>
+        </div>
+      {/* Profile Icon */}
+        <div className='profile-icon'>
+          <IoPersonCircleOutline size={45}/>
+        </div>
     </div>
   );
 }
