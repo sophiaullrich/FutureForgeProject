@@ -86,11 +86,6 @@ export default function  TasksPage(){
                                         <IoSquareOutline size={33} name="square-outline"></IoSquareOutline>
                                     )}
                                 </div>
-                                {/* <input 
-                                    type="checkbox" 
-                                    checked={task.done}
-                                    onChange={() => handleTaskToggle(task.id)}
-                                /> */}
                             </div>
                             <div className="table-cell task-name-cell">
                                 {task.name}
