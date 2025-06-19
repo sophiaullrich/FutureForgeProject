@@ -2,33 +2,11 @@ import React, { useState, useEffect } from 'react';
 import './TasksPage.css';
 
 const staticTasks = [
-  { id: 1, 
-    title: 'Create Visuals', 
-    dueDate: '2025-06-12', 
-    assignee: 'Team Marketing', 
-    status: 'To Do', 
-    static: true },
-
-  { id: 2, 
-    title: 'Get Familiar with Team', 
-    dueDate: '2025-06-30', 
-    assignee: 'Code Commanders', 
-    status: 'To Do', 
-    static: true },
-
-  { id: 3, title: 'Setup Environment', 
-    dueDate: '2025-06-10', 
-    assignee: 'Team 2', 
-    status: 'To Do', 
-    static: true },
-    
-  { id: 4, 
-    title: 'Firebase Authentication Setup', 
-    dueDate: '2025-06-28', 
-    assignee: 'Team 3', 
-    status: 'To Do', 
-    static: true }
-]; 
+  { id: 1, title: 'Create Visuals', dueDate: '2025-06-12', assignee: 'Team Marketing', status: 'To Do', static: true },
+  { id: 2, title: 'Get Familiar with Team', dueDate: '2025-06-30', assignee: 'Code Commanders', status: 'To Do', static: true },
+  { id: 3, title: 'Setup Environment', dueDate: '2025-06-10', assignee: 'Team 2', status: 'To Do', static: true },
+  { id: 4, title: 'Firebase Authentication Setup', dueDate: '2025-06-28', assignee: 'Team 3', status: 'To Do', static: true }
+];
 
 export default function TasksPage() {
   const [activeTab, setActiveTab] = useState('myTasks');
@@ -51,15 +29,21 @@ export default function TasksPage() {
 
   const handleTaskToggle = async (taskId) => {
     const task = tasks.find(t => t.id === taskId);
-    if (!task || task.static) return;
+    if (!task) return;
 
-    const updated = { ...task, status: task.status === 'Done' ? 'To Do' : 'Done' };
+    const newStatus = task.status === 'Done' ? 'To Do' : 'Done';
+    const updatedTask = { ...task, status: newStatus };
+
+    if (task.static) {
+      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+      return;
+    }
 
     try {
       await fetch(`${backendUrl}/${taskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated)
+        body: JSON.stringify(updatedTask)
       });
       const refreshed = await fetch(backendUrl).then(res => res.json());
       setTasks([...staticTasks, ...refreshed]);
@@ -126,12 +110,8 @@ export default function TasksPage() {
   return (
     <div className="tasks-page">
       <div className="tabs-container">
-        <button className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`} onClick={() => setActiveTab('myTasks')}>
-          My Tasks
-        </button>
-        <button className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`} onClick={() => setActiveTab('teamTasks')}>
-          Team Tasks
-        </button>
+        <button className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`} onClick={() => setActiveTab('myTasks')}>My Tasks</button>
+        <button className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`} onClick={() => setActiveTab('teamTasks')}>Team Tasks</button>
       </div>
 
       <div className="tasks-container">
@@ -141,7 +121,7 @@ export default function TasksPage() {
             <div className="header-cell">Task Name</div>
             <div className="header-cell">Due Date</div>
             <div className="header-cell">Team</div>
-            <div className="header-cell">Actions</div>
+            <div className="header-cell"></div>
           </div>
 
           {filteredTasks.map(task => (
@@ -151,14 +131,12 @@ export default function TasksPage() {
                   type="checkbox"
                   checked={task.status === 'Done'}
                   onChange={() => handleTaskToggle(task.id)}
-                  disabled={task.static}
                 />
               </div>
               <div className="table-cell task-name-cell">{task.title}</div>
               <div className="table-cell due-date-cell">
                 <div className="due-date">
-                  <strong>{new Date(task.dueDate).toLocaleString('default', { month: 'short' }).toUpperCase()}</strong>
-                  <div>{new Date(task.dueDate).getDate().toString().padStart(2, '0')}</div>
+                    {new Date(task.dueDate).toLocaleString('default', { month: 'short' }).toUpperCase()} {new Date(task.dueDate).getDate().toString().padStart(2, '0')}
                 </div>
               </div>
               <div className="table-cell team-cell">{task.assignee}</div>
