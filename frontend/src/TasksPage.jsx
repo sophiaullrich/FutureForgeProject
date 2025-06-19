@@ -11,30 +11,46 @@ const tasksData = [
         due: {month: 'JUN', day: '12'},
         assigned: 'Diya Topiwala',
         team: 'Team Marketing',
-    },
-        {
+    },        
+    {
         id: 2,
-        name: 'Get Familiar with Team',
-        due: {month: 'JUN', day: '30'},
-        assigned: 'Diya Topiwala',
-        team: 'Code Commanders',
-        done: false
+        done: false,
+        name: 'Page Descriptions',
+        due: {month: 'JUN', day: '16'},
+        assigned: 'Joseph Esguerra',
+        team: 'Team Marketing'
     },
-        {
+    {
         id: 3,
-        name: 'Setup Environment',
-        due: {month: 'JUN', day: '10'},
-        assigned: 'Diya Topiwala',
-        team: 'Team 2',
-        done: false
+        done: false,
+        name: 'Get User Feedback',
+        due: {month: 'JUN', day: '22'},
+        assigned: 'Sophia Ullrich',
+        team: 'Team Marketing'
     },
         {
         id: 4,
+        done: false,
+        name: 'Get Familiar with Team',
+        due: {month: 'JUN', day: '30'},
+        assigned: 'Diya Topiwala',
+        team: 'Code Commanders'
+    },
+        {
+        id: 5,
+        done: false,
+        name: 'Setup Environment',
+        due: {month: 'JUN', day: '10'},
+        assigned: 'Diya Topiwala',
+        team: 'Team 2'
+    },
+        {
+        id: 6,
+        done: false,
         name: 'Firebase Authentication Setup',
         due: {month: 'JUN', day: '28'},
         assigned: 'Diya Topiwala',
-        team: 'Team 3',
-        done: false
+        team: 'Team 3'
     },
 ];
 
