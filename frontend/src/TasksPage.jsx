@@ -63,82 +63,13 @@ const tasksData = [
 ];
 
 export default function TasksPage() {
-  const [activeTab, setActiveTab] = useState('myTasks');
-  const [tasks, setTasks] = useState(staticTasks);
-  const [showPopup, setShowPopup] = useState(false);
-  const [form, setForm] = useState({ name: '', dueDate: '', team: '' });
+      const [activeTab, setActiveTab] = useState('myTasks');
+    const [tasks, setTasks] = useState(tasksData);
 
-  const backendUrl = 'http://localhost:5000/tasks';
-  const currentUser = 'Myself';
-
-  useEffect(() => {
-    fetch(backendUrl)
-      .then(res => res.json())
-      .then(backendTasks => {
-        const merged = [...staticTasks, ...backendTasks];
-        setTasks(merged);
-      })
-      .catch(err => console.error('Failed to fetch tasks:', err));
-  }, []);
-
-  const handleTaskToggle = async (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const newStatus = task.status === 'Done' ? 'To Do' : 'Done';
-    const updatedTask = { ...task, status: newStatus };
-
-    if (task.static) {
-      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
-      return;
-    }
-
-    try {
-      await fetch(`${backendUrl}/${taskId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTask)
-      });
-      const refreshed = await fetch(backendUrl).then(res => res.json());
-      setTasks([...staticTasks, ...refreshed]);
-    } catch (err) {
-      console.error('Failed to update task:', err);
-    }
-  };
-
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await fetch(`${backendUrl}/${taskId}`, { method: 'DELETE' });
-      const refreshed = await fetch(backendUrl).then(res => res.json());
-      setTasks([...staticTasks, ...refreshed]);
-    } catch (err) {
-      console.error('Failed to delete task:', err);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddTask = async (e) => {
-    e.preventDefault();
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDate = new Date(form.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-
-    if (dueDate < today) {
-      alert('Due date cannot be in the past.');
-      return;
-    }
-
-    const newTask = {
-      title: form.name,
-      dueDate: form.dueDate,
-      assignee: form.team,
-      status: 'To Do'
+    const handleTaskToggle = (taskId) => {
+        setTasks(tasks.map(task => 
+            task.id === taskId ? { ...task, done: !task.done } : task
+        ));
     };
 
     // filtering tasks - change based on user's name!!
@@ -213,7 +144,5 @@ export default function TasksPage() {
             </div>
             <button className='add-task-btn'>Add New Task</button>
         </div>
-      )}
-    </div>
   );
 }
