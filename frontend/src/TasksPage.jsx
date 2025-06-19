@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import './TasksPage.css'; 
+import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
 
 const tasksData = [
     {
@@ -74,11 +75,21 @@ export default function  TasksPage(){
                     {tasks.map(task => (
                         <div key={task.id} className="table-row">
                             <div className="table-cell checkbox-cell">
-                                <input 
+                                <div 
+                                className="custom-checkbox"
+                                onClick={() => handleTaskToggle(task.id)}
+                                >
+                                    {task.done ? (
+                                        <IoCheckboxOutline size={33} name="checkbox-outline"></IoCheckboxOutline>
+                                    ) : (
+                                        <IoSquareOutline size={33} name="square-outline"></IoSquareOutline>
+                                    )}
+                                </div>
+                                {/* <input 
                                     type="checkbox" 
                                     checked={task.done}
                                     onChange={() => handleTaskToggle(task.id)}
-                                />
+                                /> */}
                             </div>
                             <div className="table-cell task-name-cell">
                                 {task.name}
