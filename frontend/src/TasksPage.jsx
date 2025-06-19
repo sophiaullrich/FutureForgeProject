@@ -6,15 +6,17 @@ import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
 const tasksData = [
     {
         id: 1,
+        done: false,
         name: 'Create Visuals',
         due: {month: 'JUN', day: '12'},
+        assigned: 'Diya Topiwala',
         team: 'Team Marketing',
-        done: false
     },
         {
         id: 2,
         name: 'Get Familiar with Team',
         due: {month: 'JUN', day: '30'},
+        assigned: 'Diya Topiwala',
         team: 'Code Commanders',
         done: false
     },
@@ -22,6 +24,7 @@ const tasksData = [
         id: 3,
         name: 'Setup Environment',
         due: {month: 'JUN', day: '10'},
+        assigned: 'Diya Topiwala',
         team: 'Team 2',
         done: false
     },
@@ -29,6 +32,7 @@ const tasksData = [
         id: 4,
         name: 'Firebase Authentication Setup',
         due: {month: 'JUN', day: '28'},
+        assigned: 'Diya Topiwala',
         team: 'Team 3',
         done: false
     },
@@ -65,25 +69,26 @@ export default function  TasksPage(){
             <div className="tasks-container">
                 <div className="tasks-table">
                     {/* Table Header */}
-                    <div className="table-header">
+                    <div className={`table-header ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
                         <div className="header-cell">Done?</div>
                         <div className="header-cell">Task Name</div>
                         <div className="header-cell">Due Date</div>
+                        {activeTab === 'teamTasks' && <div className="header-cell">Assigned To</div>}
                         <div className="header-cell">Team</div>
                     </div>
 
                     {/* Table Rows */}
                     {tasks.map(task => (
-                        <div key={task.id} className="table-row">
+                        <div key={task.id} className={`table-row ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
                             <div className="table-cell checkbox-cell">
                                 <div 
-                                className="custom-checkbox"
-                                onClick={() => handleTaskToggle(task.id)}
+                                    className="custom-checkbox"
+                                    onClick={() => handleTaskToggle(task.id)}
                                 >
                                     {task.done ? (
-                                        <IoCheckboxOutline size={33} name="checkbox-outline"></IoCheckboxOutline>
+                                        <IoCheckboxOutline size={33} />
                                     ) : (
-                                        <IoSquareOutline size={33} name="square-outline"></IoSquareOutline>
+                                        <IoSquareOutline size={33} />
                                     )}
                                 </div>
                             </div>
@@ -96,6 +101,11 @@ export default function  TasksPage(){
                                     <div>{task.due.day}</div>
                                 </div>
                             </div>
+                            {activeTab === 'teamTasks' && (
+                                <div className="table-cell assigned-to-cell">
+                                    {task.assigned}
+                                </div>
+                            )}
                             <div className="table-cell team-cell">
                                 {task.team}
                             </div>

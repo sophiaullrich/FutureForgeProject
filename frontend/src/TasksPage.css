@@ -77,6 +77,10 @@
   color: #22336A;
 }
 
+.table-header.team-tasks {
+  grid-template-columns: 80px minmax(200px, 1fr) 220px 200px 100px;
+}
+
 .header-cell {
   color: #22336A;
   font-family: "SF Pro Rounded", Arial, sans-serif;
@@ -85,13 +89,16 @@
   font-weight: 500;
   line-height: normal;
 }
-
 .table-row {
   display: grid;
   grid-template-columns: 80px minmax(200px, 1fr) 175px 200px;
   gap: 20px;
   padding: 10px;
   align-items: center;
+}
+
+.table-row.team-tasks {
+  grid-template-columns: 80px minmax(200px, 1fr) 280px 200px 150px;
 }
 
 .table-cell {
@@ -106,17 +113,17 @@
 }
 
 .custom-checkbox {
-width: 33px;
-height: 33px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
+  width: 33px;
+  height: 33px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .custom-checkbox ion-icon {
-color: #22336A;
---ion-color-base: #22336A !important;
+  color: #22336A;
+  --ion-color-base: #22336A !important;
 }
 
 /* task content */
@@ -153,6 +160,17 @@ color: #22336A;
 /* date */
 .due-date div {
   color: #22336A;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+/* assigned to */
+.assigned-to-cell {
+  color: #22336A;
+  text-align: center;
   font-family: "SF Pro Rounded", Arial, sans-serif;
   font-size: 20px;
   font-style: normal;
