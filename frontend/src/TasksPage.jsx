@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './TasksPage.css'; 
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
 
+// dummy data
 const tasksData = [
     {
         id: 1,
@@ -61,7 +62,7 @@ export default function  TasksPage(){
                 </button>
             </div>
             {/* table */}
-             <div className="tasks-container">
+            <div className="tasks-container">
                 <div className="tasks-table">
                     {/* Table Header */}
                     <div className="table-header">
@@ -106,8 +107,8 @@ export default function  TasksPage(){
                         </div>
                     ))}
                 </div>
-            <button className='add-task-btn'>Add New Task</button>
             </div>
+            <button className='add-task-btn'>Add New Task</button>
         </div>
     );
 }
