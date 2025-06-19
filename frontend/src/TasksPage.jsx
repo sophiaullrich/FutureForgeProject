@@ -28,7 +28,7 @@ const tasksData = [
         assigned: 'Sophia Ullrich',
         team: 'Team Marketing'
     },
-        {
+    {
         id: 4,
         done: false,
         name: 'Get Familiar with Team',
@@ -36,7 +36,7 @@ const tasksData = [
         assigned: 'Diya Topiwala',
         team: 'Code Commanders'
     },
-        {
+    {
         id: 5,
         done: false,
         name: 'Setup Environment',
@@ -44,13 +44,21 @@ const tasksData = [
         assigned: 'Diya Topiwala',
         team: 'Team 2'
     },
-        {
+    {
         id: 6,
         done: false,
         name: 'Firebase Authentication Setup',
         due: {month: 'JUN', day: '28'},
         assigned: 'Diya Topiwala',
         team: 'Team 3'
+    },
+        {
+        id: 7,
+        done: false,
+        name: 'Tasks Page',
+        due: {month: 'JUL', day: '01'},
+        assigned: 'Diya Topiwala',
+        team: 'Coding'
     },
 ];
 
@@ -63,6 +71,11 @@ export default function  TasksPage(){
             task.id === taskId ? { ...task, done: !task.done } : task
         ));
     };
+
+    // filtering tasks - change based on user's name!!
+    const filteredTasks = activeTab === 'myTasks'
+    ? tasks.filter(task => task.assigned === 'Diya Topiwala')
+    : tasks;
 
     return (
         <div>
@@ -94,7 +107,7 @@ export default function  TasksPage(){
                     </div>
 
                     {/* Table Rows */}
-                    {tasks.map(task => (
+                    {filteredTasks.map(task => (
                         <div key={task.id} className={`table-row ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
                             <div className="table-cell checkbox-cell">
                                 <div 

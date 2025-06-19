@@ -50,22 +50,25 @@
 }
 
 .tasks-container {
-  background: #F5EBE0;
   border-radius: 0 8px 8px 8px;
   padding: 0;
   min-height: 400px;
   position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* tasks table */
 .tasks-table {
   width: 100%;
-  height: 435px;
+  height: 75%;
   flex-shrink: 0;
   border-radius: 5px;
   border: 4px solid #22336A;
   background: #F3E7D3;
   overflow-x: auto;
+  overflow-y: auto;
 }
 
 .table-header {
