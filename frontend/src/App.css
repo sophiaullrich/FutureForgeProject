@@ -3,9 +3,10 @@ body, html, #root {
   padding: 0;
   height: 100%;
   font-family: "SF Pro Rounded", Arial, sans-serif;
-  overflow: hidden;
   background-color: #2D2A4A;
+  overflow: auto; /* ✅ FIXED: allows layout and modal to grow */
 }
+
 
 .app-container {
   display: flex;

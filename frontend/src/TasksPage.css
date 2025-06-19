@@ -176,3 +176,70 @@
   background: #6096BA;
   color: #F3E7D3;
 }
+
+.task-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(50, 50, 50, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.task-popup-form {
+  background: #f3e7d3;
+  padding: 20px 30px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column; 
+  gap: 15px;
+  align-items: stretch; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  width: 350px;
+}
+
+.popup-field {
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+
+.popup-field label {
+  font-size: 14px;
+  color: #22336A;
+  margin-bottom: 4px;
+}
+
+.popup-field input,
+.popup-field select {
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.popup-submit-btn {
+  background: none;
+  color: #6096BA;
+  border: 2px solid #6096BA;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-submit-btn:hover {
+  background: #6096BA;
+  color: white;
+}
+
+.popup-button-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
