@@ -1,11 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import './TasksPage.css';
+import React, {useState} from 'react';
+import './TasksPage.css'; 
+import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
 
-const staticTasks = [
-  { id: 1, title: 'Create Visuals', dueDate: '2025-06-12', assignee: 'Team Marketing', status: 'To Do', static: true },
-  { id: 2, title: 'Get Familiar with Team', dueDate: '2025-06-30', assignee: 'Code Commanders', status: 'To Do', static: true },
-  { id: 3, title: 'Setup Environment', dueDate: '2025-06-10', assignee: 'Team 2', status: 'To Do', static: true },
-  { id: 4, title: 'Firebase Authentication Setup', dueDate: '2025-06-28', assignee: 'Team 3', status: 'To Do', static: true }
+// dummy data
+const tasksData = [
+    {
+        id: 1,
+        done: false,
+        name: 'Create Visuals',
+        due: {month: 'JUN', day: '12'},
+        assigned: 'Diya Topiwala',
+        team: 'Team Marketing',
+    },        
+    {
+        id: 2,
+        done: false,
+        name: 'Page Descriptions',
+        due: {month: 'JUN', day: '16'},
+        assigned: 'Joseph Esguerra',
+        team: 'Team Marketing'
+    },
+    {
+        id: 3,
+        done: false,
+        name: 'Get User Feedback',
+        due: {month: 'JUN', day: '22'},
+        assigned: 'Sophia Ullrich',
+        team: 'Team Marketing'
+    },
+    {
+        id: 4,
+        done: false,
+        name: 'Get Familiar with Team',
+        due: {month: 'JUN', day: '30'},
+        assigned: 'Diya Topiwala',
+        team: 'Code Commanders'
+    },
+    {
+        id: 5,
+        done: false,
+        name: 'Setup Environment',
+        due: {month: 'JUN', day: '10'},
+        assigned: 'Diya Topiwala',
+        team: 'Team 2'
+    },
+    {
+        id: 6,
+        done: false,
+        name: 'Firebase Authentication Setup',
+        due: {month: 'JUN', day: '28'},
+        assigned: 'Diya Topiwala',
+        team: 'Team 3'
+    },
+        {
+        id: 7,
+        done: false,
+        name: 'Tasks Page',
+        due: {month: 'JUL', day: '01'},
+        assigned: 'Diya Topiwala',
+        team: 'Coding'
+    },
 ];
 
 export default function TasksPage() {
@@ -87,100 +141,77 @@ export default function TasksPage() {
       status: 'To Do'
     };
 
-    try {
-      await fetch(backendUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTask)
-      });
-      const updated = await fetch(backendUrl).then(res => res.json());
-      setTasks([...staticTasks, ...updated]);
-      setForm({ name: '', dueDate: '', team: '' });
-      setShowPopup(false);
-    } catch (err) {
-      console.error('Failed to add task:', err);
-    }
-  };
+    // filtering tasks - change based on user's name!!
+    const filteredTasks = activeTab === 'myTasks'
+    ? tasks.filter(task => task.assigned === 'Diya Topiwala')
+    : tasks;
 
-  const todayString = new Date().toISOString().split('T')[0];
-  const filteredTasks = tasks.filter(task =>
-    activeTab === 'myTasks' ? task.assignee === currentUser : task.assignee !== currentUser
-  );
+    return (
+        <div>
+            {/* tabs */}
+            <div className="tabs-container">
+                <button 
+                    className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('myTasks')}
+                >
+                    My Tasks
+                </button>
+                <button 
+                    className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('teamTasks')}
+                >
+                    Team Tasks
+                </button>
+            </div>
+            {/* table */}
+            <div className="tasks-container">
+                <div className="tasks-table">
+                    {/* Table Header */}
+                    <div className={`table-header ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
+                        <div className="header-cell">Done?</div>
+                        <div className="header-cell">Task Name</div>
+                        <div className="header-cell">Due Date</div>
+                        {activeTab === 'teamTasks' && <div className="header-cell">Assigned To</div>}
+                        <div className="header-cell">Team</div>
+                    </div>
 
-  return (
-    <div className="tasks-page">
-      <div className="tabs-container">
-        <button className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`} onClick={() => setActiveTab('myTasks')}>My Tasks</button>
-        <button className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`} onClick={() => setActiveTab('teamTasks')}>Team Tasks</button>
-      </div>
-
-      <div className="tasks-container">
-        <div className="tasks-table">
-          <div className="table-header">
-            <div className="header-cell">Done?</div>
-            <div className="header-cell">Task Name</div>
-            <div className="header-cell">Due Date</div>
-            <div className="header-cell">Team</div>
-            <div className="header-cell"></div>
-          </div>
-
-          {filteredTasks.map(task => (
-            <div key={task.id} className="table-row">
-              <div className="table-cell checkbox-cell">
-                <input
-                  type="checkbox"
-                  checked={task.status === 'Done'}
-                  onChange={() => handleTaskToggle(task.id)}
-                />
-              </div>
-              <div className="table-cell task-name-cell">{task.title}</div>
-              <div className="table-cell due-date-cell">
-                <div className="due-date">
-                    {new Date(task.dueDate).toLocaleString('default', { month: 'short' }).toUpperCase()} {new Date(task.dueDate).getDate().toString().padStart(2, '0')}
+                    {/* Table Rows */}
+                    {filteredTasks.map(task => (
+                        <div key={task.id} className={`table-row ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
+                            <div className="table-cell checkbox-cell">
+                                <div 
+                                    className="custom-checkbox"
+                                    onClick={() => handleTaskToggle(task.id)}
+                                >
+                                    {task.done ? (
+                                        <IoCheckboxOutline size={33} />
+                                    ) : (
+                                        <IoSquareOutline size={33} />
+                                    )}
+                                </div>
+                            </div>
+                            <div className="table-cell task-name-cell">
+                                {task.name}
+                            </div>
+                            <div className="table-cell due-date-cell">
+                                <div className="due-date">
+                                    <strong>{task.due.month}</strong>
+                                    <div>{task.due.day}</div>
+                                </div>
+                            </div>
+                            {activeTab === 'teamTasks' && (
+                                <div className="table-cell assigned-to-cell">
+                                    {task.assigned}
+                                </div>
+                            )}
+                            <div className="table-cell team-cell">
+                                {task.team}
+                            </div>
+                        </div>
+                    ))}
                 </div>
-              </div>
-              <div className="table-cell team-cell">{task.assignee}</div>
-              <div className="table-cell">
-                {!task.static && (
-                  <button className="popup-submit-btn" onClick={() => handleDeleteTask(task.id)}>
-                    Delete
-                  </button>
-                )}
-              </div>
             </div>
-          ))}
-        </div>
-
-        <button className="add-task-btn" onClick={() => setShowPopup(true)}>Add New Task</button>
-      </div>
-
-      {showPopup && (
-        <div className="task-popup-overlay">
-          <form className="task-popup-form" onSubmit={handleAddTask}>
-            <div className="popup-field">
-              <label>Task Name</label>
-              <input name="name" type="text" value={form.name} onChange={handleChange} required />
-            </div>
-            <div className="popup-field">
-              <label>Due Date</label>
-              <input name="dueDate" type="date" value={form.dueDate} onChange={handleChange} required min={todayString} />
-            </div>
-            <div className="popup-field">
-              <label>Assigned To</label>
-              <select name="team" value={form.team} onChange={handleChange} required>
-                <option value="">Select Name</option>
-                <option value="Myself">Myself</option>
-                <option value="Team Marketing">Team Marketing</option>
-                <option value="Code Commanders">Code Commanders</option>
-                <option value="Team 2">Team 2</option>
-                <option value="Team 3">Team 3</option>
-              </select>
-            </div>
-            <div className="popup-button-row">
-              <button type="submit" className="popup-submit-btn">Add New Task</button>
-              <button type="button" className="popup-submit-btn" onClick={() => setShowPopup(false)}>Cancel</button>
-            </div>
-          </form>
+            <button className='add-task-btn'>Add New Task</button>
         </div>
       )}
     </div>
