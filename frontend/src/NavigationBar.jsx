@@ -1,7 +1,9 @@
 
 import React, {useState, useEffect, useRef} from 'react';
-import { Link, useLocation } from 'react-router-dom'; // useLocation to check active link
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // useLocation to check active link
 import './NavigationBar.css'; 
+import logo from './assets/gobearlogo.png';
+import { IoSettingsOutline, IoSettings } from 'react-icons/io5';
 
 function NavigationBar() {
   const location = useLocation(); // Hook to get current path
@@ -10,6 +12,12 @@ function NavigationBar() {
   const [activeIndex, setActiveIndex] = useState(0);
   const itemRefs = useRef([]);
   const lineRef = useRef(null);
+
+  // for settings button
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
+  const previousPathRef = useRef(null);
 
   useEffect(() => {
     const activeEl = itemRefs.current[activeIndex];
@@ -32,8 +40,12 @@ function NavigationBar() {
   return (
     <div className="navbar-container">
       <div className="navbar-header">
-        <div className="navbar-bg">
-          <img src="frontend/assets/gobearlogo.png" alt="Go Bear Logo" className="logo" /> 
+        <div className="navbar-bg" 
+          onClick={()=> {
+            setActiveIndex(0);
+            navigate('/dashboard');
+          }} style={{cursor: 'pointer'}}>
+          <img src={logo} alt="Go Bear Logo" className="logo" /> 
         </div>
       </div>
 
@@ -41,7 +53,8 @@ function NavigationBar() {
         <ul>
           {['Dashboard', 'Teams', 'Tasks', 'Rewards', 'Chat'].map((label, index) => {
           const path = `/${label.toLowerCase()}`;
-
+          const isActive = location.pathname === path;
+          
           return (
             <li key={index} ref={el => itemRefs.current[index] = el}>
               <Link
@@ -50,19 +63,36 @@ function NavigationBar() {
                 onClick={() => handleClick(index)}
               >
                 {label}
+                {isActive && <span ref={lineRef} className='underline-line'></span>}
               </Link>
             </li>
           );
         })}
         </ul>
-        <span ref={lineRef} className="underline-line"></span>
       </nav>
 
-      <div className="navbar-footer">
-        {/* Placeholder for the settings icon */}
-        <span role="img" aria-label="settings">⚙️</span>
-        {/* You'll add your actual icon here */}
-      </div>
+    <div
+      className="navbar-footer"
+      onClick={() => {
+        if (location.pathname === "/settings") {
+          navigate(previousPathRef.current || '/dashboard');
+        } else {
+          previousPathRef.current = location.pathname;
+          navigate('/settings');
+          setActiveIndex(-1);
+        }
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {(location.pathname === "/settings" && hovered) || 
+      (location.pathname !== "/settings" && !hovered) ? (
+        <IoSettingsOutline size={45} color="#F3E7D3" />
+      ) : (
+        <IoSettings size={45} color="#F3E7D3" />
+      )}
+    </div>
+
     </div>
   );
 }
