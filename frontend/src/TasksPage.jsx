@@ -34,30 +34,69 @@ const tasksData = [
 
 export default function  TasksPage(){
     const [activeTab, setActiveTab] = useState('myTasks');
+    const [tasks, setTasks] = useState(tasksData);
+
+    const handleTaskToggle = (taskId) => {
+        setTasks(tasks.map(task => 
+            task.id === taskId ? { ...task, done: !task.done } : task
+        ));
+    };
 
     return (
         <div>
+            {/* tabs */}
             <div className="tabs-container">
-                <button className={activeTab === 'myTasks' ? 'tab-active' : 'tab'} onClick={()=>setActiveTab('myTasks')}>My Tasks</button>
-                <button className={activeTab === 'teamTasks' ? 'tab-active' : 'tab'} onClick={()=>setActiveTab('teamTasks')}>Team Tasks</button>
+                <button 
+                    className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('myTasks')}
+                >
+                    My Tasks
+                </button>
+                <button 
+                    className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('teamTasks')}
+                >
+                    Team Tasks
+                </button>
             </div>
-            <div className='tasks-content-area'>
-                <div className='task-header'>
-                    <span>Done?</span>
-                    <span>Task Name</span>
-                    <span>Due Date</span>
-                    <span>Team</span>
+            {/* table */}
+             <div className="tasks-container">
+                <div className="tasks-table">
+                    {/* Table Header */}
+                    <div className="table-header">
+                        <div className="header-cell">Done?</div>
+                        <div className="header-cell">Task Name</div>
+                        <div className="header-cell">Due Date</div>
+                        <div className="header-cell">Team</div>
+                    </div>
+
+                    {/* Table Rows */}
+                    {tasks.map(task => (
+                        <div key={task.id} className="table-row">
+                            <div className="table-cell checkbox-cell">
+                                <input 
+                                    type="checkbox" 
+                                    checked={task.done}
+                                    onChange={() => handleTaskToggle(task.id)}
+                                />
+                            </div>
+                            <div className="table-cell task-name-cell">
+                                {task.name}
+                            </div>
+                            <div className="table-cell due-date-cell">
+                                <div className="due-date">
+                                    <strong>{task.due.month}</strong>
+                                    <div>{task.due.day}</div>
+                                </div>
+                            </div>
+                            <div className="table-cell team-cell">
+                                {task.team}
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                {tasksData.map(task => (
-                    <div className='task-row' key={task.id}>
-                        <input type='checkbox'/>
-                        <span>{task.name}</span>
-                        <span><strong>{task.due.month}</strong><br/>{task.due.day}</span>
-                        <span>{task.team}</span>
-                    </div>    
-                ))}
-            </div>
             <button className='add-task-btn'>Add New Task</button>
+            </div>
         </div>
     );
 }
