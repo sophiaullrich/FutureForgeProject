@@ -1,38 +1,46 @@
-.App {
-  text-align: center;
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  background-color: #F3E7D3;
+  overflow: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: auto; 
+  position: relative; 
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.main-content-area {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: #F3E7D3;
 }
 
-.App-link {
-  color: #61dafb;
+
+.page-content-wrapper {
+  flex-grow: 1;
+  padding: 20px; 
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.notif-icon {
+  position: fixed; 
+  top: 25px;
+  right: 25px;
+  z-index: 1000; 
+  color: #252B2F; 
+  cursor: pointer;
+}
+
+.profile-icon {
+  position: fixed; 
+  bottom: 25px;
+  right: 25px;
+  z-index: 1000; 
+  color: #252B2F; 
+  cursor: pointer;
 }

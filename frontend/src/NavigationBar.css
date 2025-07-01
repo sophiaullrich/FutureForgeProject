@@ -1,0 +1,92 @@
+.navbar-container {
+  width: 307px; /* Fixed width of the navbar */
+  background-color: #252B2F;
+  padding: 20px;
+  display: flex;
+  flex-direction: column; /* Stack header, nav, footer vertically */
+  justify-content: space-between; /* Pushes footer to bottom */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow on the edge */
+}
+
+.navbar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 76px; /* Space below header */
+  color: #F3E7D3; 
+}
+
+.navbar-header .logo {
+  width: 138px;
+  height: 50px;
+  margin-left: 68px;
+}
+
+.navbar-bg {
+  width: 270px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #F3E7D3;
+  margin-top: 16px;
+  margin-left: 19px;
+}
+
+.navbar-nav {
+  position: relative; /* For positioning the animated line */
+}
+
+.navbar-nav ul {
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-nav li {
+  margin-bottom: 24px; /* Space between links */
+  position: relative;
+}
+
+.navbar-nav li.active {
+  opacity: 1;
+}
+
+.navbar-nav a {
+  display: block; /* Make the whole area clickable */
+  text-decoration: none;
+  padding: 10px 15px;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  color: #F5EBE0; /* Light beige text */
+  position: relative;
+  text-align: right;
+}
+
+.navbar-nav a:hover {
+  cursor: pointer;
+}
+
+.navbar-footer {
+  text-align: left;
+  margin-top: auto; /* Pushes it to the bottom */
+  padding-top: 20px;
+  font-size: 28px; /* Adjust icon size */
+  color: #F3E7D3; /* Light beige for icon */
+  cursor: pointer;
+} 
+
+/* Animated underline */
+
+.underline-line {
+  display: block;
+  height: 1px;
+  background-color: #F5EBE0;
+  border-radius: 2px;
+  margin-top: 2px;
+  transition:ease-in;
+    /* 
+    Custom spring approximation:
+    - 851ms duration
+    - 85 stiffness, 14.1 damping, 1 mass translates roughly to cubic-bezier(0.68, -0.55, 0.265, 1.55)
+    - This creates a bouncy, spring-like effect
+  */
+}
