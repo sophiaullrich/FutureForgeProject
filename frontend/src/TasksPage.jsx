@@ -63,8 +63,15 @@ const tasksData = [
 ];
 
 export default function TasksPage() {
-      const [activeTab, setActiveTab] = useState('myTasks');
+    const [activeTab, setActiveTab] = useState('myTasks');
     const [tasks, setTasks] = useState(tasksData);
+    const [showPopup, setShowPopup] = useState(false);
+    const [newTask, setNewTask] = useState({
+        name: '',
+        due: { month: '', day: '' },
+        assigned: '',
+        team: ''
+    });
 
     const handleTaskToggle = (taskId) => {
         setTasks(tasks.map(task => 
@@ -142,7 +149,85 @@ export default function TasksPage() {
                     ))}
                 </div>
             </div>
-            <button className='add-task-btn'>Add New Task</button>
+            {/* add task */}
+            
+            {showPopup && (
+                <div className="task-popup-overlay">
+                    <div className="task-popup-form">
+                    <div className="popup-field">
+                        <label>Task Name</label>
+                        <input
+                        type="text"
+                        value={newTask.name}
+                        onChange={(e) =>
+                            setNewTask({ ...newTask, name: e.target.value })
+                        }
+                        />
+                    </div>
+                    <div className="popup-field">
+                        <label>Due Month</label>
+                        <input
+                        type="text"
+                        value={newTask.due.month}
+                        onChange={(e) =>
+                            setNewTask({ ...newTask, due: { ...newTask.due, month: e.target.value.toUpperCase() } })
+                        }
+                        />
+                    </div>
+                    <div className="popup-field">
+                        <label>Due Day</label>
+                        <input
+                        type="text"
+                        value={newTask.due.day}
+                        onChange={(e) =>
+                            setNewTask({ ...newTask, due: { ...newTask.due, day: e.target.value } })
+                        }
+                        />
+                    </div>
+                    <div className="popup-field">
+                        <label>Assigned To</label>
+                        <input
+                        type="text"
+                        value={newTask.assigned}
+                        onChange={(e) =>
+                            setNewTask({ ...newTask, assigned: e.target.value })
+                        }
+                        />
+                    </div>
+                    <div className="popup-field">
+                        <label>Team</label>
+                        <input
+                        type="text"
+                        value={newTask.team}
+                        onChange={(e) =>
+                            setNewTask({ ...newTask, team: e.target.value })
+                        }
+                        />
+                    </div>
+
+                    <div className="popup-button-row">
+                        <button
+                        className="popup-submit-btn"
+                        onClick={() => {
+                            const newId = tasks.length + 1;
+                            setTasks([...tasks, { ...newTask, id: newId, done: false }]);
+                            setShowPopup(false);
+                            setNewTask({ name: '', due: { month: '', day: '' }, assigned: '', team: '' });
+                        }}
+                        >
+                        Add Task
+                        </button>
+                        <button
+                        className="popup-submit-btn"
+                        onClick={() => setShowPopup(false)}
+                        >
+                        Cancel
+                        </button>
+                    </div>
+                    </div>
+                </div>
+                )}
+            <button className='add-task-btn' onClick={()=>setShowPopup(true)}>Add New Task</button>    
         </div>
   );
 }
