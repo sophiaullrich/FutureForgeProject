@@ -1,7 +1,8 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import TasksPage from './TasksPage.jsx';
-import TeamsPage from './teams-page/TeamsPage.jsx'; // note: corrected path
+//import TeamsPage from './teams-page/TeamsPage.jsx'; // note: corrected path
+import TeamsPage from './TeamsPage.jsx';
 import NavigationBar from './NavigationBar.jsx'; 
 import './App.css';
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -32,6 +33,7 @@ function App() {
             <Route path="/" element={<h1>Welcome to your Dashboard!</h1>} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
+            <Route path="/teams" element={<TeamsPage />} />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
