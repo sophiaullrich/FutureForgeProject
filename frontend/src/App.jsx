@@ -6,6 +6,7 @@ import Signup from "./Signup.jsx";
 import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx"; // note: corrected path
 import NavigationBar from "./NavigationBar.jsx";
+import DashboardPage from "./dashboard/DashboardPage.jsx";
 import "./App.css";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { IoPersonCircleOutline } from "react-icons/io5";
@@ -32,7 +33,8 @@ function App() {
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
-            <Route path="/" element={<h1>Welcome to your Dashboard!</h1>} />
+             <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
             <Route path="/login" element={<Login />} />
