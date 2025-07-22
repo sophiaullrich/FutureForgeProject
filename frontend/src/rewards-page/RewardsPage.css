@@ -1,0 +1,139 @@
+.rewards-content {
+  padding: 3rem;
+  font-family: 'Helvetica Neue', sans-serif;
+  background-color: #f8e9d2;
+  min-height: 100vh;
+}
+
+.rewards-header h1 {
+  display: none; /* Hide 'Rewards' header like in screenshot */
+}
+
+.rewards-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.left-column,
+.right-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* Badges */
+.badges-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.badge-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6fe2d2, #2e5fa1);
+}
+
+/* Leaderboard */
+.leaderboard-section h2 {
+  font-size: 1.2rem;
+  margin: 2rem 0 1rem 0;
+}
+
+.leaderboard {
+  list-style: none;
+  padding: 1rem;
+  background-color: #fef6ed;
+  border: 1px solid #bfbfbf;
+  border-radius: 10px;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-top: 1px solid #eee;
+}
+
+.leaderboard li:first-child {
+  border-top: none;
+}
+
+.leaderboard-last {
+  border-top: 1px solid #ccc;
+  font-style: italic;
+  padding-top: 0.5rem;
+}
+
+.rank-number {
+  font-weight: bold;
+  width: 30px;
+  text-align: center;
+}
+
+.leaderboard li:nth-child(1) .rank-number::before {
+  content: "🥇";
+}
+.leaderboard li:nth-child(2) .rank-number::before {
+  content: "🥈";
+}
+.leaderboard li:nth-child(3) .rank-number::before {
+  content: "🥉";
+}
+
+/* Footer note inside leaderboard */
+.leaderboard::after {
+  content: "Updated Just Now...";
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.5rem;
+  padding-right: 0.25rem;
+}
+
+/* Rewards */
+.rewards-grid h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.rewards-grid p {
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.rewards-list {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 1rem;
+  justify-content: center;
+}
+
+.reward-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #4ecdc4, #556270, #dd5e89);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
