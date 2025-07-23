@@ -67,12 +67,17 @@ export default function TasksPage() {
     const [tasks, setTasks] = useState(tasksData);
     const [showPopup, setShowPopup] = useState(false);
     const [newTask, setNewTask] = useState({
-    name: '',
-    due: '',
-    assigned: '',
-    team: ''
+        name: '',
+        due: '',
+        assigned: '',
+        team: ''
     });
 
+    // Extract unique assigned names from tasksData (dummy data)
+    const assignedNames = Array.from(new Set(tasksData.map(task => task.assigned)));
+
+    // Extract unique team names from tasksData (dummy data)
+    const teamNames = Array.from(new Set(tasksData.map(task => task.team)));
 
     const handleTaskToggle = (taskId) => {
         setTasks(tasks.map(task => 
@@ -184,9 +189,10 @@ export default function TasksPage() {
                         type="date"
                         placeholder="dd/mm/yyyy"
                         value={newTask.due}
-                        onChange={(e) =>
-                        setNewTask({ ...newTask, due: e.target.value })
-                        }
+                        onChange={(e) => {
+                            console.log("Date input value:", e.target.value);
+                            setNewTask({ ...newTask, due: e.target.value });
+                        }}
                     />
                     </div>
 
@@ -195,36 +201,40 @@ export default function TasksPage() {
                         <select
                             value={newTask.assigned}
                             onChange={(e) =>
-                            setNewTask({ ...newTask, assigned: e.target.value })
+                                setNewTask({ ...newTask, assigned: e.target.value })
                             }
                         >
                             <option value="">Select Name</option>
-                            <option value="Alice">Alice</option>
-                            <option value="Bob">Bob</option>
-                            <option value="Charlie">Charlie</option>
-                            <option value="Daisy">Daisy</option>
+                            {assignedNames.map((name, index) => (
+                                <option key={index} value={name}>{name}</option>
+                            ))}
                         </select>
                     </div>
 
                     <div className="popup-field">
                         <label>Team</label>
-                        <input
-                            type="text"
-                            placeholder="Enter Team"
+                        <select
                             value={newTask.team}
                             onChange={(e) =>
-                            setNewTask({ ...newTask, team: e.target.value })
+                                setNewTask({ ...newTask, team: e.target.value })
                             }
-                        />
+                        >
+                            <option value="">Select Team</option>
+                            {teamNames.map((team, index) => (
+                                <option key={index} value={team}>{team}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
+
                 <div className="popup-button-row">
                     <button className="add-task-btn" onClick={() => {
                         const newId = tasks.length + 1;
                         const formattedDue = formatDateForDisplay(newTask.due);
+                        console.log("Formatted due for new task (object):", formattedDue);
                         setTasks([
                             ...tasks,
-                            { ...newTask, id: newId, done: false }
+                            { ...newTask, id: newId, done: false, due: formattedDue}
                         ]);
                         setShowPopup(false);
                         setNewTask({
