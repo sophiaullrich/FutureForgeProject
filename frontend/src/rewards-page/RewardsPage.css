@@ -1,14 +1,23 @@
+/* Global reset and font smoothing */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
 .rewards-content {
   padding: 3rem;
   font-family: 'Helvetica Neue', sans-serif;
   background-color: #f8e9d2;
   min-height: 100vh;
+  position: relative;
 }
 
+/* Hide title */
 .rewards-header h1 {
-  display: none; /* Hide 'Rewards' header like in screenshot */
+  display: none;
 }
 
+/* Layout: Two columns */
 .rewards-sections {
   display: flex;
   flex-wrap: wrap;
@@ -22,10 +31,11 @@
   min-width: 300px;
 }
 
-/* Badges */
+/* BADGES */
 .badges-section h2 {
   font-size: 1.2rem;
   margin-bottom: 1rem;
+  font-weight: bold;
 }
 
 .badges {
@@ -38,21 +48,22 @@
   width: 80px;
   height: 80px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #6fe2d2, #2e5fa1);
+  background: linear-gradient(135deg, #4ecdc4, #2e5fa1);
 }
 
-/* Leaderboard */
+/* LEADERBOARD */
 .leaderboard-section h2 {
   font-size: 1.2rem;
   margin: 2rem 0 1rem 0;
+  font-weight: bold;
 }
 
 .leaderboard {
   list-style: none;
   padding: 1rem;
-  background-color: #fef6ed;
+  background-color: #fefaf3;
   border: 1px solid #bfbfbf;
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 0;
   font-size: 0.95rem;
 }
@@ -69,29 +80,36 @@
   border-top: none;
 }
 
-.leaderboard-last {
-  border-top: 1px solid #ccc;
-  font-style: italic;
-  padding-top: 0.5rem;
-}
-
 .rank-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
   font-weight: bold;
-  width: 30px;
-  text-align: center;
+  font-size: 1rem;
 }
 
+/* Medal emojis */
 .leaderboard li:nth-child(1) .rank-number::before {
   content: "🥇";
+  margin-right: 0.3rem;
 }
 .leaderboard li:nth-child(2) .rank-number::before {
   content: "🥈";
+  margin-right: 0.3rem;
 }
 .leaderboard li:nth-child(3) .rank-number::before {
   content: "🥉";
+  margin-right: 0.3rem;
 }
 
-/* Footer note inside leaderboard */
+.leaderboard-last {
+  font-style: italic;
+  padding-top: 0.5rem;
+  border-top: 1px solid #ccc;
+}
+
+/* Footer note */
 .leaderboard::after {
   content: "Updated Just Now...";
   display: block;
@@ -102,11 +120,12 @@
   padding-right: 0.25rem;
 }
 
-/* Rewards */
+/* REWARDS */
 .rewards-grid h2 {
   font-size: 1.2rem;
   margin-bottom: 0.25rem;
   text-align: center;
+  font-weight: bold;
 }
 
 .rewards-grid p {
@@ -123,17 +142,35 @@
   justify-content: center;
 }
 
+.reward-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .reward-circle {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: radial-gradient(circle, #4ecdc4, #556270, #dd5e89);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  font-size: 0.9rem;
+  background: radial-gradient(circle at center, #4ecdc4, #556270, #dd5e89);
+  border: 6px solid #a96e7b;
   cursor: pointer;
+}
+
+.reward-label {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+/* Top-right icons */
+.top-right-icons {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
 }
