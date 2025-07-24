@@ -57,8 +57,9 @@ const RewardsPage = () => {
             <p>Click to Redeem Reward</p>
             <div className="rewards-list">
               {rewards.map((points, index) => (
-                <div key={index} className="reward-circle">
-                  {points} Points
+                <div key={index} className="reward-item">
+                  <div className="reward-circle" />
+                  <div className="reward-label">{points} Points</div>
                 </div>
               ))}
             </div>
