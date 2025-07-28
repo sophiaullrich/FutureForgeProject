@@ -1,5 +1,5 @@
-import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import React, { useRef, useState } from 'react';
+import { Routes, Route, useNavigate, useLocation} from "react-router-dom";
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
@@ -7,11 +7,17 @@ import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx"; // note: corrected path
 import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
+import ProfilePage from "./ProfilePage.jsx";
 import "./App.css";
-import { IoNotificationsOutline } from "react-icons/io5";
-import { IoPersonCircleOutline } from "react-icons/io5";
+import { IoNotificationsOutline,  IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
+
 
 function App() {
+  const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const profilePrevPath = useRef(null);
+
   const SafeTeamsWrapper = () => {
     try {
       return <TeamsPage />;
@@ -40,6 +46,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/Resetpass" element={<Resetpass />} />
+            <Route path="/ProfilePage" element={<ProfilePage />} />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
@@ -51,9 +58,28 @@ function App() {
       </div>
 
       {/* Profile Icon */}
-      <div className="profile-icon">
-        <IoPersonCircleOutline size={45} />
+      <div
+        className="profile-icon"
+        onClick={() => {
+          if (location.pathname === "/ProfilePage") {
+            navigate(profilePrevPath.current || "/dashboard");
+          } else {
+            profilePrevPath.current = location.pathname;
+            navigate("/ProfilePage");
+          }
+        }}
+        style={{ cursor: "pointer" }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {(location.pathname === "/settings" && hovered) || 
+              (location.pathname !== "/settings" && !hovered) ? (
+                <IoPersonCircleOutline size={45} color="#252B2F" />
+              ) : (
+                <IoPersonCircle size={45} color="#252B2F" />
+              )}
       </div>
+
     </div>
   );
 }
