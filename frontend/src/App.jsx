@@ -37,6 +37,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import TasksPage from './TasksPage.jsx';
 import TeamsPage from './TeamsPage.jsx';
+import ChatsPage from './chat.jsx';
 import NavigationBar from './NavigationBar.jsx'; 
 import './App.css'; // <--- Ensure your main app CSS is imported
 import { IoNotificationsOutline, IoNotifications } from "react-icons/io5";
@@ -54,6 +55,7 @@ function App() {
             <Route path="/" element={<h1>Welcome to your Dashboard!</h1>} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/chat" element={<ChatsPage />} />            
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>

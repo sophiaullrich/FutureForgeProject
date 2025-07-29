@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+.package-lock.json
+.package.json
 
 # testing
 /coverage
@@ -17,7 +19,10 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env
 
 npm-debug.log*
+/backend/package-lock.json
+/backend/package.json
 yarn-debug.log*
 yarn-error.log*
