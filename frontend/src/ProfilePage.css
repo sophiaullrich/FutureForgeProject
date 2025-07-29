@@ -6,16 +6,16 @@
 
 /* Header */
 .top-header h1 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+  font-size: 36px;
+  margin-bottom: 16px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .profile-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 2rem;
-  margin-bottom: 2rem;
 }
 
 .profile-left {
@@ -30,6 +30,7 @@
   height: 160px;
   cursor: pointer;
 }
+
 .profile-img {
   width: 100%;
   height: 100%;
@@ -38,7 +39,7 @@
   transition: filter 0.3s ease;
 }
 
-/* Hover effect: dim + show overlay + icon */
+/* Hover effect */
 .profile-img-container::after {
   content: "";
   position: absolute;
@@ -75,59 +76,74 @@
   opacity: 1;
 }
 
-.profile-info {
-  text-align: center;
-  margin-top: 1rem;
+.profile-info { 
+  text-align: left;
 }
 
-.profile-info h2 {
-  margin-bottom: 0.3rem;
+/* Name */
+.profile-info h2 { 
+  color: #252B2F;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 12px;
 }
 
+/* Description */
 .profile-info p {
-  font-size: 0.95rem;
   color: #252B2F80;
-  max-width: 300px;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  min-width: auto;
+  margin-bottom: 23px;
 }
 
 /* Social accounts */
 .social-section {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   min-width: 260px;
 }
 
 .social-section h4 {
-  margin-bottom: 0.5rem;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 15px;
+  text-align: right;
 }
 
 .social-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 19.92px;
+  margin-bottom: 20px;
 }
 
 .social-link .icon {
-  font-size: 1.2rem;
+  font-size: 25px;
 }
 
 .social-link input {
-  border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 0.25rem 0.5rem;
+  border: 2px solid #6096BA;
+  background: #F3E7D3;
+  padding: 6px;
   flex: 1;
-  background: #fdf8f3;
-  font-size: 0.9rem;
+  color: #252B2F;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 /* Interests and badges scroll */
 .scrollable-row {
   display: flex;
-  gap: 0.75rem;
   overflow-x: auto;
-  margin: 1.25rem 0;
-  padding-bottom: 0.5rem;
 }
 
 .interests-row .interest-tag,
@@ -136,29 +152,50 @@
 }
 
 .interest-tag {
+  display: flex;
+  width: 130px;
+  height: 30px;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 5px;
   background: #252B2F;
   color: #F3E7D3;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.interest-tag:hover {
-  background: #333;
+  text-align: center;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-right: 15px;
 }
 
 .career-goals {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
   position: relative;
-  border-radius: 5px;
-  border: 3px solid #252B2F;
-  background: #F5EBE0;
-  padding: 12px;
-  max-width: 887px;
 }
 
 .career-goals h3 {
-  margin-bottom: 0.5rem;
+  color: #252B2F;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: -10px;
+}
+
+.career-goals ul {
+  border-radius: 5px;
+  font-size: 20px;
+  border: 3px solid #252B2F;
+  background: #F5EBE0;
+  padding-left: 44px;
+  padding-right: 26px;
+  padding-top: 21px;
+  padding-bottom: 21px;
+  max-width: 887px;
 }
 
 .edit-icon {
@@ -169,8 +206,19 @@
 }
 
 .badge-box {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #1f4f4f, #7ea863);
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #51905A 0%, #6096BA 100%);
+  margin-right: 30px;
+}
+
+.badge-box-name {
+  color: #252B2F;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 10px;
 }

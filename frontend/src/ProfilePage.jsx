@@ -3,7 +3,7 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp } from 'react-icons/io5';
 function ProfilePage() {
-    const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML"];
+    const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI"];
     const [editingGoals, setEditingGoals] = useState(false);
     const [careerGoals, setCareerGoals] = useState([
         "Learn a new programming language",
@@ -103,8 +103,11 @@ function ProfilePage() {
       </div>
 
       {/* Badges */}
+        <div className="badge-box-name">
+            Diya's Badges
+        </div>
       <div className="scrollable-row badges-row">
-        {[...Array(6)].map((_, idx) => (
+        {[...Array(8)].map((_, idx) => (
           <div key={idx} className="badge-box" />
         ))}
       </div>
