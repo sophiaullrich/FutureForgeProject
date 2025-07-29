@@ -13,7 +13,8 @@ function ProfilePage() {
         "Become proficient in Git Version Control",
     ]);
 
-    const [profileImg, setProfileImg] = useState("/default-avatar.png");
+    const defaultImg = "/defaultImage.png"; 
+    const [profileImg, setProfileImg] = useState(defaultImg);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -21,6 +22,11 @@ function ProfilePage() {
         setProfileImg(URL.createObjectURL(file));
         }
     };
+
+    const handleImageError = () => {
+        setProfileImg(defaultImg)
+    };
+
     return(
     <div className="profile-page">
       {/* Top heading */}
@@ -33,7 +39,7 @@ function ProfilePage() {
         {/* Left - Image and Info */}
         <div className="profile-left">
           <div className="profile-img-container">
-            <img src={profileImg} alt="Profile" className="profile-img" />
+            <img src={profileImg} alt="Profile" className="profile-img" onError={handleImageError}/>
             <label htmlFor="imgUpload" className="edit-img-btn">
               <IoPencilSharp />
             </label>
