@@ -1,0 +1,176 @@
+.profile-page {
+  padding-left: 50px;
+  height: 100%;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+}
+
+/* Header */
+.top-header h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+
+.profile-img-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  cursor: pointer;
+}
+.profile-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+/* Hover effect: dim + show overlay + icon */
+.profile-img-container::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.edit-img-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #252B2F;
+  color: white;
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.profile-img-container:hover::after {
+  opacity: 1;
+}
+
+.profile-img-container:hover .edit-img-btn {
+  opacity: 1;
+}
+
+.profile-info {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.profile-info h2 {
+  margin-bottom: 0.3rem;
+}
+
+.profile-info p {
+  font-size: 0.95rem;
+  color: #252B2F80;
+  max-width: 300px;
+}
+
+/* Social accounts */
+.social-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 260px;
+}
+
+.social-section h4 {
+  margin-bottom: 0.5rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.social-link .icon {
+  font-size: 1.2rem;
+}
+
+.social-link input {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+  flex: 1;
+  background: #fdf8f3;
+  font-size: 0.9rem;
+}
+
+/* Interests and badges scroll */
+.scrollable-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  padding-bottom: 0.5rem;
+}
+
+.interests-row .interest-tag,
+.badges-row .badge-box {
+  flex: 0 0 auto;
+}
+
+.interest-tag {
+  background: #252B2F;
+  color: #F3E7D3;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.interest-tag:hover {
+  background: #333;
+}
+
+.career-goals {
+  position: relative;
+  border-radius: 5px;
+  border: 3px solid #252B2F;
+  background: #F5EBE0;
+  padding: 12px;
+  max-width: 887px;
+}
+
+.career-goals h3 {
+  margin-bottom: 0.5rem;
+}
+
+.edit-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.badge-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1f4f4f, #7ea863);
+}
