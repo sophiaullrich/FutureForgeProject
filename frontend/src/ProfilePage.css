@@ -213,7 +213,7 @@ body {
   padding-right: 26px;
   padding-top: 21px;
   padding-bottom: 21px;
-  max-width: 887px;
+  min-width: 887px;
 }
 
 .edit-icon {
