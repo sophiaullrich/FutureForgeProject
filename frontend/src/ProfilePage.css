@@ -1,7 +1,13 @@
 .profile-page {
   padding-left: 50px;
   height: 100%;
+  max-width: 1200px;
   font-family: "SF Pro Rounded", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
 }
 
 /* Header */
@@ -16,12 +22,16 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .profile-left {
   display: flex;
   flex-direction: column;
   align-items: left;
+  flex: 1;
+  min-width: 300px;
 }
 
 .profile-img-container {
@@ -99,13 +109,17 @@
   line-height: normal;
   min-width: auto;
   margin-bottom: 23px;
+  word-wrap: break-word;
+
 }
 
 /* Social accounts */
 .social-section {
   display: flex;
   flex-direction: column;
+  flex: 0 0 300px;
   min-width: 260px;
+  max-width: 100%;
 }
 
 .social-section h4 {
@@ -138,17 +152,21 @@
   font-size: 15px;
   font-style: normal;
   font-weight: 400;
+  min-width: 0;
 }
 
 /* Interests and badges scroll */
 .scrollable-row {
   display: flex;
   overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: 0.01;
 }
 
 .interests-row .interest-tag,
 .badges-row .badge-box {
   flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .interest-tag {

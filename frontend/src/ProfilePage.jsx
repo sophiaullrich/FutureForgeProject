@@ -3,7 +3,7 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp } from 'react-icons/io5';
 function ProfilePage() {
-    const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI"];
+    const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI", "Astronomy", "Baking"];
     const [editingGoals, setEditingGoals] = useState(false);
     const [careerGoals, setCareerGoals] = useState([
         "Learn a new programming language",
