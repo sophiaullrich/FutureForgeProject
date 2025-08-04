@@ -1,8 +1,9 @@
+// RewardsPage.jsx
 import React from 'react';
 import './RewardsPage.css';
 
 const RewardsPage = () => {
-  const badges = [1, 2, 3, 4, 5, 6]; // sample badge data
+  const badges = [1, 2, 3, 4, 5, 6];
   const leaderboard = [
     { name: 'Stephen. T', points: 147 },
     { name: 'Joseph. E', points: 139 },
@@ -16,22 +17,18 @@ const RewardsPage = () => {
   const rewards = [5, 10, 20, 25, 30, 50, 100, 300, 500];
 
   return (
-    <main className="rewards-content">
-      <header className="rewards-header">
-        <h1>Rewards</h1>
-      </header>
+    <div className="rewards-content">
+      <section className="badges-section">
+        <h2>Your Badges</h2>
+        <div className="badges">
+          {badges.map((b, index) => (
+            <div key={index} className="badge-placeholder" />
+          ))}
+        </div>
+      </section>
 
-      <div className="rewards-sections">
+      <div className="sections-row">
         <div className="left-column">
-          <section className="badges-section">
-            <h2>Your Badges</h2>
-            <div className="badges">
-              {badges.map((b, index) => (
-                <div key={index} className="badge-placeholder" />
-              ))}
-            </div>
-          </section>
-
           <section className="leaderboard-section">
             <h2>Leaderboard</h2>
             <ol className="leaderboard">
@@ -66,7 +63,7 @@ const RewardsPage = () => {
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

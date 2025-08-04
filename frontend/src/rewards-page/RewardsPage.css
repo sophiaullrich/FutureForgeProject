@@ -1,37 +1,24 @@
-/* Global reset and font smoothing */
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
 }
 
-.rewards-content {
-  padding: 3rem;
-  font-family: 'Helvetica Neue', sans-serif;
+body {
+  margin: 0;
   background-color: #f8e9d2;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.rewards-content {
+  padding: 6rem 3rem 3rem 3rem;
+  max-width: 1280px;
+  margin: 0 auto;
   min-height: 100vh;
-  position: relative;
-}
-
-/* Hide title */
-.rewards-header h1 {
-  display: none;
-}
-
-/* Layout: Two columns */
-.rewards-sections {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 2rem;
-  justify-content: space-between;
 }
 
-.left-column,
-.right-column {
-  flex: 1;
-  min-width: 300px;
-}
-
-/* BADGES */
 .badges-section h2 {
   font-size: 1.2rem;
   margin-bottom: 1rem;
@@ -45,27 +32,49 @@
 }
 
 .badge-placeholder {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
+  width: 130px;
+  height: 130px;
+  border-radius: 5px;
   background: linear-gradient(135deg, #4ecdc4, #2e5fa1);
+  flex-shrink: 0;
 }
 
-/* LEADERBOARD */
+/* Container for Leaderboard + Rewards aligned horizontally */
+.sections-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+/* Leaderboard Section */
+.left-column {
+  flex-shrink: 0;
+}
+
+.leaderboard-section {
+  width: 450px;
+  flex-shrink: 0;
+}
+
 .leaderboard-section h2 {
   font-size: 1.2rem;
-  margin: 2rem 0 1rem 0;
+  margin-bottom: 1rem;
   font-weight: bold;
 }
 
 .leaderboard {
   list-style: none;
+  width: 100%;
   padding: 1rem;
-  background-color: #fefaf3;
-  border: 1px solid #bfbfbf;
-  border-radius: 12px;
+  background-color: #F5EBE0;
+  border: 1px solid #22336A;
+  border-radius: 5px;
   margin: 0;
   font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .leaderboard li {
@@ -73,11 +82,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.4rem 0;
-  border-top: 1px solid #eee;
 }
 
-.leaderboard li:first-child {
-  border-top: none;
+.leaderboard li:nth-child(-n+3) {
+  border-bottom: 1px solid #333;
 }
 
 .rank-number {
@@ -89,7 +97,6 @@
   font-size: 1rem;
 }
 
-/* Medal emojis */
 .leaderboard li:nth-child(1) .rank-number::before {
   content: "🥇";
   margin-right: 0.3rem;
@@ -106,39 +113,63 @@
 .leaderboard-last {
   font-style: italic;
   padding-top: 0.5rem;
-  border-top: 1px solid #ccc;
 }
 
-/* Footer note */
 .leaderboard::after {
   content: "Updated Just Now...";
   display: block;
   text-align: right;
   font-size: 0.75rem;
   color: #999;
-  margin-top: 0.5rem;
+  margin-top: auto;
   padding-right: 0.25rem;
 }
 
-/* REWARDS */
+/* Rewards Grid Section */
+.right-column {
+  flex-shrink: 0;
+}
+
+.rewards-grid {
+  width: 450px;
+  flex-shrink: 0;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .rewards-grid h2 {
   font-size: 1.2rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
   text-align: center;
   font-weight: bold;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.rewards-grid h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px;
+  background-color: #333;
 }
 
 .rewards-grid p {
-  font-size: 0.8rem;
-  text-align: center;
-  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.75rem;
   color: #555;
+  text-align: center;
 }
 
 .rewards-list {
   display: grid;
-  grid-template-columns: repeat(3, 100px);
-  gap: 1rem;
+  grid-template-columns: repeat(3, 90px);
+  gap: 0.75rem;
   justify-content: center;
 }
 
@@ -149,28 +180,31 @@
 }
 
 .reward-circle {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: radial-gradient(circle at center, #4ecdc4, #556270, #dd5e89);
-  border: 6px solid #a96e7b;
+  border: 4px solid #a96e7b;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .reward-label {
-  margin-top: 0.4rem;
+  margin-top: 0.3rem;
   font-size: 0.9rem;
   font-weight: bold;
   color: #333;
   text-align: center;
 }
 
-/* Top-right icons */
-.top-right-icons {
-  position: absolute;
-  top: 1.5rem;
-  right: 2rem;
-  font-size: 1.5rem;
-  display: flex;
-  gap: 1.5rem;
+/* Responsive Mobile */
+@media (max-width: 1000px) {
+  .sections-row {
+    flex-wrap: wrap;
+  }
+
+  .leaderboard-section,
+  .rewards-grid {
+    width: 100%;
+  }
 }
