@@ -13,7 +13,8 @@ function ProfilePage() {
     ]);
     const [newInterest, setNewInterest] = useState('');
 
-    const [editingGoals, setEditingGoals] = useState(false);
+    const [isEditingGoals, setIsEditingGoals] = useState(false); // Renamed for clarity
+    const [isHoveringGoals, setIsHoveringGoals] = useState(false); // New state for hover
     const [careerGoals, setCareerGoals] = useState([
         "Learn a new programming language",
         "Build a project portfolio",
@@ -21,10 +22,12 @@ function ProfilePage() {
         "Earn Certifications",
         "Become proficient in Git Version Control",
     ]);
+    const [tempGoalsText, setTempGoalsText] = useState('');
 
     const defaultImg = "/defaultImage.png"; 
     const [profileImg, setProfileImg] = useState(defaultImg);
 
+    // image handlers
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -36,6 +39,7 @@ function ProfilePage() {
         setProfileImg(defaultImg)
     };
 
+    // interest handlers
     const handleAddInterest = () => {
         if (newInterest.trim() !== '' && !interests.includes(newInterest.trim())) {
             setInterests([...interests, newInterest.trim()]);
@@ -46,6 +50,25 @@ function ProfilePage() {
     const handleDeleteInterest = (index) => {
         const newInterests = interests.filter((_, i) => i !== index);
         setInterests(newInterests);
+    };
+
+    // career goals handlers
+    const handleEditGoalsClick = () => {
+        // Join the array into a single string for editing
+        setTempGoalsText(careerGoals.join('\n'));
+        setIsEditingGoals(true); // Toggle to edit mode
+        setIsHoveringGoals(false); // Hide the hover icon
+    };
+
+    const handleSaveGoals = () => {
+        // Split the text back into an array, filter out empty lines
+        const updatedGoals = tempGoalsText.split('\n').map(goal => goal.trim()).filter(goal => goal !== '');
+        setCareerGoals(updatedGoals);
+        setIsEditingGoals(false);
+    };
+
+    const handleCancelGoals = () => {
+        setIsEditingGoals(false);
     };
 
     return(
@@ -168,16 +191,34 @@ function ProfilePage() {
       {/* Career Goals */}
       <div
         className="career-goals"
-        onMouseEnter={() => setEditingGoals(true)}
-        onMouseLeave={() => setEditingGoals(false)}
+        onMouseEnter={() => setIsHoveringGoals(true)} // Change state on hover
+        onMouseLeave={() => setIsHoveringGoals(false)} // Change state on un-hover
       >
         <h3>Career Goals</h3>
-        <ul>
-          {careerGoals.map((goal, index) => (
-            <li key={index}>{goal}</li>
-          ))}
-        </ul>
-        {editingGoals && <IoPencilSharp className="edit-icon" />}
+        {isEditingGoals ? (
+          <div className="career-goals-edit-container">
+            <textarea
+              className="editable-goals-textarea"
+              value={tempGoalsText}
+              onChange={(e) => setTempGoalsText(e.target.value)}
+            />
+            <div className="career-goals-buttons">
+              <button onClick={handleSaveGoals} className="save-btn">Save</button>
+              <button onClick={handleCancelGoals} className="cancel-btn">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="career-goals-textbox">
+                <ul>
+                    {careerGoals.map((goal, index) => (
+                        <li key={index}>{goal}</li>
+                    ))}
+                </ul>
+            </div>
+            {isHoveringGoals && <IoPencilSharp className="edit-icon" onClick={handleEditGoalsClick} />}
+          </>
+        )}
       </div>
 
       {/* Badges */}

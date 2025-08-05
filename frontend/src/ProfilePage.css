@@ -343,7 +343,7 @@ body {
   color: #F3E7D3;
 }
 
-.career-goals {
+/* .career-goals {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -377,6 +377,145 @@ body {
   top: 10px;
   right: 10px;
   cursor: pointer;
+} */
+
+.career-goals {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.career-goals h3 {
+  color: #252B2F;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 10px;
+}
+
+/* Edit icon for hover behavior */
+.career-goals .edit-icon {
+  position: absolute;
+  top: 50px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #252B2F;
+}
+
+/* New CSS for the career goals text box (view mode) */
+.career-goals-textbox {
+    border-radius: 5px;
+    font-size: 20px;
+    border: 3px solid #252B2F;
+    background: #F5EBE0;
+    padding-left: 44px;
+    padding-right: 26px;
+    padding-top: 21px;
+    padding-bottom: 21px;
+    min-width: 887px;
+}
+
+.career-goals-textbox ul {
+    list-style: none; /* Remove list bullets */
+    padding: 0;
+    margin: 0;
+}
+
+.career-goals-textbox li {
+    position: relative;
+    padding-left: 1.5em; /* Space for the custom bullet */
+}
+
+.career-goals-textbox li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #252B2F; /* Bullet color */
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+/* Edit mode container */
+.career-goals-edit-container {
+  border-radius: 5px;
+  border: 3px solid #252B2F;
+  background: #F5EBE0;
+  padding: 20px;
+}
+
+/* Editable textarea styles */
+.editable-goals-textarea {
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+  font-size: 20px;
+  border: none;
+  /* border: 1px solid #252B2F; */
+  background: #F5EBE0;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: inherit;
+  min-height: 200px; /* Adjust height as needed */
+  resize: vertical; /* Allow vertical resizing */
+}
+
+/* Save and Cancel buttons */
+.career-goals-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.career-goals-buttons button {
+  position: static; 
+  border-radius: 5px; 
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+/* 
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s; */
+}
+
+.save-btn {
+  background-color: #51905A;
+  color: #F3E7D3;
+  border: 3px solid #F3E7D3;
+}
+
+.save-btn:hover {
+  background-color: #F3E7D3;
+  color: #51905A;
+  border: 3px solid #51905A;
+}
+
+.cancel-btn {
+  background-color: #AC4750;
+  color: #F3E7D3;
+  border: 3px solid #F3E7D3;
+}
+
+.cancel-btn:hover {
+  background-color: #F3E7D3;
+  color: #AC4750;
+  border: 3px solid #AC4750;
 }
 
 .badge-box {
@@ -386,6 +525,7 @@ body {
   border-radius: 5px;
   background: linear-gradient(180deg, #51905A 0%, #6096BA 100%);
   margin-right: 30px;
+  
 }
 
 .badge-box-name {
@@ -395,4 +535,5 @@ body {
   font-weight: 400;
   line-height: normal;
   margin-bottom: 10px;
+  margin-top: 25px;
 }
