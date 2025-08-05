@@ -3,6 +3,9 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp } from 'react-icons/io5';
 function ProfilePage() {
+    const [isEditingInfo, setIsEditingInfo] = useState(false);
+    const [name, setName] = useState("Diya Topiwala");
+    const [description, setDescription] = useState("Hi! My name is Diya and I am a software developer with an interest in photography and astronomy!");
     const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI", "Astronomy", "Baking"];
     const [editingGoals, setEditingGoals] = useState(false);
     const [careerGoals, setCareerGoals] = useState([
@@ -52,12 +55,32 @@ function ProfilePage() {
             />
           </div>
 
-          <div className="profile-info">
-            <h2>Diya Topiwala</h2>
-            <p>
-              Hi! My name is Diya and I am a software developer with an interest in photography and astronomy!
-            </p>
-          </div>
+        <div className="profile-info">
+            <h2>{name}</h2>
+            {isEditingInfo ? (
+            <div>
+                {/* Input fields for editing */}
+                <textarea 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)}
+                />
+                <div class="saveButton">
+                    {/* Save button for editing */}
+                    <button onClick={() => setIsEditingInfo(false)}>Save</button>
+                </div>
+            </div>
+            ) : (
+            // View mode
+            <>
+                <p>{description}</p>
+                {/* The new pen icon */}
+                <IoPencilSharp 
+                className="description-edit-icon" 
+                onClick={() => setIsEditingInfo(true)} 
+                />
+            </>
+            )}
+            </div>
         </div>
 
         {/* Right - Social accounts */}
