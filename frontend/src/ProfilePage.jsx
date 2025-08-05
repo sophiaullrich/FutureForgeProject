@@ -82,7 +82,7 @@ function ProfilePage() {
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)}
                 />
-                <div class="saveButton">
+                <div class="profile-info-button-container">
                     {/* Save button for editing */}
                     <button onClick={() => setIsEditingInfo(false)}>Save</button>
                 </div>
@@ -134,17 +134,21 @@ function ProfilePage() {
                 <div className="add-interest-container">
                 <input 
                     type="text" 
-                    placeholder="Add new interest..." 
+                    placeholder="Add new interest...e.g. Cooking" 
                     value={newInterest} 
                     onChange={(e) => setNewInterest(e.target.value)} 
                     onKeyPress={(e) => {
                     if (e.key === 'Enter') handleAddInterest();
                     }}
                 />
-                <button onClick={handleAddInterest}>Add</button>
-                </div>
-                <div className="profile-info-button-container">
-                <button onClick={() => setIsEditingInterests(false)}>Save</button>
+                    {/* Add Button */}
+                    <div>
+                        <button onClick={handleAddInterest}>Add</button>
+                    </div>
+                    {/* Save Button */}
+                    <div>
+                    <button onClick={() => setIsEditingInterests(false)}>Save</button>
+                    </div>
                 </div>
             </div>
             ) : (
