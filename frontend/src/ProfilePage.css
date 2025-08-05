@@ -121,6 +121,7 @@ body {
   opacity: 0; /* Hidden by default */
   transition: opacity 0.3s ease;
   font-size: 20px;
+  color: #252B2F;
 }
 
 /* Show the icon on hover over the profile-info container */
@@ -248,6 +249,89 @@ body {
   font-weight: 400;
   line-height: normal;
   margin-right: 15px;
+}
+
+.interests-wrapper {
+  margin-top: 20px;
+  position: relative; /* Container for the header and icon positioning */
+}
+
+.interests-edit-icon {
+  position: absolute;
+  top: 5px; /* Adjust this value to align with the interests content */
+  left: -30px; /* Moves the icon to the left */
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease;
+  font-size: 20px;
+  color: #252B2F;
+}
+
+.interests-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.interests-wrapper:hover .interests-edit-icon {
+  opacity: 1;
+}
+
+.editable-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editable-interest-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: #252B2F;
+  color: #F3E7D3;
+  font-size: 16px;
+}
+
+.editable-interest-tag .delete-icon {
+  cursor: pointer;
+  color: #F3E7D3;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
+.editable-interest-tag .delete-icon:hover {
+  color: #AC4750;
+}
+
+.add-interest-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.add-interest-container input {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #6096BA;
+  background: #F3E7D3;
+  font-family: inherit;
+}
+
+.add-interest-container button {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 3px solid #51905A;
+  background-color: #F3E7D3;
+  color: #51905A;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-interest-container button:hover {
+  background-color: #437a4a;
 }
 
 .career-goals {

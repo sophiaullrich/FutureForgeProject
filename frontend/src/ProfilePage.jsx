@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
-import { IoPencilSharp } from 'react-icons/io5';
+import { IoPencilSharp, IoCloseSharp} from 'react-icons/io5';
 function ProfilePage() {
     const [isEditingInfo, setIsEditingInfo] = useState(false);
     const [name, setName] = useState("Diya Topiwala");
     const [description, setDescription] = useState("Hi! My name is Diya and I am a software developer with an interest in photography and astronomy!");
-    const interestsList = ["React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI", "Astronomy", "Baking"];
+    
+    const [isEditingInterests, setIsEditingInterests] = useState(false);
+    const [interests, setInterests] = useState([
+        "React", "Java", "Python", "TypeScript", "PHP", "HTML", "CSS", "AI", "Astronomy", "Baking"
+    ]);
+    const [newInterest, setNewInterest] = useState('');
+
     const [editingGoals, setEditingGoals] = useState(false);
     const [careerGoals, setCareerGoals] = useState([
         "Learn a new programming language",
@@ -28,6 +34,18 @@ function ProfilePage() {
 
     const handleImageError = () => {
         setProfileImg(defaultImg)
+    };
+
+    const handleAddInterest = () => {
+        if (newInterest.trim() !== '' && !interests.includes(newInterest.trim())) {
+            setInterests([...interests, newInterest.trim()]);
+            setNewInterest('');
+        }
+    };
+
+    const handleDeleteInterest = (index) => {
+        const newInterests = interests.filter((_, i) => i !== index);
+        setInterests(newInterests);
     };
 
     return(
@@ -102,12 +120,45 @@ function ProfilePage() {
       </div>
 
       {/* Interests */}
-      <div className="scrollable-row interests-row">
-        {interestsList.map((interest, index) => (
-          <div key={index} className="interest-tag">
-            {interest}
-          </div>
-        ))}
+        <div className="interests-wrapper"> 
+            {isEditingInterests ? (
+            <div className="interests-edit-container">
+                <div className="editable-interests">
+                {interests.map((interest, index) => (
+                    <div key={index} className="editable-interest-tag">
+                    <span>{interest}</span>
+                    <IoCloseSharp className="delete-icon" onClick={() => handleDeleteInterest(index)} />
+                    </div>
+                ))}
+                </div>
+                <div className="add-interest-container">
+                <input 
+                    type="text" 
+                    placeholder="Add new interest..." 
+                    value={newInterest} 
+                    onChange={(e) => setNewInterest(e.target.value)} 
+                    onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleAddInterest();
+                    }}
+                />
+                <button onClick={handleAddInterest}>Add</button>
+                </div>
+                <div className="profile-info-button-container">
+                <button onClick={() => setIsEditingInterests(false)}>Save</button>
+                </div>
+            </div>
+            ) : (
+            <>
+                <div className="scrollable-row interests-row">
+                {interests.map((interest, index) => (
+                    <div key={index} className="interest-tag">
+                    {interest}
+                    </div>
+                ))}
+                </div>
+                <IoPencilSharp className="interests-edit-icon" onClick={() => setIsEditingInterests(true)} />
+            </>
+            )}
       </div>
 
       {/* Career Goals */}
