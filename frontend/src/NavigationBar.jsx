@@ -74,19 +74,19 @@ function NavigationBar() {
     <div
       className="navbar-footer"
       onClick={() => {
-        if (location.pathname === "/settings") {
+        if (location.pathname === "/Settings") {
           navigate(previousPathRef.current || '/dashboard');
         } else {
           previousPathRef.current = location.pathname;
-          navigate('/settings');
+          navigate('/Settings');
           setActiveIndex(-1);
         }
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {(location.pathname === "/settings" && hovered) || 
-      (location.pathname !== "/settings" && !hovered) ? (
+      {(location.pathname === "/Settings" && hovered) || 
+      (location.pathname !== "/Settings" && !hovered) ? (
         <IoSettingsOutline size={45} color="#F3E7D3" />
       ) : (
         <IoSettings size={45} color="#F3E7D3" />
