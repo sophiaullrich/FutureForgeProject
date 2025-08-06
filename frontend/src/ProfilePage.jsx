@@ -210,13 +210,16 @@ function ProfilePage() {
         ) : (
           <>
             <div className="career-goals-textbox">
-                <ul>
-                    {careerGoals.map((goal, index) => (
-                        <li key={index}>{goal}</li>
-                    ))}
-                </ul>
+            <ul>
+                {careerGoals.map((goal, index) => (
+                <li key={index}>{goal}</li>
+                ))}
+            </ul>
+
+            {isHoveringGoals && (
+                <IoPencilSharp className="edit-icon" onClick={handleEditGoalsClick} />
+            )}
             </div>
-            {isHoveringGoals && <IoPencilSharp className="edit-icon" onClick={handleEditGoalsClick} />}
           </>
         )}
       </div>
