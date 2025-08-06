@@ -195,6 +195,22 @@ body {
   text-align: right;
 }
 
+.socials-edit-icon {
+  font-size: 25px;
+  cursor: pointer;
+  padding: 4px;
+  color: #252B2F;
+  flex-shrink: 0;
+}
+
+.social-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  position: relative;
+}
+
 .social-link {
   display: flex;
   align-items: center;

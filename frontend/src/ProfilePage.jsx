@@ -27,6 +27,15 @@ function ProfilePage() {
     const defaultImg = "/defaultImage.png"; 
     const [profileImg, setProfileImg] = useState(defaultImg);
 
+    const [isHoveringSocials, setIsHoveringSocials] = useState(false);
+    const [isEditingSocials, setIsEditingSocials] = useState(false);
+    const [socials, setSocials] = useState({
+        google: "diyatopiwala@gmail.com",
+        github: "diyatop1204",
+        linkedin: "diya-t-0pc130219"
+    });
+
+
     // image handlers
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -37,6 +46,20 @@ function ProfilePage() {
 
     const handleImageError = () => {
         setProfileImg(defaultImg)
+    };
+
+    // social media handlers
+    const handleSocialChange = (key, value) => {
+        setSocials(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSaveSocials = () => {
+        setIsEditingSocials(false);
+    };
+
+    const handleCancelSocials = () => {
+        setIsEditingSocials(false);
+    // Optionally reset to original state if needed
     };
 
     // interest handlers
@@ -125,21 +148,70 @@ function ProfilePage() {
         </div>
 
         {/* Right - Social accounts */}
-        <div className="social-section">
-          <h4>Social Accounts</h4>
-          <div className="social-link">
-            <FaGoogle className="icon" />
-            <input type="text" readOnly value="diyatopiwala@gmail.com" />
-          </div>
-          <div className="social-link">
-            <FaGithub className="icon" />
-            <input type="text" readOnly value="diyatop1204" />
-          </div>
-          <div className="social-link">
-            <FaLinkedin className="icon" />
-            <input type="text" readOnly value="diya-t-0pc130219" />
-          </div>
+        <div 
+        className="social-section"
+        onMouseEnter={() => setIsHoveringSocials(true)}
+        onMouseLeave={() => setIsHoveringSocials(false)}
+        >
+        <div className="social-header">
+            {isHoveringSocials && !isEditingSocials && (
+            <IoPencilSharp 
+                className="socials-edit-icon" 
+                onClick={() => setIsEditingSocials(true)} 
+            />
+            )}
+            <h4>Social Accounts</h4>
         </div>
+
+        {isEditingSocials ? (
+            <>
+            <div className="social-link">
+                <FaGoogle className="icon" />
+                <input 
+                type="text" 
+                value={socials.google} 
+                onChange={(e) => handleSocialChange('google', e.target.value)} 
+                />
+            </div>
+            <div className="social-link">
+                <FaGithub className="icon" />
+                <input 
+                type="text" 
+                value={socials.github} 
+                onChange={(e) => handleSocialChange('github', e.target.value)} 
+                />
+            </div>
+            <div className="social-link">
+                <FaLinkedin className="icon" />
+                <input 
+                type="text" 
+                value={socials.linkedin} 
+                onChange={(e) => handleSocialChange('linkedin', e.target.value)} 
+                />
+            </div>
+            <div className="social-buttons">
+                <button onClick={handleSaveSocials}>Save</button>
+                <button onClick={handleCancelSocials}>Cancel</button>
+            </div>
+            </>
+        ) : (
+            <>
+            <div className="social-link">
+                <FaGoogle className="icon" />
+                <input type="text" readOnly value={socials.google} />
+            </div>
+            <div className="social-link">
+                <FaGithub className="icon" />
+                <input type="text" readOnly value={socials.github} />
+            </div>
+            <div className="social-link">
+                <FaLinkedin className="icon" />
+                <input type="text" readOnly value={socials.linkedin} />
+            </div>
+            </>
+        )}
+        </div>
+
       </div>
 
       {/* Interests */}
