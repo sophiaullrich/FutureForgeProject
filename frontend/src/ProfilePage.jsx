@@ -55,11 +55,12 @@ function ProfilePage() {
 
     const handleSaveSocials = () => {
         setIsEditingSocials(false);
+        setIsHoveringSocials(false); 
     };
 
     const handleCancelSocials = () => {
         setIsEditingSocials(false);
-    // Optionally reset to original state if needed
+        setIsHoveringSocials(false);
     };
 
     // interest handlers
@@ -190,8 +191,8 @@ function ProfilePage() {
                 />
             </div>
             <div className="social-buttons">
-                <button onClick={handleSaveSocials}>Save</button>
-                <button onClick={handleCancelSocials}>Cancel</button>
+                <button onClick={handleSaveSocials} className="save-btn">Save</button>
+                <button onClick={handleCancelSocials} className="cancel-btn">Cancel</button>
             </div>
             </>
         ) : (

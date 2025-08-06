@@ -192,6 +192,7 @@ body {
   font-weight: 400;
   line-height: normal;
   margin-bottom: 15px;
+  width: 100%;
   text-align: right;
 }
 
@@ -201,6 +202,9 @@ body {
   padding: 4px;
   color: #252B2F;
   flex-shrink: 0;
+  position: relative;
+  right: 0;
+  top: 0;
 }
 
 .social-header {
@@ -494,27 +498,50 @@ body {
 }
 
 .save-btn {
+  background-color: #F3E7D3;
+  color: #51905A;
+  border: 3px solid #51905A;
+  position: static; 
+  border-radius: 5px; 
+  width: 120px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+  margin-right: 5px;
+}
+
+.save-btn:hover {
   background-color: #51905A;
   color: #F3E7D3;
   border: 3px solid #F3E7D3;
 }
 
-.save-btn:hover {
-  background-color: #F3E7D3;
-  color: #51905A;
-  border: 3px solid #51905A;
-}
-
 .cancel-btn {
-  background-color: #AC4750;
-  color: #F3E7D3;
-  border: 3px solid #F3E7D3;
-}
-
-.cancel-btn:hover {
   background-color: #F3E7D3;
   color: #AC4750;
   border: 3px solid #AC4750;
+  position: static; 
+  border-radius: 5px; 
+  width: 120px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+}
+
+.cancel-btn:hover {
+  background-color: #AC4750;
+  color: #F3E7D3;
+  border: 3px solid #F3E7D3;
 }
 
 .badge-box {
