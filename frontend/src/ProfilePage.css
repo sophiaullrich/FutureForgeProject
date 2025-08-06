@@ -333,51 +333,15 @@ body {
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease; 
-  background-color: #F3E7D3;
-  color: #51905A;
+  background-color: #51905A;
+  color: #F3E7D3;
   align-items: center;
 }
 
 .add-interest-container button:hover {
-  background-color: #51905A;
-  color: #F3E7D3;
+  background-color: #F3E7D3;
+  color: #51905A;
 }
-
-/* .career-goals {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.career-goals h3 {
-  color: #252B2F;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  margin-bottom: -10px;
-}
-
-.career-goals ul {
-  border-radius: 5px;
-  font-size: 20px;
-  border: 3px solid #252B2F;
-  background: #F5EBE0;
-  padding-left: 44px;
-  padding-right: 26px;
-  padding-top: 21px;
-  padding-bottom: 21px;
-  min-width: 887px;
-}
-
-.edit-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-} */
 
 .career-goals {
   display: flex;
@@ -399,18 +363,8 @@ body {
   margin-bottom: 10px;
 }
 
-/* Edit icon for hover behavior */
-.career-goals .edit-icon {
-  position: absolute;
-  top: 50px;
-  right: 15px;
-  cursor: pointer;
-  font-size: 20px;
-  color: #252B2F;
-}
-
-/* New CSS for the career goals text box (view mode) */
 .career-goals-textbox {
+    position: relative; 
     border-radius: 5px;
     font-size: 20px;
     border: 3px solid #252B2F;
@@ -420,6 +374,24 @@ body {
     padding-top: 21px;
     padding-bottom: 21px;
     min-width: 887px;
+}
+
+.career-goals-textbox::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(37, 43, 47, 0.30);
+    border-radius: 5px;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+/* Show overlay on hover */
+.career-goals-textbox:hover::after {
+    opacity: 1;
 }
 
 .career-goals-textbox ul {
@@ -442,6 +414,25 @@ body {
     line-height: 1;
 }
 
+/* Edit icon inside the box */
+.edit-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    font-size: 45px;
+    color: #252B2F; 
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+    z-index: 10; /* Ensure icon is on top of the overlay */
+}
+
+/* Show the icon on hover over the textbox */
+.career-goals-textbox:hover .edit-icon {
+    opacity: 1;
+}
+
 /* Edit mode container */
 .career-goals-edit-container {
   border-radius: 5px;
@@ -456,7 +447,6 @@ body {
   box-sizing: border-box; /* Ensures padding doesn't affect width */
   font-size: 20px;
   border: none;
-  /* border: 1px solid #252B2F; */
   background: #F5EBE0;
   padding: 10px;
   border-radius: 5px;
@@ -485,13 +475,6 @@ body {
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease; 
   align-items: center;
-/* 
-  padding: 10px 20px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s, color 0.3s; */
 }
 
 .save-btn {
