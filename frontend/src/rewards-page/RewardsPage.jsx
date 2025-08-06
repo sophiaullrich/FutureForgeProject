@@ -1,4 +1,3 @@
-// RewardsPage.jsx
 import React from 'react';
 import './RewardsPage.css';
 
@@ -22,7 +21,7 @@ const RewardsPage = () => {
         <h2>Your Badges</h2>
         <div className="badges">
           {badges.map((b, index) => (
-            <div key={index} className="badge-placeholder" />
+            <div key={index} className={`badge-placeholder badge-gradient-${index + 1}`} />
           ))}
         </div>
       </section>

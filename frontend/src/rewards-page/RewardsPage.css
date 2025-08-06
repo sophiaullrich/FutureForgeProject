@@ -19,6 +19,7 @@ body {
   gap: 2rem;
 }
 
+/* Badges Section */
 .badges-section h2 {
   font-size: 1.2rem;
   margin-bottom: 1rem;
@@ -34,12 +35,36 @@ body {
 .badge-placeholder {
   width: 130px;
   height: 130px;
-  border-radius: 5px;
-  background: linear-gradient(135deg, #4ecdc4, #2e5fa1);
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
-/* Container for Leaderboard + Rewards aligned horizontally */
+/* Gradient Variants for 6 Squares */
+.badge-gradient-1 {
+  background: linear-gradient(180deg, #5FA97F 0%, #6BB0C4 100%);
+}
+
+.badge-gradient-2 {
+  background: linear-gradient(180deg, #6096BA 0%, #1B2E6E 100%);
+}
+
+.badge-gradient-3 {
+  background: linear-gradient(180deg, #5FA97F 0%, #B35F5F 100%);
+}
+
+.badge-gradient-4 {
+  background: linear-gradient(180deg, #B35F5F 0%, #6096BA 100%);
+}
+
+.badge-gradient-5 {
+  background: radial-gradient(circle, #5FA97F 20%, #6096BA 100%);
+}
+
+.badge-gradient-6 {
+  background: linear-gradient(180deg, #6BB0C4 0%, #1B2E6E 100%);
+}
+
+/* Sections Row */
 .sections-row {
   display: flex;
   flex-wrap: nowrap;
@@ -48,14 +73,13 @@ body {
   gap: 2rem;
 }
 
-/* Leaderboard Section */
-.left-column {
+.left-column, .right-column {
   flex-shrink: 0;
 }
 
+/* Leaderboard */
 .leaderboard-section {
   width: 450px;
-  flex-shrink: 0;
 }
 
 .leaderboard-section h2 {
@@ -97,18 +121,9 @@ body {
   font-size: 1rem;
 }
 
-.leaderboard li:nth-child(1) .rank-number::before {
-  content: "🥇";
-  margin-right: 0.3rem;
-}
-.leaderboard li:nth-child(2) .rank-number::before {
-  content: "🥈";
-  margin-right: 0.3rem;
-}
-.leaderboard li:nth-child(3) .rank-number::before {
-  content: "🥉";
-  margin-right: 0.3rem;
-}
+.leaderboard li:nth-child(1) .rank-number::before { content: "🥇"; margin-right: 0.3rem; }
+.leaderboard li:nth-child(2) .rank-number::before { content: "🥈"; margin-right: 0.3rem; }
+.leaderboard li:nth-child(3) .rank-number::before { content: "🥉"; margin-right: 0.3rem; }
 
 .leaderboard-last {
   font-style: italic;
@@ -125,15 +140,9 @@ body {
   padding-right: 0.25rem;
 }
 
-/* Rewards Grid Section */
-.right-column {
-  flex-shrink: 0;
-}
-
+/* Rewards Grid */
 .rewards-grid {
   width: 450px;
-  flex-shrink: 0;
-  margin-top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -197,7 +206,7 @@ body {
   text-align: center;
 }
 
-/* Responsive Mobile */
+/* Responsive */
 @media (max-width: 1000px) {
   .sections-row {
     flex-wrap: wrap;
