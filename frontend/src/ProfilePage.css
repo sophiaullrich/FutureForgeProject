@@ -1,0 +1,565 @@
+.profile-page {
+  padding-left: 50px;
+  height: 100%;
+  max-width: 1200px;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+}
+
+/* Header */
+.top-header h1 {
+  font-size: 36px;
+  margin-bottom: 16px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.profile-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  flex: 1;
+  min-width: 300px;
+}
+
+.profile-img-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  cursor: pointer;
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+/* Hover effect */
+.profile-img-container::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.edit-img-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #252B2F;
+  color: white;
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.profile-img-container:hover::after {
+  opacity: 1;
+}
+
+.profile-img-container:hover .edit-img-btn {
+  opacity: 1;
+}
+
+.profile-info { 
+  text-align: left;
+  position: relative;
+}
+
+/* Name */
+.profile-info h2 { 
+  color: #252B2F;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 12px;
+}
+
+/* Description */
+.profile-info p {
+  color: #252B2F80;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  min-width: auto;
+  margin-bottom: 23px;
+  word-wrap: break-word;
+}
+
+.description-edit-icon {
+  position: absolute;
+  top: 85px; /* Adjust this value to align with the description text */
+  left: -30px; /* Adjust this to move it to the left of the text */
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease;
+  font-size: 20px;
+  color: #252B2F;
+}
+
+/* Show the icon on hover over the profile-info container */
+.profile-info:hover .description-edit-icon {
+  opacity: 1; /* Make it visible on hover */
+}
+
+.profile-info input,
+.profile-info textarea {
+  font-size: 20px;
+  width: 100%;
+  border: 2px solid #6096BA;
+  background: #F5EBE0;
+  padding: 5px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  min-width: 100px;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+}
+
+.profile-info textarea {
+  min-height: 50px;
+}
+
+.profile-info-button-container {
+  text-align: center;
+}
+
+.profile-info button {
+  position: static; 
+  border-radius: 5px; 
+  border: 3px solid #51905A;
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  margin-bottom: 10px;
+}
+
+/* Normal state */
+.profile-info button {
+  background-color: #F3E7D3;
+  color: #51905A;
+}
+
+/* Hover state */
+.profile-info button:hover {
+  background-color: #51905A;
+  color: #F3E7D3;
+}
+
+/* Social accounts */
+.social-section {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 200px;
+  min-width: 260px;
+  max-width: 100%;
+}
+
+.social-section h4 {
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 15px;
+  width: 100%;
+  text-align: right;
+}
+
+.socials-edit-icon {
+  font-size: 25px;
+  cursor: pointer;
+  padding: 4px;
+  color: #252B2F;
+  flex-shrink: 0;
+  position: relative;
+  right: 0;
+  top: 0;
+}
+
+.social-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  position: relative;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 19.92px;
+  margin-bottom: 20px;
+}
+
+.social-link .icon {
+  font-size: 25px;
+}
+
+.social-link input {
+  border-radius: 5px;
+  border: 2px solid #6096BA;
+  background: #F3E7D3;
+  padding: 6px;
+  flex: 1;
+  color: #252B2F;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  min-width: 0;
+}
+
+/* Interests and badges scroll */
+.scrollable-row {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: 0.01;
+}
+
+.interests-row .interest-tag,
+.badges-row .badge-box {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.interest-tag {
+  display: flex;
+  width: 130px;
+  height: 30px;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: #252B2F;
+  color: #F3E7D3;
+  text-align: center;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-right: 15px;
+}
+
+.interests-wrapper {
+  margin-top: 20px;
+  position: relative; /* Container for the header and icon positioning */
+}
+
+.interests-edit-icon {
+  position: absolute;
+  top: 5px; /* Adjust this value to align with the interests content */
+  left: -30px; /* Moves the icon to the left */
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease;
+  font-size: 20px;
+  color: #252B2F;
+}
+
+.interests-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.interests-wrapper:hover .interests-edit-icon {
+  opacity: 1;
+}
+
+.editable-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editable-interest-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: #252B2F;
+  color: #F3E7D3;
+  font-size: 16px;
+}
+
+.editable-interest-tag .delete-icon {
+  cursor: pointer;
+  color: #F3E7D3;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
+.editable-interest-tag .delete-icon:hover {
+  color: #AC4750;
+}
+
+.add-interest-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.add-interest-container input {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #6096BA;
+  background: #F3E7D3;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 16px;
+}
+
+.add-interest-container button {
+  position: static; 
+  border-radius: 5px; 
+  border: 3px solid #51905A;
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  background-color: #51905A;
+  color: #F3E7D3;
+  align-items: center;
+}
+
+.add-interest-container button:hover {
+  background-color: #F3E7D3;
+  color: #51905A;
+}
+
+.career-goals {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.career-goals h3 {
+  color: #252B2F;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 10px;
+}
+
+.career-goals-textbox {
+    position: relative; 
+    border-radius: 5px;
+    font-size: 20px;
+    border: 3px solid #252B2F;
+    background: #F5EBE0;
+    padding-left: 44px;
+    padding-right: 26px;
+    padding-top: 21px;
+    padding-bottom: 21px;
+    min-width: 887px;
+}
+
+.career-goals-textbox::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(37, 43, 47, 0.30);
+    border-radius: 5px;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+/* Show overlay on hover */
+.career-goals-textbox:hover::after {
+    opacity: 1;
+}
+
+.career-goals-textbox ul {
+    list-style: none; /* Remove list bullets */
+    padding: 0;
+    margin: 0;
+}
+
+.career-goals-textbox li {
+    position: relative;
+    padding-left: 1.5em; /* Space for the custom bullet */
+}
+
+.career-goals-textbox li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #252B2F; /* Bullet color */
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+/* Edit icon inside the box */
+.edit-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    font-size: 45px;
+    color: #252B2F; 
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+    z-index: 10; /* Ensure icon is on top of the overlay */
+}
+
+/* Show the icon on hover over the textbox */
+.career-goals-textbox:hover .edit-icon {
+    opacity: 1;
+}
+
+/* Edit mode container */
+.career-goals-edit-container {
+  border-radius: 5px;
+  border: 3px solid #252B2F;
+  background: #F5EBE0;
+  padding: 20px;
+}
+
+/* Editable textarea styles */
+.editable-goals-textarea {
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+  font-size: 20px;
+  border: none;
+  background: #F5EBE0;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: inherit;
+  min-height: 200px; /* Adjust height as needed */
+  resize: vertical; /* Allow vertical resizing */
+}
+
+/* Save and Cancel buttons */
+.career-goals-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.career-goals-buttons button {
+  position: static; 
+  border-radius: 5px; 
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+}
+
+.save-btn {
+  background-color: #F3E7D3;
+  color: #51905A;
+  border: 3px solid #51905A;
+  position: static; 
+  border-radius: 5px; 
+  width: 120px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+  margin-right: 5px;
+}
+
+.save-btn:hover {
+  background-color: #51905A;
+  color: #F3E7D3;
+  border: 3px solid #F3E7D3;
+}
+
+.cancel-btn {
+  background-color: #F3E7D3;
+  color: #AC4750;
+  border: 3px solid #AC4750;
+  position: static; 
+  border-radius: 5px; 
+  width: 120px;
+  height: 38px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  align-items: center;
+}
+
+.cancel-btn:hover {
+  background-color: #AC4750;
+  color: #F3E7D3;
+  border: 3px solid #F3E7D3;
+}
+
+.badge-box {
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #51905A 0%, #6096BA 100%);
+  margin-right: 30px;
+  
+}
+
+.badge-box-name {
+  color: #252B2F;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 10px;
+  margin-top: 25px;
+}
