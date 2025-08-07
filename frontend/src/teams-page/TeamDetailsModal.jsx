@@ -1,45 +1,76 @@
 // src/teams-page/TeamDetailsModal.jsx
 import React from "react";
 
-export default function TeamDetailsModal({ onClose }) {
-  const team = {
-    name: "Team Marketing",
-    description: "We’re working on marketing career challenges for students.",
-    members: ["Sophia Ullrich", "Willie Dong", "William Cao", "Diya Topiwala"],
-    tasks: [
-      { title: "Write pitch post", due: "June 30", assigned: "Sophia" },
-      { title: "Create logo", due: "July 2", assigned: "William" },
-      { title: "Design carousel", due: "July 5", assigned: "Diya" },
-    ],
-  };
-
+export default function TeamDetailsModal({ team, onClose }) {
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content">
-        <h2>{team.name}</h2>
-        <p style={{ fontStyle: "italic", marginBottom: "1rem" }}>{team.description}</p>
+    <div style={{
+      background: "#fef6e4",
+      border: "2px solid #a3bffa",
+      borderRadius: "10px",
+      padding: "2rem",
+      width: "90%",
+      maxWidth: "700px",
+      position: "relative",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+    }}>
+      <button
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          top: "1rem",
+          right: "1rem",
+          fontSize: "20px",
+          background: "none",
+          border: "none",
+          cursor: "pointer"
+        }}
+      >
+        ×
+      </button>
 
-        <h3>Members</h3>
-        <ul style={{ marginBottom: "1rem" }}>
-          {team.members.map((member, index) => (
-            <li key={index}>👤 {member}</li>
+      <h2>{team.name}</h2>
+      <p>{team.description}</p>
+
+      <h3>Members</h3>
+      <ul>
+        {team.members.map((member, idx) => (
+          <li key={idx}>{member}</li>
+        ))}
+      </ul>
+
+      <h3>Team Tasks</h3>
+      <table style={{ width: "100%", marginTop: "1rem", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th>Done?</th>
+            <th>Task Name</th>
+            <th>Due Date</th>
+            <th>Assigned To</th>
+          </tr>
+        </thead>
+        <tbody>
+          {team.tasks?.map((task, idx) => (
+            <tr key={idx}>
+              <td><input type="checkbox" /></td>
+              <td>{task.name}</td>
+              <td>{task.dueDate}</td>
+              <td>{task.assignedTo}</td>
+            </tr>
           ))}
-        </ul>
+        </tbody>
+      </table>
 
-        <h3>Tasks</h3>
-        <ul>
-          {team.tasks.map((task, index) => (
-            <li key={index} style={{ marginBottom: "8px" }}>
-              <strong>{task.title}</strong> <br />
-              Due: {task.due} <br />
-              Assigned to: {task.assigned}
-            </li>
-          ))}
-        </ul>
-
-        <button style={{ marginTop: "1rem" }}>Add New Task</button>
-        <button style={{ marginTop: "1rem" }} onClick={onClose}>Close</button>
-      </div>
+      <button style={{
+        marginTop: "1rem",
+        padding: "0.5rem 1rem",
+        backgroundColor: "#dbeafe",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        fontWeight: "bold",
+      }}>
+        Add New Task
+      </button>
     </div>
   );
 }
