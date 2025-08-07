@@ -8,6 +8,7 @@ import TeamsPage from "./teams-page/TeamsPage.jsx"; // note: corrected path
 import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
 import RewardsPage from './rewards-page/RewardsPage';
+import Settings from './Settings.jsx'
 import "./App.css";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { IoPersonCircleOutline } from "react-icons/io5";
@@ -42,6 +43,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/Resetpass" element={<Resetpass />} />
+            <Route path="/Settings" element={<Settings />} />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
