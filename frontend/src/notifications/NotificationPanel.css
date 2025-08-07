@@ -1,0 +1,124 @@
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.12);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease;
+  z-index: 900; 
+}
+.notif-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.notification-panel {
+  position: fixed;
+  right: -420px;
+  top: 0;
+  height: 100vh;
+  width: 380px;
+  max-width: 92%;
+  background: #F5EBE0; 
+  border-left: 6px solid #22336A;
+  box-shadow: -8px 0 24px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 300ms cubic-bezier(.2,.9,.2,1);
+  display: flex;
+  flex-direction: column;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  color: #22336A;
+}
+
+.notification-panel.open {
+  right: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-bottom: 1px solid rgba(34,51,106,0.08);
+}
+.panel-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mark-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  color: #22336A;
+  border: 2px solid #22336A;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.mark-all-btn:hover { background: rgba(34,51,106,0.06); }
+.close-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #22336A;
+}
+
+.panel-body {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.empty {
+  padding: 28px;
+  text-align: center;
+  color: #6a6a6a;
+}
+
+.notif-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: transparent;
+  cursor: pointer;
+  align-items: center;
+}
+.notif-item:hover {
+  background: rgba(34,51,106,0.03);
+}
+.notif-item.unread {
+  box-shadow: inset 0 0 0 2px rgba(97,150,186,0.08);
+  background: rgba(96,150,186,0.06);
+}
+.notif-left { flex: 1; }
+.notif-title { font-weight: 700; font-size: 14px; color: #22336A; }
+.notif-meta { font-size: 13px; color: rgba(34,51,106,0.8); margin-top: 6px; }
+.notif-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 58px;
+}
+.notif-time { font-size: 12px; color: rgba(34,51,106,0.6); }
+.unread-dot { 
+  width: 10px; 
+  height: 10px; 
+  border-radius: 50%; 
+  background: #6096BA; 
+  display: inline-block; 
+}
+
+
