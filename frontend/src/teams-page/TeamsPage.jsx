@@ -5,12 +5,13 @@ import CreateTeamModal from "./CreateTeamModal";
 import InviteMembersModal from "./InviteMembersModal";
 import JoinTeamModal from "./JoinTeamModal";
 import TeamDetailsModal from "./TeamDetailsModal";
+import "./TeamsPage.css";
+
 
 export default function TeamsPage() {
   const [modal, setModal] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teams, setTeams] = useState([]);
-
 
   useEffect(() => {
     fetch("http://localhost:5000/teams")
@@ -24,7 +25,6 @@ export default function TeamsPage() {
     setModal("details");
   };
 
-  // ✅ Send POST request to backend on team creation
   const handleAddTeam = async (newTeam) => {
     try {
       const res = await fetch("http://localhost:5000/teams", {
@@ -47,6 +47,14 @@ export default function TeamsPage() {
     }
   };
 
+  const handleJoinTeam = (joinedTeam) => {
+    // Prevent duplicate joins
+    const alreadyJoined = teams.some((team) => team.name === joinedTeam.name);
+    if (!alreadyJoined) {
+      setTeams((prev) => [...prev, joinedTeam]);
+    }
+  };
+
   return (
     <div style={{ padding: "2rem", backgroundColor: "#fdf6ee", minHeight: "100vh" }}>
       <h2 style={{ marginBottom: "1rem" }}>Your Teams</h2>
@@ -58,11 +66,11 @@ export default function TeamsPage() {
           gap: "1rem",
           background: "#1e1e1e",
           padding: "1rem",
-          borderRadius: "10px"
+          borderRadius: "10px",
         }}
       >
         {teams.map((team, i) => (
-          <TeamCard key={i} name={team.name} onClick={() => handleCardClick(team)} />
+          <TeamCard key={i} team={team} onClick={() => handleCardClick(team)} />
         ))}
       </div>
 
@@ -76,7 +84,12 @@ export default function TeamsPage() {
         <CreateTeamModal onClose={() => setModal(null)} onCreate={handleAddTeam} />
       )}
       {modal === "invite" && <InviteMembersModal onClose={() => setModal(null)} />}
-      {modal === "join" && <JoinTeamModal onClose={() => setModal(null)} />}
+      {modal === "join" && (
+        <JoinTeamModal
+          onClose={() => setModal(null)}
+          onJoinTeam={handleJoinTeam}
+        />
+      )}
       {modal === "details" && selectedTeam && (
         <div
           style={{
@@ -89,7 +102,7 @@ export default function TeamsPage() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           <TeamDetailsModal team={selectedTeam} onClose={() => setModal(null)} />
