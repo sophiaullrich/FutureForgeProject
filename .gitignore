@@ -1,62 +1,16 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# Dependencies
-/node_modules/
+﻿# dependencies
+node_modules/
 **/node_modules/
-.pnp/
-.pnp.js
-.pack
 
-# Testing
-/coverage/
-**/coverage/
-
-# Production build
-/build/
-**/build/
-
-# Misc
-.DS_Store
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# IDE-specific (optional but recommended)
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# System files
-*.DS_Store
-Thumbs.db
-
-# Log files
-*.log
-
-# Cache folders
-.cache/
+# caches / build artifacts
 **/.cache/
-.eslintcache
-# Babel loader cache
-babel-loader/
-# Next.js build output
-.next/
-out/
+*.pack
+frontend/node_modules/.cache/
+frontend/build/
+backend/build/
+dist/
+coverage/
 
-# Others
-*.tgz
-# Optional: ignore local coverage/lcov files
-lcov-report/
-coverage-final.json
-
-# VSCode settings
-.settings/
-.history/
+# OS / editor
+.DS_Store
+Thumbs.db
