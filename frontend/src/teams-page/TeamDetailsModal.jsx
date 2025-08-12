@@ -1,18 +1,21 @@
 // src/teams-page/TeamDetailsModal.jsx
-import React from "react";
+import React, { useState } from "react";
+import AddTaskModal from "../AddTaskModal"; // ✅ make sure path is correct
 
 export default function TeamDetailsModal({ team, onClose }) {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [tasks, setTasks] = useState(team.tasks || []);
+
+  if (!team) return null;
+
+  const handleAddTask = (task) => {
+    const updatedTask = { ...task, team: team.name };
+    setTasks((prev) => [...prev, updatedTask]);
+    setShowAddModal(false);
+  };
+
   return (
-    <div style={{
-      background: "#fef6e4",
-      border: "2px solid #a3bffa",
-      borderRadius: "10px",
-      padding: "2rem",
-      width: "90%",
-      maxWidth: "700px",
-      position: "relative",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-    }}>
+    <div style={modalStyle}>
       <button
         onClick={onClose}
         style={{
@@ -28,14 +31,14 @@ export default function TeamDetailsModal({ team, onClose }) {
         ×
       </button>
 
-      <h2>{team.name}</h2>
-      <p>{team.description}</p>
+      <h2>{team.name || "Unnamed Team"}</h2>
+      <p>{team.description || "No description provided."}</p>
 
       <h3>Members</h3>
       <ul>
-        {team.members.map((member, idx) => (
+        {team.members?.map((member, idx) => (
           <li key={idx}>{member}</li>
-        ))}
+        )) || <li>No members listed.</li>}
       </ul>
 
       <h3>Team Tasks</h3>
@@ -49,7 +52,7 @@ export default function TeamDetailsModal({ team, onClose }) {
           </tr>
         </thead>
         <tbody>
-          {team.tasks?.map((task, idx) => (
+          {tasks.map((task, idx) => (
             <tr key={idx}>
               <td><input type="checkbox" /></td>
               <td>{task.name}</td>
@@ -60,17 +63,41 @@ export default function TeamDetailsModal({ team, onClose }) {
         </tbody>
       </table>
 
-      <button style={{
-        marginTop: "1rem",
-        padding: "0.5rem 1rem",
-        backgroundColor: "#dbeafe",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-        fontWeight: "bold",
-      }}>
+      <button
+        onClick={() => setShowAddModal(true)}
+        style={addTaskBtnStyle}
+      >
         Add New Task
       </button>
+
+      {/* ✅ Show AddTaskModal when button is clicked */}
+      {showAddModal && (
+        <AddTaskModal
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddTask}
+        />
+      )}
     </div>
   );
 }
+
+const modalStyle = {
+  background: "#fef6e4",
+  border: "2px solid #a3bffa",
+  borderRadius: "10px",
+  padding: "2rem",
+  width: "90%",
+  maxWidth: "700px",
+  position: "relative",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+};
+
+const addTaskBtnStyle = {
+  marginTop: "1rem",
+  padding: "0.5rem 1rem",
+  backgroundColor: "#dbeafe",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontWeight: "bold",
+};
