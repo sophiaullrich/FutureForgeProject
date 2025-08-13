@@ -1,182 +1,84 @@
-// src/teams-page/CreateTeamModal.jsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export default function CreateTeamModal({ onClose, onCreate }) {
   const [teamName, setTeamName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState([]);
   const [error, setError] = useState("");
 
-  const dummyMembers = ["Willie Dong", "Marcos Figueiredo", "William Cao"];
+  const allMembers = ["Willie Dong", "Marcos Figueiredo", "William Cao"];
 
-  const toggleMember = (name) => {
-    setSelectedMembers((prev) =>
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return !q ? allMembers : allMembers.filter(n => n.toLowerCase().includes(q));
+  }, [query]);
+
+  const toggle = (name) =>
+    setSelected((prev) =>
       prev.includes(name) ? prev.filter((m) => m !== name) : [...prev, name]
     );
-  };
 
-  const handleCreateTeam = () => {
-    if (!teamName.trim()) {
-      setError("Please enter a team name.");
-      return;
-    }
-
-    const newTeam = {
-      name: teamName,
-      description,
-      members: selectedMembers,
-    };
-
-    onCreate(newTeam);
+  const handleCreate = () => {
+    if (!teamName.trim()) return setError("Please enter a team name.");
+    onCreate?.({ name: teamName.trim(), description: description.trim(), members: selected });
   };
 
   return (
-    <div className="modal-backdrop" style={backdropStyle}>
-      <div className="modal-overlay" style={overlayStyle}>
-        <div className="create-modal" style={modalStyle}>
-          <button className="close-button" onClick={onClose} style={closeBtn}>✕</button>
-          <h2 style={titleStyle}>Create Team</h2>
+    <div className="modal-backdrop">
+      <div className="create-modal">
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
 
-          {error && <div style={errorStyle}>{error}</div>}
+        <h2 className="create-title">Create Team</h2>
 
+        {error && <div className="form-error">{error}</div>}
+
+        <label className="form-label">Team Name</label>
+        <input
+          className="form-input"
+          placeholder="Enter Team Name"
+          value={teamName}
+          onChange={(e) => setTeamName(e.target.value)}
+        />
+
+        <label className="form-label">Description</label>
+        <textarea
+          className="form-textarea"
+          placeholder="Enter Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <label className="form-label">Add Members</label>
+        <div className="search-row">
+          <span className="search-icon">🔎</span>
           <input
-            type="text"
-            placeholder="Team Name"
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            style={inputStyle}
+            className="search-input"
+            placeholder="Search for Members..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
-
-          <textarea
-            placeholder="Team Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            style={textareaStyle}
-          />
-
-          <label style={labelStyle}>Select Members</label>
-          <ul style={memberListStyle}>
-            {dummyMembers.map((name) => (
-              <li
-                key={name}
-                onClick={() => toggleMember(name)}
-                style={{
-                  ...memberItemStyle,
-                  backgroundColor: selectedMembers.includes(name) ? "#d1e7dd" : "#fff",
-                }}
-              >
-                {name}
-              </li>
-            ))}
-          </ul>
-
-          <div style={actionBtnRow}>
-            <button onClick={handleCreateTeam} style={greenBtn}>Create</button>
-            <button onClick={onClose} style={redBtn}>Cancel</button>
-          </div>
         </div>
+
+        <div className="member-list">
+          {filtered.map((name) => {
+            const active = selected.includes(name);
+            return (
+              <button
+                type="button"
+                key={name}
+                className={`member-row ${active ? "active" : ""}`}
+                onClick={() => toggle(name)}
+              >
+                <span className="avatar-dot" />
+                <span className="member-name">{name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button className="primary-cta" onClick={handleCreate}>Create Team</button>
       </div>
     </div>
   );
 }
-
-// Styles
-const backdropStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.6)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 1000,
-};
-
-const overlayStyle = {
-  background: "#f8f6ef",
-  padding: "2rem",
-  borderRadius: "10px",
-  width: "90%",
-  maxWidth: "600px",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-  position: "relative",
-};
-
-const modalStyle = {
-  width: "100%",
-};
-
-const titleStyle = {
-  marginBottom: "1rem",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "0.6rem",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-  marginBottom: "0.75rem",
-};
-
-const textareaStyle = {
-  ...inputStyle,
-  height: "100px",
-  resize: "none",
-};
-
-const labelStyle = {
-  fontWeight: "bold",
-  marginTop: "1rem",
-};
-
-const memberListStyle = {
-  listStyle: "none",
-  padding: 0,
-  marginBottom: "1rem",
-};
-
-const memberItemStyle = {
-  cursor: "pointer",
-  padding: "0.5rem",
-  border: "1px solid #ccc",
-  borderRadius: "5px",
-  marginBottom: "4px",
-};
-
-const errorStyle = {
-  color: "#c53030",
-  marginBottom: "0.5rem",
-};
-
-const actionBtnRow = {
-  display: "flex",
-  justifyContent: "space-between",
-};
-
-const greenBtn = {
-  backgroundColor: "#2f855a",
-  color: "#fff",
-  border: "none",
-  padding: "0.5rem 1rem",
-  borderRadius: "6px",
-};
-
-const redBtn = {
-  backgroundColor: "#c53030",
-  color: "#fff",
-  border: "none",
-  padding: "0.5rem 1rem",
-  borderRadius: "6px",
-};
-
-const closeBtn = {
-  position: "absolute",
-  top: "1rem",
-  right: "1rem",
-  background: "none",
-  border: "none",
-  fontSize: "1.2rem",
-  cursor: "pointer",
-};
