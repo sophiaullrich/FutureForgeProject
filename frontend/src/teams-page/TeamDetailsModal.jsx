@@ -1,103 +1,134 @@
 // src/teams-page/TeamDetailsModal.jsx
-import React, { useState } from "react";
-import AddTaskModal from "../AddTaskModal"; // ✅ make sure path is correct
+import React, { useMemo, useState } from "react";
+import AddTaskModal from "../AddTaskModal";
 
 export default function TeamDetailsModal({ team, onClose }) {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [tasks, setTasks] = useState(team.tasks || []);
+  const [tasks, setTasks] = useState(
+    (team?.tasks || []).map(t => ({ ...t, done: !!t.done }))
+  );
 
-  if (!team) return null;
-
-  const handleAddTask = (task) => {
-    const updatedTask = { ...task, team: team.name };
-    setTasks((prev) => [...prev, updatedTask]);
+  const addTask = (task) => {
+    // Ensure new tasks start as not done
+    setTasks((prev) => [...prev, { ...task, done: false }]);
     setShowAddModal(false);
   };
 
+  const toggleDone = (index) => {
+    setTasks(prev =>
+      prev.map((t, i) => (i === index ? { ...t, done: !t.done } : t))
+    );
+  };
+
+  // Dynamic progress % based on done tasks
+  const progressPct = useMemo(() => {
+    if (!tasks.length) return 0;
+    const done = tasks.filter(t => t.done).length;
+    return Math.round((done / tasks.length) * 100);
+  }, [tasks]);
+
+  // Format like mock: "JUN" on first line, "12" on second
+  const formatDue = (d) => {
+    if (!d) return { mon: "—", day: "" };
+    const date = new Date(d);
+    if (isNaN(date)) return { mon: "—", day: "" };
+    return {
+      mon: date.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+      day: String(date.getDate()),
+    };
+  };
+
   return (
-    <div style={modalStyle}>
-      <button
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          top: "1rem",
-          right: "1rem",
-          fontSize: "20px",
-          background: "none",
-          border: "none",
-          cursor: "pointer"
-        }}
-      >
-        ×
-      </button>
+    <div className="details-modal">
+      <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
 
-      <h2>{team.name || "Unnamed Team"}</h2>
-      <p>{team.description || "No description provided."}</p>
+      {/* Header */}
+      <h2 className="details-title">{team?.name || "Team"}</h2>
+      {team?.description && <p className="details-sub">{team.description}</p>}
 
-      <h3>Members</h3>
-      <ul>
-        {team.members?.map((member, idx) => (
-          <li key={idx}>{member}</li>
-        )) || <li>No members listed.</li>}
-      </ul>
+      {/* Top row: Members | Progress */}
+      <div className="details-top">
+        <div className="members-card">
+          <div className="card-title">Members</div>
+          <div className="members-list-chip">
+            {(team?.members || []).map((m) => (
+              <input key={m} className="member-chip" value={m} readOnly />
+            ))}
+          </div>
+        </div>
 
-      <h3>Team Tasks</h3>
-      <table style={{ width: "100%", marginTop: "1rem", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th>Done?</th>
-            <th>Task Name</th>
-            <th>Due Date</th>
-            <th>Assigned To</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks.map((task, idx) => (
-            <tr key={idx}>
-              <td><input type="checkbox" /></td>
-              <td>{task.name}</td>
-              <td>{task.dueDate}</td>
-              <td>{task.assignedTo}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div className="progress-card">
+          <div className="card-title center">Team Progress</div>
+          <div className="progress-bar-wrap">
+            <div className="progress-bar-track">
+              <div
+                className="progress-bar-fill"
+                style={{ width: `${progressPct}%` }}
+                aria-valuenow={progressPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                role="progressbar"
+              />
+            </div>
+            <div style={{ textAlign: "center", marginTop: 6, color: "#2b2d63", fontWeight: 600 }}>
+              {progressPct}%
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <button
-        onClick={() => setShowAddModal(true)}
-        style={addTaskBtnStyle}
-      >
+      {/* Tasks */}
+      <div className="tasks-section">
+        <div className="card-title">Team Tasks</div>
+
+        <div className="tasks-card">
+          <div className="tasks-head">
+            <span>Done?</span>
+            <span>Task Name</span>
+            <span>Due Date</span>
+            <span>Assigned To</span>
+          </div>
+
+          <div className="tasks-body">
+            {tasks.length === 0 ? (
+              <div className="tasks-empty">No tasks yet.</div>
+            ) : (
+              tasks.map((t, i) => {
+                const d = formatDue(t.dueDate);
+                return (
+                  <div className="task-row" key={`${t.name}-${i}`}>
+                    <span>
+                      <input
+                        type="checkbox"
+                        checked={!!t.done}
+                        onChange={() => toggleDone(i)}
+                      />
+                    </span>
+                    <span className="task-name">{t.name}</span>
+                    <span className="due">
+                      <strong className="due-mon">{d.mon}</strong>
+                      <span className="due-day">{d.day}</span>
+                    </span>
+                    <span>{t.assignedTo}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
         Add New Task
       </button>
 
-      {/* ✅ Show AddTaskModal when button is clicked */}
       {showAddModal && (
         <AddTaskModal
+          members={team?.members || []}   
           onClose={() => setShowAddModal(false)}
-          onAdd={handleAddTask}
+          onAdd={addTask}
         />
       )}
     </div>
   );
 }
-
-const modalStyle = {
-  background: "#fef6e4",
-  border: "2px solid #a3bffa",
-  borderRadius: "10px",
-  padding: "2rem",
-  width: "90%",
-  maxWidth: "700px",
-  position: "relative",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-};
-
-const addTaskBtnStyle = {
-  marginTop: "1rem",
-  padding: "0.5rem 1rem",
-  backgroundColor: "#dbeafe",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
-  fontWeight: "bold",
-};

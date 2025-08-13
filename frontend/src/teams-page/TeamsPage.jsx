@@ -1,4 +1,3 @@
-// src/teams-page/TeamsPage.jsx
 import React, { useState, useEffect } from "react";
 import TeamCard from "./TeamCard";
 import CreateTeamModal from "./CreateTeamModal";
@@ -6,7 +5,6 @@ import InviteMembersModal from "./InviteMembersModal";
 import JoinTeamModal from "./JoinTeamModal";
 import TeamDetailsModal from "./TeamDetailsModal";
 import "./TeamsPage.css";
-
 
 export default function TeamsPage() {
   const [modal, setModal] = useState(null);
@@ -32,12 +30,7 @@ export default function TeamsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTeam),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create team");
-      }
-
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to create team");
       const createdTeam = await res.json();
       setTeams((prev) => [...prev, createdTeam]);
       setModal(null);
@@ -48,63 +41,46 @@ export default function TeamsPage() {
   };
 
   const handleJoinTeam = (joinedTeam) => {
-    // Prevent duplicate joins
-    const alreadyJoined = teams.some((team) => team.name === joinedTeam.name);
-    if (!alreadyJoined) {
+    if (!teams.some((t) => t.name === joinedTeam.name)) {
       setTeams((prev) => [...prev, joinedTeam]);
     }
   };
 
   return (
-    <div style={{ padding: "2rem", backgroundColor: "#fdf6ee", minHeight: "100vh" }}>
-      <h2 style={{ marginBottom: "1rem" }}>Your Teams</h2>
+    <div className="teams-page">
+      {/* Your Teams panel */}
+      <section className="your-teams-panel">
+        <div className="panel-title">Your Teams</div>
+        <div className="teams-grid">
+          {teams.map((team, i) => (
+            <TeamCard key={i} team={team} onClick={() => handleCardClick(team)} />
+          ))}
+        </div>
+      </section>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "1rem",
-          background: "#1e1e1e",
-          padding: "1rem",
-          borderRadius: "10px",
-        }}
-      >
-        {teams.map((team, i) => (
-          <TeamCard key={i} team={team} onClick={() => handleCardClick(team)} />
-        ))}
+      {/* Action rows */}
+      <div className="teams-actions">
+        <button onClick={() => setModal("create")} className="action-tile">
+          <span>Create Team</span><span className="chevron">›</span>
+        </button>
+        <button onClick={() => setModal("invite")} className="action-tile">
+          <span>Invite Members</span><span className="chevron">›</span>
+        </button>
+        <button onClick={() => setModal("join")} className="action-tile">
+          <span>Join a Team</span><span className="chevron">›</span>
+        </button>
       </div>
 
-      <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <button onClick={() => setModal("create")} className="styled-btn">Create Team</button>
-        <button onClick={() => setModal("invite")} className="styled-btn">Invite Members</button>
-        <button onClick={() => setModal("join")} className="styled-btn">Join a Team</button>
-      </div>
-
+      {/* Modals */}
       {modal === "create" && (
         <CreateTeamModal onClose={() => setModal(null)} onCreate={handleAddTeam} />
       )}
       {modal === "invite" && <InviteMembersModal onClose={() => setModal(null)} />}
       {modal === "join" && (
-        <JoinTeamModal
-          onClose={() => setModal(null)}
-          onJoinTeam={handleJoinTeam}
-        />
+        <JoinTeamModal onClose={() => setModal(null)} onJoinTeam={handleJoinTeam} />
       )}
       {modal === "details" && selectedTeam && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
+        <div className="modal-backdrop">
           <TeamDetailsModal team={selectedTeam} onClose={() => setModal(null)} />
         </div>
       )}
