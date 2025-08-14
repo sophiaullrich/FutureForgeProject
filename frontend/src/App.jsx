@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation} from "react-router-dom";
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
@@ -9,13 +9,17 @@ import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
 import RewardsPage from './rewards-page/RewardsPage';
-import Settings from './Settings.jsx'
+import Settings from './Settings.jsx';
+import NotificationPanel from './notifications/NotificationPanel';
 import "./App.css";
 import { IoNotificationsOutline,  IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
 
 
 function App() {
   const [hovered, setHovered] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const profilePrevPath = useRef(null);
@@ -33,6 +37,59 @@ function App() {
       );
     }
   };
+  
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/notifications');
+      if (res.ok) {
+        const data = await res.json();
+        const notifArray = data.map(n => ({
+        ...n,
+        time: n.timestamp 
+        ? new Date(n.timestamp._seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        : ''
+        }));
+
+        setNotifications(notifArray);
+      } else {
+        console.error("Failed to fetch notifications");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const markRead = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/notifications/${id}/read`, { method: 'PATCH' });
+      if (res.ok) {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await Promise.all(
+        notifications.filter(n => !n.read).map(n =>
+          fetch(`http://localhost:5000/notifications/${n.id}/read`, { method: 'PATCH' })
+        )
+      );
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleNotif = () => setNotifOpen(s => !s);
+  const closeNotif = () => setNotifOpen(false);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="app-container">
@@ -57,9 +114,26 @@ function App() {
       </div>
 
       {/* Notifications Icon */}
-      <div className="notif-icon">
+      <div
+        className="notif-icon"
+        onClick={toggleNotif}
+        role="button"
+        aria-label="Open notifications"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleNotif(); }}
+      >
         <IoNotificationsOutline size={45} />
+        {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
       </div>
+
+      {/* Notification Panel */}
+      <NotificationPanel
+        open={notifOpen}
+        onClose={closeNotif}
+        notifications={notifications}
+        onMarkRead={markRead}
+        onMarkAllRead={markAllRead}
+      />
 
       {/* Profile Icon */}
       <div

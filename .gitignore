@@ -60,3 +60,6 @@ coverage-final.json
 # VSCode settings
 .settings/
 .history/
+
+# Firebase service account key
+backend/gobear-c15ba-firebase-adminsdk-fbsvc-76919e5f66.json
