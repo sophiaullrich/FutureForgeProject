@@ -1,37 +1,93 @@
-import React, { useMemo, useState } from "react";
+// frontend/src/teams-page/CreateTeamModal.jsx
+import React, { useEffect, useMemo, useState } from "react";
+import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
 
-export default function CreateTeamModal({ onClose, onCreate }) {
+export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   const [teamName, setTeamName] = useState("");
   const [description, setDescription] = useState("");
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [error, setError] = useState("");
+  const [visibility, setVisibility] = useState("private"); // NEW: public/private toggle
 
-  const allMembers = ["Willie Dong", "Marcos Figueiredo", "William Cao"];
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  const [query, setQuery] = useState("");
+  const [selectedUids, setSelectedUids] = useState(new Set());
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const ppl = await listProfiles();
+        setProfiles(ppl);
+      } catch (e) {
+        console.error("Failed to load profiles:", e);
+        setLoadError(
+          "Could not load users. Make sure you are signed in and Firestore rules allow read on /profiles."
+        );
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return !q ? allMembers : allMembers.filter(n => n.toLowerCase().includes(q));
-  }, [query]);
+    if (!q) return profiles;
+    return profiles.filter((p) => {
+      const name = (p.displayName || "").toLowerCase();
+      const email = (p.email || "").toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
+  }, [profiles, query]);
 
-  const toggle = (name) =>
-    setSelected((prev) =>
-      prev.includes(name) ? prev.filter((m) => m !== name) : [...prev, name]
-    );
+  const toggle = (uid) => {
+    setSelectedUids((prev) => {
+      const next = new Set(prev);
+      next.has(uid) ? next.delete(uid) : next.add(uid);
+      return next;
+    });
+  };
 
-  const handleCreate = () => {
-    if (!teamName.trim()) return setError("Please enter a team name.");
-    onCreate?.({ name: teamName.trim(), description: description.trim(), members: selected });
+  const handleCreate = async () => {
+    setSubmitError("");
+    const name = teamName.trim();
+    if (!name) {
+      setSubmitError("Please enter a team name.");
+      return;
+    }
+
+    try {
+      const teamId = await onCreate?.({
+        name,
+        description: description.trim(),
+        isPublic: visibility === "public" // <- NEW
+      });
+
+      const uids = Array.from(selectedUids);
+      if (teamId && uids.length && onAddMembers) {
+        await onAddMembers({ teamId, memberUids: uids });
+      }
+
+      onClose?.();
+    } catch (e) {
+      console.error(e);
+      setSubmitError(e?.message || "Failed to create team.");
+    }
   };
 
   return (
     <div className="modal-backdrop">
       <div className="create-modal">
-        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
 
         <h2 className="create-title">Create Team</h2>
 
-        {error && <div className="form-error">{error}</div>}
+        {submitError && <div className="form-error">{submitError}</div>}
 
         <label className="form-label">Team Name</label>
         <input
@@ -49,35 +105,72 @@ export default function CreateTeamModal({ onClose, onCreate }) {
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <label className="form-label">Add Members</label>
+        <label className="form-label">Team Visibility</label>
+        <div className="radio-row" style={{ marginBottom: "1rem" }}>
+          <label style={{ marginRight: "1rem" }}>
+            <input
+              type="radio"
+              name="visibility"
+              value="public"
+              checked={visibility === "public"}
+              onChange={() => setVisibility("public")}
+            />
+            Public
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="visibility"
+              value="private"
+              checked={visibility === "private"}
+              onChange={() => setVisibility("private")}
+            />
+            Private
+          </label>
+        </div>
+
+        <label className="form-label">Add Members (from registered users)</label>
         <div className="search-row">
           <span className="search-icon">🔎</span>
           <input
             className="search-input"
-            placeholder="Search for Members..."
+            placeholder="Search by name or email..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
 
-        <div className="member-list">
-          {filtered.map((name) => {
-            const active = selected.includes(name);
-            return (
-              <button
-                type="button"
-                key={name}
-                className={`member-row ${active ? "active" : ""}`}
-                onClick={() => toggle(name)}
-              >
-                <span className="avatar-dot" />
-                <span className="member-name">{name}</span>
-              </button>
-            );
-          })}
+        <div className="member-list" style={{ maxHeight: 240, overflowY: "auto" }}>
+          {loading ? (
+            <div className="tasks-empty">Loading users…</div>
+          ) : loadError ? (
+            <div className="form-error" style={{ marginTop: 8 }}>{loadError}</div>
+          ) : filtered.length === 0 ? (
+            <div className="tasks-empty">No users found.</div>
+          ) : (
+            filtered.map((p) => {
+              const uid = p.uid || p.id;
+              const active = selectedUids.has(uid);
+              return (
+                <button
+                  type="button"
+                  key={uid}
+                  className={`member-row ${active ? "active" : ""}`}
+                  onClick={() => toggle(uid)}
+                  title={p.email}
+                >
+                  <span className="avatar-dot" />
+                  <span className="member-name">{p.displayName || p.email || uid}</span>
+                  <span className="member-sub">{p.email}</span>
+                </button>
+              );
+            })
+          )}
         </div>
 
-        <button className="primary-cta" onClick={handleCreate}>Create Team</button>
+        <button className="primary-cta" onClick={handleCreate}>
+          Create Team
+        </button>
       </div>
     </div>
   );
