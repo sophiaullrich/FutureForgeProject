@@ -450,7 +450,7 @@ body {
 .due-mon{ letter-spacing:1px; }
 .due-day{ margin-top:2px; }
 
-/* CTA */
+
 .primary-outline-btn{
   display:block; margin:16px auto 0; width:min(360px, 80%);
   background:#e7eefb; color:#2b2d63;
@@ -458,3 +458,84 @@ body {
   padding:12px 14px; cursor:pointer;
 }
 .primary-outline-btn:hover{ filter:brightness(.98); }
+/* highlight selected row like dark pill */
+.invite-row { display:flex; align-items:center; justify-content:space-between; width:100%; border:1px solid var(--card-border); border-radius:0.75rem; padding:0.9rem 1rem; background:var(--panel); cursor:pointer; }
+.invite-row + .invite-row { margin-top:0.75rem; }
+.invite-row.selected { background:#1d2330; color:#e9ecf2; } 
+.invite-status.pending { color:#7aa0c2; }
+.invite-status.declined { color:#b05555; font-weight:500; }
+.avatar-dot { width:28px; height:28px; border-radius:999px; display:inline-block; margin-right:10px; background:radial-gradient(circle at 30% 30%, #7bb, #a56); }
+
+/* overlay */
+.overlay-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.25); }
+.overlay-card { background:#fffaf2; border:2px solid #5da066; border-radius:12px; padding:16px 22px; min-width:320px; text-align:center; }
+.overlay-card.success .overlay-title { margin:0 0 6px; font-size:20px; color:#2d6a3f; }
+.overlay-sub { margin:0 0 12px; }
+.overlay-ok { border:none; border-radius:10px; padding:8px 18px; background:#5da066; color:#fff; cursor:pointer; }
+.invite-row.selected {
+  background: #1d2330; /* your dark highlight color */
+  color: #ffffff; /* makes the name text white */
+}
+
+.invite-row.selected {
+  background: #e2d9c4;
+  border-color: #2b2d63;
+  color: #1f2242;
+}
+
+.invite-row.selected .invite-name,
+.invite-row.selected .invite-status {
+  color: #1f2242;
+}
+
+/* ==== Invite Mode Toggle Tabs ==== */
+.invite-mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.invite-mode-toggle button {
+  background-color: #efe9d9;
+  color: #2b2d63;
+  border: 2px solid #2b2d63;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.invite-mode-toggle button:hover {
+  background-color: #e0d3bd;
+}
+
+.invite-mode-toggle button.active {
+  background-color: #2b2d63;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.select-team-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #2b2d63;
+  font-size: 16px;
+}
+
+.select-team-dropdown {
+  width: 100%;
+  max-width: 320px;
+  font-size: 14px;
+  background: #fff;
+  border: 2px solid #2b2d63;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #2b2d63;
+  appearance: none;
+  outline: none;
+  margin-bottom: 18px;
+}
+

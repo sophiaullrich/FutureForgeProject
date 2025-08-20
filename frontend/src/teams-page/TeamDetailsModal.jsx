@@ -2,32 +2,29 @@
 import React, { useMemo, useState } from "react";
 import AddTaskModal from "../AddTaskModal";
 
-export default function TeamDetailsModal({ team, onClose }) {
+export default function TeamDetailsModal({ team, onClose, onDelete }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [tasks, setTasks] = useState(
-    (team?.tasks || []).map(t => ({ ...t, done: !!t.done }))
+    (team?.tasks || []).map((t) => ({ ...t, done: !!t.done }))
   );
 
   const addTask = (task) => {
-    // Ensure new tasks start as not done
     setTasks((prev) => [...prev, { ...task, done: false }]);
     setShowAddModal(false);
   };
 
   const toggleDone = (index) => {
-    setTasks(prev =>
+    setTasks((prev) =>
       prev.map((t, i) => (i === index ? { ...t, done: !t.done } : t))
     );
   };
 
-  // Dynamic progress % based on done tasks
   const progressPct = useMemo(() => {
     if (!tasks.length) return 0;
-    const done = tasks.filter(t => t.done).length;
+    const done = tasks.filter((t) => t.done).length;
     return Math.round((done / tasks.length) * 100);
   }, [tasks]);
 
-  // Format like mock: "JUN" on first line, "12" on second
   const formatDue = (d) => {
     if (!d) return { mon: "—", day: "" };
     const date = new Date(d);
@@ -36,7 +33,7 @@ export default function TeamDetailsModal({ team, onClose }) {
       mon: date.toLocaleString("en-US", { month: "short" }).toUpperCase(),
       day: String(date.getDate()),
     };
-  };
+    };
 
   return (
     <div className="details-modal">
@@ -118,13 +115,20 @@ export default function TeamDetailsModal({ team, onClose }) {
         </div>
       </div>
 
-      <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
-        Add New Task
-      </button>
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
+          Add New Task
+        </button>
+        {onDelete && (
+          <button className="revoke-btn" onClick={onDelete}>
+            Delete Team (owner)
+          </button>
+        )}
+      </div>
 
       {showAddModal && (
         <AddTaskModal
-          members={team?.members || []}   
+          members={team?.members || []}
           onClose={() => setShowAddModal(false)}
           onAdd={addTask}
         />
