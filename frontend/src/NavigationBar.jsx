@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // useLocation to check active link
 import "./NavigationBar.css";
-import logo from "./assets/gobearlogo.png";
+import logo from "./assets/GoBearLogo.png";
 import { IoSettingsOutline, IoSettings } from "react-icons/io5";
 import firebaseApp from "./Firebase.js";
 import { getAuth, signOut } from "firebase/auth";
