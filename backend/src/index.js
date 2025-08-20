@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const taskRoutes = require('./tasks/task.controller');
+const taskRoutes = require("./tasks/tasks.routes");
 const teamRoutes = require('./teams/teams.routes'); 
 const notificationRoutes = require('./notifications/notification.routes');
 
