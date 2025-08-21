@@ -14,6 +14,7 @@
 html, body, #root {
   height: 100%;
   margin: 0;
+  overflow-y: auto;
 }
 
 body {
@@ -33,6 +34,8 @@ body {
   min-width: 0;                /* avoid grid overflow */
   background: #F3E7D3;
   display: grid;
+  overflow-y: auto;
+  height: 100dvh;
 }
 
 .page-content-wrapper{
