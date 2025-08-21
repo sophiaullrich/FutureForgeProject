@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ref, push, onValue } from "firebase/database";
 import { FiSearch } from "react-icons/fi";
 import { IoIosArrowForward } from "react-icons/io";
-import { db } from "./firebase";
+import { db } from "./Firebase";
 import "./chat.css";
 
 const avatarColors = [
