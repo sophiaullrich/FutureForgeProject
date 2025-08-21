@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -10,27 +9,8 @@ const firebaseConfig = {
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const messaging = getMessaging(app);
-
-// Request notification permission
-export const requestPermission = () => {
-  Notification.requestPermission().then((permission) => {
-    if (permission === "granted") {
-      getToken(messaging, { vapidKey: process.env.VAPIDKEY })
-        .then((token) => console.log("FCM Token:", token))
-        .catch((err) => console.log("Error getting token:", err));
-    }
-  });
-};
-
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      console.log("Notification received:", payload);
-      resolve(payload);
-    });
-  });
+export const db = getDatabase(app);
