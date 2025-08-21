@@ -114,31 +114,6 @@ function App() {
           </div>
         </>
       )}
-      <div className="notif-icon">
-        <IoNotificationsOutline size={45} />
-      </div>
-
-      <div
-        className="profile-icon"
-        onClick={() => {
-          if (location.pathname === "/ProfilePage") {
-            navigate(profilePrevPath.current || "/dashboard");
-          } else {
-            profilePrevPath.current = location.pathname;
-            navigate("/ProfilePage");
-          }
-        }}
-        style={{ cursor: "pointer" }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        {(location.pathname === "/settings" && hovered) ||
-        (location.pathname !== "/settings" && !hovered) ? (
-          <IoPersonCircleOutline size={45} color="#252B2F" />
-        ) : (
-          <IoPersonCircle size={45} color="#252B2F" />
-        )}
-      </div>
     </div>
   );
 }
