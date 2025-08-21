@@ -1,55 +1,38 @@
 .navbar-container {
-  width: clamp(240px, 22vw, 307px);
-  flex: 0 0 clamp(240px, 22vw, 307px);
+  width: 307px; /* Fixed width of the navbar */
   background-color: #252B2F;
-  box-sizing: border-box;
   padding: 20px;
   display: flex;
   flex-direction: column; /* Stack header, nav, footer vertically */
   justify-content: space-between; /* Pushes footer to bottom */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow on the edge */
-  overflow: hidden;
-  min-width: 200px;
 }
 
-.navbar-header{
-  height: clamp(48px, 6vw, 64px);
-  margin: 0 12px clamp(32px, 6vh, 76px);
-  /* height: 50px;
-  margin: 0 19px clamp(32px, 8vh, 76px);
-  width: 88%;
-  max-width: 270px; */
-}
-
-.navbar-bg{
+.navbar-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding-inline: clamp(16px, 6vw, 36px);
-  height: 50px;
-  border-radius: 12px;
-  background: #F3E7D3;
-  overflow: hidden; 
-  min-width: 0;
+  margin-bottom: 76px; /* Space below header */
+  color: #F3E7D3; 
 }
 
-/* logo sits nicely centered in the pill */
-.navbar-header .logo{
-  max-width: 100%;
-  height: clamp(28px, 4vw, 36px); 
-  width: auto;
-  height: 100%;
-  object-fit: contain;
+.navbar-header .logo {
+  width: 138px;
+  height: 50px;
+  margin-left: 68px;
+}
+
+.navbar-bg {
+  width: 270px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #F3E7D3;
+  margin-top: 16px;
+  margin-left: 19px;
 }
 
 .navbar-nav {
   position: relative; /* For positioning the animated line */
-}
-
-.navbar-nav a{
-  font-size: clamp(16px, 1.6vw, 22px);
-  padding: 8px 10px;
-  text-align: right;
 }
 
 .navbar-nav ul {
@@ -73,7 +56,7 @@
   padding: 10px 15px;
   font-family: "SF Pro Rounded", Arial, sans-serif;
   font-size: 24px;
-  color: #F5EBE0;
+  color: #F5EBE0; /* Light beige text */
   position: relative;
   text-align: right;
 }
@@ -92,14 +75,14 @@
 } 
 
 /* Animated underline */
+
 .underline-line {
   display: block;
   height: 1px;
   background-color: #F5EBE0;
   border-radius: 2px;
   margin-top: 2px;
-  transition: ease-in;
-  transition: 300ms cubic-bezier(.68,-.55,.265,1.55);
+  transition:ease-in;
     /* 
     Custom spring approximation:
     - 851ms duration
