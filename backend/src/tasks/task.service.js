@@ -1,76 +1,40 @@
-const { v4: uuidv4 } = require('uuid');
+const { db } = require("../firebase");
 
-class TaskService {
-  constructor() {
-    this.tasks = [];
-  }
+const tasksCollection = db.collection("tasks");
 
-  validateTask(task, isUpdate = false) {
-    const requiredFields = ['title', 'dueDate', 'assignee'];
-    if (!isUpdate) {
-      for (let field of requiredFields) {
-        if (!task[field]) return `${field} is required`;
-      }
-    }
-    return null; 
-  }
+const getAllTasks = async () => {
+    const snapshot = await tasksCollection.get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
-  create(taskDto) {
-    const error = this.validateTask(taskDto);
-    if (error) throw { status: 400, message: error };
+const getTaskById = async (id) => {
+    const docRef = tasksCollection.doc(id);
+    const taskDoc = await docRef.get();
+    if (!taskDoc.exists) throw new Error("Task not found");
+    return { id: taskDoc.id, ...taskDoc.data() };
+};
 
-    const task = {
-      id: uuidv4(),
-      title: taskDto.title,
-      dueDate: taskDto.dueDate,
-      assignee: taskDto.assignee,
-      assigneeType: taskDto.assigneeType || 'team',
-      priority: taskDto.priority || 'Medium',
-      status: taskDto.status || 'To Do'
-    };
+const createTask = async (taskData) => {
+    const docRef = await tasksCollection.add(taskData);
+    return { id: docRef.id, ...taskData };
+};
 
-    this.tasks.push(task);
-    return task;
-  }
+const updateTask = async (id, taskData) => {
+    const docRef = tasksCollection.doc(id);
+    await docRef.update(taskData);
+    return { id, ...taskData };
+};
 
-  findAll() {
-    return this.tasks;
-  }
+const deleteTask = async (id) => {
+    const docRef = tasksCollection.doc(id);
+    await docRef.delete();
+    return { message: `Task ${id} deleted successfully` };
+};
 
-  findById(id) {
-    const task = this.tasks.find(t => t.id === id);
-    if (!task) throw { status: 404, message: 'Task not found' };
-    return task;
-  }
-
-  update(id, updates) {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) throw { status: 404, message: 'Task not found' };
-
-    const error = this.validateTask(updates, true);
-    if (error) throw { status: 400, message: error };
-
-    this.tasks[index] = { ...this.tasks[index], ...updates };
-    return this.tasks[index];
-  }
-
-  delete(id) {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) throw { status: 404, message: 'Task not found' };
-    this.tasks.splice(index, 1);
-  }
-
-  assign(id, payload) {
-    const task = this.findById(id);
-    const { assignee } = payload;
-
-    if (!assignee) {
-      throw { status: 400, message: 'Assignee is required' };
-    }
-
-    task.assignee = assignee;
-    return task;
-  }
-}
-
-module.exports = new TaskService();
+module.exports = {
+    getAllTasks,
+    getTaskById,
+    createTask,
+    updateTask,
+    deleteTask
+};
