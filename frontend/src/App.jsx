@@ -1,6 +1,7 @@
+import React, { useRef, useState } from 'react';
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
@@ -25,6 +26,10 @@ function App() {
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
+  // Define which routes should hide navbar + icons
+  const hideUIRoutes = ["/login", "/signup", "/resetpass"];
+  const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
+  
   useEffect(() => {
     const off = onAuthStateChanged(auth, async (user) => {
       try {
@@ -54,6 +59,9 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Only show NavigationBar if not on login/signup/reset */}
+      {!shouldHideUI && <NavigationBar />}
+
       <NavigationBar />
       <div className="main-content-area">
         <div className="page-content-wrapper">
@@ -65,6 +73,9 @@ function App() {
             <Route path="/teams" element={<SafeTeamsWrapper />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/resetpass" element={<Resetpass />} />
+            <Route path="/profilepage" element={<ProfilePage />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/Resetpass" element={<Resetpass />} />
             <Route path="/ProfilePage" element={<ProfilePage />} />
             <Route path="/Settings" element={<Settings />} />
@@ -74,6 +85,38 @@ function App() {
         </div>
       </div>
 
+      {/* Only show icons if not on login/signup/reset */}
+      {!shouldHideUI && (
+        <>
+          {/* Notifications Icon */}
+          <div className="notif-icon">
+            <IoNotificationsOutline size={45} />
+          </div>
+
+          {/* Profile Icon */}
+          <div
+            className="profile-icon"
+            onClick={() => {
+              if (location.pathname === "/profilepage") {
+                navigate(profilePrevPath.current || "/dashboard");
+              } else {
+                profilePrevPath.current = location.pathname;
+                navigate("/profilepage");
+              }
+            }}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            {(location.pathname === "/settings" && hovered) || 
+              (location.pathname !== "/settings" && !hovered) ? (
+                <IoPersonCircleOutline size={45} color="#252B2F" />
+              ) : (
+                <IoPersonCircle size={45} color="#252B2F" />
+              )}
+          </div>
+        </>
+      )}
       <div className="notif-icon">
         <IoNotificationsOutline size={45} />
       </div>

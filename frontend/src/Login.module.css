@@ -1,0 +1,195 @@
+.loginBody {
+    font-family: "SF Pro Rounded", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.titleLogo {
+    width: 455.4px;
+    height: 165px;
+    display: block;
+    margin: 0 auto;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.formCont {
+    background-color: #252B2F;
+    font-family: "SF Pro Rounded", Arial, sans-serif;
+    border-radius: 10px;
+    width: 500px;
+    height: 600px;
+    display: block;
+    margin: 0 auto;
+}
+
+.formCont h1 {
+    flex-shrink: 0;
+    color: #F5EBE0;
+    font-family: "SF Pro Rounded";
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+}
+
+.loginInputEmail {
+    width: 460px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: #F3E7D3;
+    margin-left: 22px;
+    margin-bottom: 18px;
+    color: #252B2F;
+font-family: "SF Pro Rounded";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-decoration-line: underline;
+text-decoration-style: solid;
+text-decoration-skip-ink: auto;
+text-decoration-thickness: auto;
+text-underline-offset: auto;
+text-underline-position: from-font;
+border: none;
+}
+
+.loginInput {
+    width: 460px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: #F3E7D3;
+    margin-left: 22px;
+    margin-bottom: 18px;
+    color: #252B2F;
+    border: none;
+}
+
+.formCont label {
+    color: #F5EBE0;
+    font-family: "SF Pro Rounded";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-left: 28px;
+    margin-bottom: 9px;
+}
+
+.loginBtn {
+    width: 255px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    border: 3px solid #6096BA;
+    background: #F3E7D3;
+    color: #6096BA;
+    text-align: center;
+    font-family: "SF Pro Rounded";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    align-self: center;
+}
+
+.loginBtn:hover {
+    border: 3px solid #F3E7D3;
+    background: #6096BA;
+    color: #F3E7D3;
+}
+
+.signupBtn {
+    width: 255px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    text-align: center;
+    font-family: "SF Pro Rounded";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    border: 3px solid #F3E7D3;
+    background: #22336A;
+    color: #F3E7D3;
+    align-items: center;
+    display: block;
+  margin: 0 auto;
+}
+
+.signupBtn:hover {
+    border-radius: 5px;
+    border: 3px solid #22336A;
+    background: #F3E7D3;
+    color: #22336A;
+}
+
+.socialIconsCont {
+    display: flex;
+    justify-content: center;
+    gap: 23px;
+    margin-bottom: 33px;
+    margin-top: 7px;
+  }
+
+.socialIcons {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.forgotPass{
+    color: #F5EBE0;
+    text-align: right;
+    font-family: "SF Pro Rounded";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin: 11px 18px 18px 0px;
+}
+
+.forgotPass a{
+    text-decoration: none;
+}
+
+.forgotPass a:hover {
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+}
+
+.forgotPass a:visited{
+    color: #F5EBE0 !important;
+}
+
+.continuePara {
+    color: #F5EBE0;
+    text-align: center;
+    font-family: "SF Pro Rounded";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.accountPara {
+    color: #F5EBE0;
+    text-align: center;
+    font-family: "SF Pro Rounded";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}

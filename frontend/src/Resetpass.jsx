@@ -1,6 +1,6 @@
 import React, { use } from "react";
 import "./Resetpass.css";
-import logo from "./assets/gobearlogo.png";
+import logo from "./assets/GoBearLogo.png";
 import firebaseApp from "./Firebase.js";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
