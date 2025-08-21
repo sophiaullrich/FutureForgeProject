@@ -91,21 +91,10 @@ const Chat = () => {
             </div>
           ))}
         </div>
-        {/* Messaging box */}
-        <div style={{ marginTop: "32px" }}>
-          <div
-            style={{
-              maxHeight: "220px",
-              overflowY: "auto",
-              marginBottom: "12px",
-              background: "#fff",
-              borderRadius: "8px",
-              padding: "12px",
-              border: "1px solid #eee",
-            }}
-          >
+        <div className="messaging-area">
+          <div className="messages-display">
             {messages.map((msg, idx) => (
-              <div key={idx} style={{ marginBottom: "10px" }}>
+              <div key={idx} className="message-row">
                 <span>{msg.text}</span>
               </div>
             ))}
@@ -113,32 +102,18 @@ const Chat = () => {
           </div>
           <form
             onSubmit={sendMessage}
-            style={{ display: "flex", gap: "8px" }}
+            className="messaging-form"
           >
             <input
               type="text"
               placeholder="Type a message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              style={{
-                flex: 1,
-                padding: "10px 14px",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-                fontSize: "1rem",
-              }}
+              className="messaging-input"
             />
             <button
               type="submit"
-              style={{
-                padding: "10px 18px",
-                borderRadius: "8px",
-                background: "#222",
-                color: "#fff",
-                border: "none",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
+              className="messaging-send-btn"
             >
               Send
             </button>
