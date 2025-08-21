@@ -1,7 +1,7 @@
 import React from "react";
 import firebaseApp from "./Firebase.js";
 import "./Signup.css";
-import logo from "./assets/GoBearLogo.png";
+import logo from "./assets/gobearlogo.png";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 import { useState } from "react";

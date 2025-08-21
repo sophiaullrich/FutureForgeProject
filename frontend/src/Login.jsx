@@ -1,7 +1,7 @@
 import React from "react";
 import firebaseApp from "./Firebase.js";
 import styles from "./Login.module.css";
-import logo from "./assets/GoBearLogo.png";
+import logo from "./assets/gobearlogo.png";
 import googleicon from "./assets/Google Icon.png";
 import githubicon from "./assets/GitHub Icon.png";
 import linkedinicon from "./assets/LinkedIn Icon.png";
