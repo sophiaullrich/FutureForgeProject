@@ -1,22 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./Firebase";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx";
+import ChatsPage from './chat.jsx';
 import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
+import { ensureProfile } from "./teams-page/ProfileService";
 import "./App.css";
 import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
-
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./Firebase";
-import { ensureProfile } from "./teams-page/ProfileService.js";
 
 function App() {
   const [hovered, setHovered] = useState(false);
@@ -78,6 +78,8 @@ function App() {
             <Route path="/ProfilePage" element={<ProfilePage />} />
             <Route path="/Settings" element={<Settings />} />
             <Route path="/join/:teamId" element={<JoinTeamPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/chat" element={<ChatsPage />} />            
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
