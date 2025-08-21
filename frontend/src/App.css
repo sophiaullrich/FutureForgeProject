@@ -1,46 +1,60 @@
-body, html, #root {
-  margin: 0;
-  padding: 0;
+/* ---- Global tokens ---- */
+:root{
+  --sidebar: clamp(240px, 22vw, 320px);  /* fluid sidebar width */
+  --pad: clamp(12px, 2vw, 24px);         /* fluid padding */
+  --gap: clamp(12px, 2vw, 24px);
+  --radius: 12px;
+  --content-max: 1400px;               
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root {
   height: 100%;
+  margin: 0;
+  overflow-y: auto;
+}
+
+body {
   font-family: "SF Pro Rounded", Arial, sans-serif;
   background-color: #F3E7D3;
-  overflow: hidden;
 }
 
-.app-container {
-  display: flex;
-  height: 100vh;
-  overflow: auto; 
-  position: relative; 
+.app-container{
+  display: grid;
+  grid-template-columns: var(--sidebar) 1fr; /* sidebar + flexible main */
+  min-height: 100dvh;                        /* safe on mobile */
+  position: relative;
 }
 
-.main-content-area {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: #F3E7D3;
+/* Main content area fills the rest and centers large pages */
+.main-content-area{
+  min-width: 0;                /* avoid grid overflow */
+  background: #F3E7D3;
+  display: grid;
+  overflow-y: auto;
+  height: 100dvh;
 }
 
-
-.page-content-wrapper {
-  flex-grow: 1;
-  padding: 20px; 
+.page-content-wrapper{
+  width: min(100%, 1400px);    /* readable max width */
+  margin-inline: auto;
+  padding-right: calc(var(--pad) + 64px);   /* space for icons */
+  padding-top:  calc(var(--pad) + 56px);    /* space for bell */
+  padding-bottom: calc(var(--pad) + 72px);  /* space for profile */
 }
 
-.notif-icon {
-  position: fixed; 
-  top: 25px;
-  right: 25px;
-  z-index: 1000; 
-  color: #252B2F; 
+.notif-icon, .profile-icon{
+  position: fixed;
+  z-index: 1000;
+  color: #252B2F;
   cursor: pointer;
 }
+.notif-icon { top: 25px; right: 25px; }
+.profile-icon { bottom: 25px; right: 25px; }
 
-.profile-icon {
-  position: fixed; 
-  bottom: 25px;
-  right: 25px;
-  z-index: 1000; 
-  color: #252B2F; 
-  cursor: pointer;
+@media (max-width: 900px){
+  .app-container{ grid-template-columns: 1fr; }
 }
