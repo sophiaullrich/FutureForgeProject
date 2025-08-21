@@ -60,7 +60,6 @@ function App() {
       {/* Only show NavigationBar if not on login/signup/reset */}
       {!shouldHideUI && <NavigationBar />}
 
-      <NavigationBar />
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
