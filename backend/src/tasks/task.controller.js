@@ -1,9 +1,9 @@
 const taskService = require("./task.service");
-const notificationService = require("../notifications/notification.service"); 
+const notificationService = require("../notifications/notification.service");
 
 const getTasks = async (req, res) => {
     try {
-        const tasks = await taskService.getAllTasks();
+        const tasks = await taskService.getAllTasksForUser(req.user.uid);
         res.status(200).json(tasks);
     } catch (err) {
         console.error("Error fetching tasks:", err);
@@ -13,7 +13,7 @@ const getTasks = async (req, res) => {
 
 const getTask = async (req, res) => {
     try {
-        const task = await taskService.getTaskById(req.params.id);
+        const task = await taskService.getTaskById(req.params.id, req.user.uid);
         res.status(200).json(task);
     } catch (err) {
         console.error("Error fetching task:", err);
@@ -23,24 +23,26 @@ const getTask = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { name, due, assigned, team } = req.body;
-        if (!name || !due || !assigned || !team) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+        const { name, due, team } = req.body;
+        if (!name || !due || !team) return res.status(400).json({ error: "Missing required fields" });
 
-        const newTask = await taskService.createTask({ name, due, assigned, team, done: false });
-        let dueDate;
-        if (newTask.due && newTask.due.toDate) {
-            dueDate = newTask.due.toDate();
-        } else {
-            dueDate = new Date(newTask.due);
-        }
+        const taskData = {
+            name,
+            due,
+            team,
+            done: false,
+            userId: req.user.uid,        // tie task to current user
+            assigned: req.user.uid       // optional: automatically assigned to self
+        };
+
+        const newTask = await taskService.createTask(taskData);
+
         try {
             await notificationService.createNotification(
+                req.user.uid,
                 "New Task Assigned",
-                `"${newTask.name}" due ${dueDate.toLocaleDateString()}`
+                `"${newTask.name}" due ${new Date(newTask.due).toLocaleDateString()}`
             );
-            console.log("Notification created for task:", newTask.name);
         } catch (notifErr) {
             console.error("Failed to create notification:", notifErr);
         }
@@ -54,7 +56,7 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
     try {
-        const updatedTask = await taskService.updateTask(req.params.id, req.body);
+        const updatedTask = await taskService.updateTask(req.params.id, req.body, req.user.uid);
         res.status(200).json(updatedTask);
     } catch (err) {
         console.error("Error updating task:", err);
@@ -64,7 +66,7 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
     try {
-        const result = await taskService.deleteTask(req.params.id);
+        const result = await taskService.deleteTask(req.params.id, req.user.uid);
         res.status(200).json(result);
     } catch (err) {
         console.error("Error deleting task:", err);
@@ -72,10 +74,4 @@ const deleteTask = async (req, res) => {
     }
 };
 
-module.exports = {
-    getTasks,
-    getTask,
-    createTask,
-    updateTask,
-    deleteTask
-};
+module.exports = { getTasks, getTask, createTask, updateTask, deleteTask };

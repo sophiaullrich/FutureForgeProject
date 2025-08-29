@@ -21,7 +21,6 @@ const formatTimestamp = (ts) => {
   });
 };
 
-
 export default function NotificationPanel({
   open,
   onClose,

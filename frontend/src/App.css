@@ -58,3 +58,18 @@ body {
 @media (max-width: 900px){
   .app-container{ grid-template-columns: 1fr; }
 }
+/* Fullscreen for login/signup/reset pages */
+.fullscreen-page {
+  width: 100vw;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #F3E7D3;
+  padding: 0;
+}
+
+/* Hide scrollbar on fullscreen page (optional) */
+.fullscreen-page::-webkit-scrollbar {
+  display: none;
+}
