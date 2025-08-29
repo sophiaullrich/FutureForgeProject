@@ -1,65 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import './TasksPage.css';
+import React, { useState, useEffect } from "react";
+import "./TasksPage.css";
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
+import { getAuth } from "firebase/auth";
 
 export default function TasksPage() {
-  const [activeTab, setActiveTab] = useState('myTasks');
+  const [activeTab, setActiveTab] = useState("myTasks");
   const [tasks, setTasks] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [newTaskName, setNewTaskName] = useState('');
-  const [newTaskDue, setNewTaskDue] = useState('');
-  const [newTaskAssigned, setNewTaskAssigned] = useState('');
-  
-  const currentUser = "Current User"; 
-  const usersList = [currentUser, "Diya", "Joseph", "Marcos", "Sophia", "William", "Willie"];
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskDue, setNewTaskDue] = useState("");
+  const [newTaskTeam, setNewTaskTeam] = useState("Team Marketing");
+  const [newTaskMember, setNewTaskMember] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState("Team Marketing");
+
+  const auth = getAuth();
+  const API_URL = "http://localhost:5000/tasks";
+
+  const TEAMS = {
+    "Team Marketing": ["Diya", "Joseph", "Sophia"],
+    "Code Commanders": ["Marcos", "William", "Willie"]
+  };
 
   useEffect(() => {
-    fetch("http://localhost:5000/tasks")
-      .then(res => res.json())
-      .then(data => setTasks(data))
-      .catch(err => console.error("Error fetching tasks:", err));
+    const unsubscribe = auth.onAuthStateChanged((user) => setCurrentUser(user));
+    return () => unsubscribe();
   }, []);
+
+  const getToken = async () => currentUser ? await currentUser.getIdToken() : null;
+
+  const fetchTasks = async () => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const res = await fetch(API_URL, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setTasks(await res.json());
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  useEffect(() => { if (currentUser) fetchTasks(); }, [currentUser]);
 
   const handleTaskToggle = async (taskId, currentDone) => {
     try {
-      const updatedTask = { done: !currentDone };
-      const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+      const token = await getToken();
+      if (!token) return;
+
+      const res = await fetch(`${API_URL}/${taskId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTask)
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ done: !currentDone }),
       });
-      if (res.ok) {
-        setTasks(tasks.map(task =>
-          task.id === taskId ? { ...task, done: !currentDone } : task
-        ));
-      }
+
+      if (res.ok) setTasks(tasks.map(t => t.id === taskId ? { ...t, done: !currentDone } : t));
     } catch (error) {
       console.error("Error updating task:", error);
     }
   };
 
   const handleAddTask = async () => {
-    if (!newTaskName || !newTaskDue || !newTaskAssigned) return alert("Fill all fields");
-    const newTask = {
-      name: newTaskName,
-      due: new Date(newTaskDue),
-      assigned: newTaskAssigned,
-      team: "Future Forge",
-      done: false
-    };
+    if (!newTaskName || !newTaskDue || !newTaskMember) return alert("Fill all fields");
+    if (!currentUser) return alert("User not logged in");
+
     try {
-      const res = await fetch("http://localhost:5000/tasks", {
+      const token = await getToken();
+      if (!token) return;
+
+      const displayName = currentUser.displayName || currentUser.email || "Unknown User";
+      const assignedTo = newTaskMember === "Myself" ? displayName : newTaskMember;
+
+      const newTask = {
+        name: newTaskName,
+        due: new Date(newTaskDue).toISOString(),
+        team: newTaskTeam,
+        assigned: assignedTo
+      };
+
+      const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask)
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(newTask),
       });
+
       if (res.ok) {
         const created = await res.json();
         setTasks([...tasks, created]);
         setShowPopup(false);
-        setNewTaskName('');
-        setNewTaskDue('');
-        setNewTaskAssigned('');
+        setNewTaskName("");
+        setNewTaskDue("");
+        setNewTaskMember("");
+      } else {
+        alert("Failed to create task");
       }
     } catch (error) {
       console.error("Error creating task:", error);
@@ -68,55 +101,64 @@ export default function TasksPage() {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const res = await fetch(`http://localhost:5000/tasks/${taskId}`, { method: "DELETE" });
+      const token = await getToken();
+      if (!token) return;
+
+      const res = await fetch(`${API_URL}/${taskId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) setTasks(tasks.filter(task => task.id !== taskId));
     } catch (error) {
       console.error("Error deleting task:", error);
     }
   };
 
-  const filteredTasks = activeTab === 'myTasks'
-    ? tasks.filter(task => task.assigned === currentUser)
-    : tasks;
+  const filteredTasks = activeTab === "myTasks"
+    ? tasks.filter(task => task.assigned === (currentUser?.displayName || currentUser?.email))
+    : tasks.filter(task => task.team === selectedTeam);
+
+  const teamMembers = [...TEAMS[newTaskTeam]];
+  if (newTaskTeam === "Code Commanders" && currentUser) teamMembers.unshift("Myself");
 
   return (
-    <div>
-      {/* Tabs */}
+    <div className="tasks-page">
       <div className="tabs-container">
-        <button className={`tab ${activeTab === 'myTasks' ? 'active' : ''}`} onClick={() => setActiveTab('myTasks')}>
-          My Tasks
-        </button>
-        <button className={`tab ${activeTab === 'teamTasks' ? 'active' : ''}`} onClick={() => setActiveTab('teamTasks')}>
-          Team Tasks
-        </button>
+        <button className={`tab ${activeTab === "myTasks" ? "active" : ""}`} onClick={() => setActiveTab("myTasks")}>My Tasks</button>
+        <button className={`tab ${activeTab === "teamTasks" ? "active" : ""}`} onClick={() => setActiveTab("teamTasks")}>Team Tasks</button>
       </div>
 
-      {/* Tasks Table */}
       <div className="tasks-container">
+        {activeTab === "teamTasks" && (
+          <div style={{ margin: "10px 20px" }}>
+            <label>Select Team: </label>
+            <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+              {Object.keys(TEAMS).map(team => <option key={team} value={team}>{team}</option>)}
+            </select>
+          </div>
+        )}
+
         <div className="tasks-table">
-          <div className={`table-header ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
+          <div className={`table-header ${activeTab === "teamTasks" ? "team-tasks" : ""}`}>
             <div className="header-cell">Done?</div>
             <div className="header-cell">Task Name</div>
             <div className="header-cell">Due Date</div>
-            {activeTab === 'teamTasks' && <div className="header-cell">Assigned To</div>}
-            <div className="header-cell">Team</div>
+            {activeTab === "teamTasks" && <div className="header-cell">Assigned To</div>}
+            {activeTab === "teamTasks" && <div className="header-cell">Team</div>}
             <div className="header-cell">Actions</div>
           </div>
 
           {filteredTasks.map(task => (
-            <div key={task.id} className={`table-row ${activeTab === 'teamTasks' ? 'team-tasks' : ''}`}>
+            <div key={task.id} className={`table-row ${activeTab === "teamTasks" ? "team-tasks" : ""}`}>
               <div className="table-cell checkbox-cell" onClick={() => handleTaskToggle(task.id, task.done)}>
                 {task.done ? <IoCheckboxOutline size={33} /> : <IoSquareOutline size={33} />}
               </div>
               <div className="table-cell task-name-cell">{task.name}</div>
               <div className="table-cell due-date-cell">
                 <div className="due-date">
-                  <strong>{new Date(task.due).toLocaleString('en-US', { month: 'short' }).toUpperCase()}</strong>
+                  <strong>{new Date(task.due).toLocaleString("en-US", { month: "short" }).toUpperCase()}</strong>
                   <div>{new Date(task.due).getDate()}</div>
                 </div>
               </div>
-              {activeTab === 'teamTasks' && <div className="table-cell assigned-to-cell">{task.assigned}</div>}
-              <div className="table-cell team-cell">{task.team}</div>
+              {activeTab === "teamTasks" && <div className="table-cell team-cell">{task.assigned}</div>}
+              {activeTab === "teamTasks" && <div className="table-cell team-cell">{task.team}</div>}
               <div className="table-cell actions-cell">
                 <button className="delete-btn" onClick={() => handleDeleteTask(task.id)}>Delete</button>
               </div>
@@ -125,27 +167,33 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* Add Task Button */}
-      <button className='add-task-btn' onClick={() => setShowPopup(true)}>Add New Task</button>
+      <button className="add-task-btn" onClick={() => { if (!currentUser) { alert("Please login to add a task"); return; } setShowPopup(true); }}>
+        Add New Task
+      </button>
 
-      {/* Popup Overlay */}
       {showPopup && (
         <div className="task-popup-overlay">
           <div className="task-popup-form">
             <div className="popup-fields-row">
               <div className="popup-field">
                 <label>Task Name</label>
-                <input value={newTaskName} onChange={e => setNewTaskName(e.target.value)} />
+                <input value={newTaskName} onChange={(e) => setNewTaskName(e.target.value)} />
               </div>
               <div className="popup-field">
                 <label>Due Date</label>
-                <input type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
+                <input type="date" value={newTaskDue} onChange={(e) => setNewTaskDue(e.target.value)} />
               </div>
               <div className="popup-field">
-                <label>Assigned To</label>
-                <select value={newTaskAssigned} onChange={e => setNewTaskAssigned(e.target.value)}>
-                  <option value="">Select Name</option>
-                  {usersList.map(user => <option key={user} value={user}>{user}</option>)}
+                <label>Team</label>
+                <select value={newTaskTeam} onChange={(e) => setNewTaskTeam(e.target.value)}>
+                  {Object.keys(TEAMS).map(team => <option key={team} value={team}>{team}</option>)}
+                </select>
+              </div>
+              <div className="popup-field">
+                <label>Assign To</label>
+                <select value={newTaskMember} onChange={(e) => setNewTaskMember(e.target.value)}>
+                  <option value="">Select member</option>
+                  {teamMembers.map(member => <option key={member} value={member}>{member}</option>)}
                 </select>
               </div>
             </div>
