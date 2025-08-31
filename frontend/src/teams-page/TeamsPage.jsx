@@ -14,7 +14,7 @@ import {
   acceptInvite,
   deleteTeam,
   addMembers,
-} from "./TeamsService";
+} from "../TeamsService";
 import { auth } from "../Firebase";
 
 export default function TeamsPage() {

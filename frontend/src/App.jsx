@@ -16,8 +16,9 @@ import "./App.css";
 
 import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./Firebase";
+import { auth, db } from "./Firebase"; // Firestore
 import { ensureProfile } from "./teams-page/ProfileService.js";
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 function App() {
   const [hovered, setHovered] = useState(false);
@@ -31,51 +32,48 @@ function App() {
 
   const hideUIRoutes = ["/login", "/signup", "/resetpass"];
   const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
-  
+
   useEffect(() => {
-    const off = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeNotif = null;
+
+    const offAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+
       if (user) {
         try {
           await ensureProfile();
-          await fetchNotifications(user);
+
+          // Real-time notifications
+          const notifQuery = query(
+            collection(db, "notifications"),
+            where("userId", "==", user.uid),
+            orderBy("timestamp", "desc")
+          );
+
+          unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
+            const newNotifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setNotifications(newNotifs);
+          });
         } catch (err) {
           console.error("Error ensuring profile or fetching notifications:", err);
         }
       } else {
-        setNotifications([]); 
+        setNotifications([]);
+        if (unsubscribeNotif) unsubscribeNotif();
       }
     });
-    return () => off();
-  }, []);
 
-  const fetchNotifications = async (user) => {
-    if (!user) return;
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch("http://localhost:5000/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    return () => {
+      offAuth();
+      if (unsubscribeNotif) unsubscribeNotif();
+    };
+  }, []);
 
   const markRead = async (id) => {
     if (!currentUser) return;
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch(`http://localhost:5000/notifications/${id}/read`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-      }
+      const notifRef = doc(db, "notifications", id);
+      await updateDoc(notifRef, { read: true });
     } catch (err) {
       console.error(err);
     }
@@ -84,16 +82,10 @@ function App() {
   const markAllRead = async () => {
     if (!currentUser) return;
     try {
-      const token = await currentUser.getIdToken();
+      const unread = notifications.filter(n => !n.read);
       await Promise.all(
-        notifications.filter(n => !n.read).map(n =>
-          fetch(`http://localhost:5000/notifications/${n.id}/read`, {
-            method: "PATCH",
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        )
+        unread.map(n => updateDoc(doc(db, "notifications", n.id), { read: true }))
       );
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       console.error(err);
     }
