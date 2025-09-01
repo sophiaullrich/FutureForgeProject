@@ -29,30 +29,30 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
-      const unsubscribe = observeMyTeams((teams) => {
-        setTeams(teams);
-        if (teams.length > 0) {
-          setSelectedTeam(teams[0].name);
-          setNewTaskTeam(teams[0].name);
-        }
-      });
-      return () => unsubscribe();
-    }
+    if (!currentUser) return;
+    const unsubscribe = observeMyTeams((teams) => {
+      setTeams(teams);
+      if (teams.length > 0) {
+        setSelectedTeam(teams[0].name);
+        setNewTaskTeam(teams[0].name);
+      }
+    });
+    return () => unsubscribe();
   }, [currentUser]);
 
   useEffect(() => {
+    if (!currentUser) return;
     const fetchProfiles = async () => {
       const allProfiles = await listProfiles();
       setProfiles(allProfiles);
     };
     fetchProfiles();
-  }, []);
+  }, [currentUser]);
 
-  const getToken = async () =>
-    currentUser ? await currentUser.getIdToken() : null;
+  const getToken = async () => (currentUser ? await currentUser.getIdToken() : null);
 
   const fetchTasks = async () => {
+    if (!currentUser) return;
     try {
       const token = await getToken();
       if (!token) return;
@@ -76,17 +76,17 @@ export default function TasksPage() {
   };
 
   useEffect(() => {
-    if (currentUser && profiles.length > 0) fetchTasks();
+    if (!currentUser || profiles.length === 0) return;
+    fetchTasks();
   }, [currentUser, profiles]);
 
   const filteredTasks =
     activeTab === "myTasks"
-      ? tasks.filter((task) =>
-          task.assignedUsers.some((u) => u.email === currentUser?.email)
-        )
+      ? tasks.filter((task) => task.assignedUsers.some((u) => u.email === currentUser?.email))
       : tasks.filter((task) => task.team === selectedTeam);
 
   const handleTaskToggle = async (taskId, currentDone) => {
+    if (!currentUser) return;
     try {
       const token = await getToken();
       if (!token) return;
@@ -101,20 +101,15 @@ export default function TasksPage() {
       });
 
       if (res.ok)
-        setTasks(
-          tasks.map((t) =>
-            t.id === taskId ? { ...t, done: !currentDone } : t
-          )
-        );
+        setTasks(tasks.map((t) => (t.id === taskId ? { ...t, done: !currentDone } : t)));
     } catch (error) {
       console.error("Error updating task:", error);
     }
   };
 
   const handleAddTask = async () => {
-    if (!newTaskName || !newTaskDue || !newTaskMember)
-      return alert("Fill all fields");
-    if (!currentUser) return alert("User not logged in");
+    if (!currentUser) return alert("Please login to add a task");
+    if (!newTaskName || !newTaskDue || !newTaskMember) return alert("Fill all fields");
 
     try {
       const token = await getToken();
@@ -148,17 +143,16 @@ export default function TasksPage() {
         setTasks([...tasks, { ...created, assignedUsers }]);
 
         await addDoc(collection(db, "notifications"), {
-  userId: profile?.uid || assignedEmail,
-  message: `You have been assigned a new task: ${created.name}. Due: ${new Date(created.due).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  })}`,
-  taskId: created.id,
-  read: false,
-  timestamp: serverTimestamp(),
-});
-
+          userId: profile?.uid || assignedEmail,
+          message: `You have been assigned a new task: ${created.name}. Due: ${new Date(created.due).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}`,
+          taskId: created.id,
+          read: false,
+          timestamp: serverTimestamp(),
+        });
 
         setShowPopup(false);
         setNewTaskName("");
@@ -173,6 +167,7 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (taskId) => {
+    if (!currentUser) return;
     try {
       const token = await getToken();
       if (!token) return;
@@ -189,8 +184,8 @@ export default function TasksPage() {
 
   const teamMembers =
     teams.length > 0
-      ? (teams.find((t) => t.name === newTaskTeam)?.members || []).map(uid => {
-          const profile = profiles.find(p => p.uid === uid);
+      ? (teams.find((t) => t.name === newTaskTeam)?.members || []).map((uid) => {
+          const profile = profiles.find((p) => p.uid === uid);
           return profile ? { email: profile.email, displayName: profile.displayName } : { email: uid, displayName: uid };
         })
       : [];
@@ -216,10 +211,7 @@ export default function TasksPage() {
         {activeTab === "teamTasks" && (
           <div style={{ margin: "10px 20px" }}>
             <label>Select Team: </label>
-            <select
-              value={selectedTeam}
-              onChange={(e) => setSelectedTeam(e.target.value)}
-            >
+            <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
               {teams.map((team) => (
                 <option key={team.id} value={team.name}>
                   {team.name}
@@ -261,7 +253,9 @@ export default function TasksPage() {
         </div>
       </div>
 
-      <button className="add-task-btn" onClick={() => currentUser ? setShowPopup(true) : alert("Please login to add a task")}>Add New Task</button>
+      <button className="add-task-btn" onClick={() => currentUser ? setShowPopup(true) : alert("Please login to add a task")}>
+        Add New Task
+      </button>
 
       {showPopup && (
         <div className="task-popup-overlay">
