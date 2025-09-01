@@ -3,7 +3,7 @@
   height: 100%;
   max-width: 1200px;
   font-family: "SF Pro Rounded", Arial, sans-serif;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 body {
