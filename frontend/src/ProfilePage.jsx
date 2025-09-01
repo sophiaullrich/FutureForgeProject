@@ -129,7 +129,7 @@ function ProfilePage() {
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)}
                 />
-                <div class="profile-info-button-container">
+                <div className="profile-info-button-container">
                     {/* Save button for editing */}
                     <button onClick={() => setIsEditingInfo(false)}>Save</button>
                 </div>
@@ -137,12 +137,13 @@ function ProfilePage() {
             ) : (
             // View mode
             <>
-                <p>{description}</p>
+                <div className="description-row" />
                 {/* The new pen icon */}
                 <IoPencilSharp 
                 className="description-edit-icon" 
                 onClick={() => setIsEditingInfo(true)} 
                 />
+                <p>{description}</p>
             </>
             )}
             </div>

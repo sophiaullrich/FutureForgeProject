@@ -1,4 +1,7 @@
 .profile-page {
+  min-height: 100vh;
+  height: 100%;
+  margin: 0 auto;
   padding-left: 50px;
   height: 100%;
   max-width: 1200px;
@@ -24,6 +27,7 @@ body {
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 20px;
+  flex: 1;
 }
 
 .profile-left {
@@ -116,7 +120,7 @@ body {
 .description-edit-icon {
   position: absolute;
   top: 85px; /* Adjust this value to align with the description text */
-  left: -30px; /* Adjust this to move it to the left of the text */
+  left: auto; /* Adjust this to move it to the left of the text -30px */
   cursor: pointer;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.3s ease;
@@ -274,17 +278,25 @@ body {
 .interests-wrapper {
   margin-top: 20px;
   position: relative; /* Container for the header and icon positioning */
+  padding-left: 0;
+  transition: padding-left .2s ease;
+}
+
+.interests-wrapper:hover {
+  padding-left: 28px;
 }
 
 .interests-edit-icon {
   position: absolute;
   top: 5px; /* Adjust this value to align with the interests content */
-  left: -30px; /* Moves the icon to the left */
+  left: 0; /* Moves the icon to the left */
   cursor: pointer;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.3s ease;
   font-size: 20px;
   color: #252B2F;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .interests-edit-container {
@@ -295,6 +307,26 @@ body {
 
 .interests-wrapper:hover .interests-edit-icon {
   opacity: 1;
+  pointer-events: auto;
+}
+
+.interests-wrapper::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -6px;                   
+  height: 4px;
+  background: #252B2F;            
+  border-radius: 3px;
+  opacity: 0;
+  transform: scaleX(.6);
+  transform-origin: left;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.interests-wrapper:hover::after {
+  opacity: .5;
+  transform: scaleX(1);
 }
 
 .editable-interests {
@@ -407,6 +439,7 @@ body {
     border-radius: 5px;
     opacity: 0; /* Hidden by default */
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 /* Show overlay on hover */
@@ -446,6 +479,7 @@ body {
     opacity: 0; /* Hidden by default */
     transition: opacity 0.3s ease;
     z-index: 10; /* Ensure icon is on top of the overlay */
+    pointer-events: auto;
 }
 
 /* Show the icon on hover over the textbox */
