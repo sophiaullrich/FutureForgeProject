@@ -1,6 +1,6 @@
 import React, { use } from "react";
-import "./Resetpass.css";
-import logo from "./assets/GoBearLogo.png";
+import styles from"./Resetpass.module.css";
+import logo from "./assets/gobearlogo.png";
 import firebaseApp from "./Firebase.js";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
@@ -28,15 +28,15 @@ function Resetpass() {
   };
 
   return (
-    <div id="body">
-      <div id="title-cont">
+    <div className={styles.resetBody}>
+      <div className={styles.titleCont}>
         <img src={logo} alt="GoBear Logo" />
       </div>
 
-      <div id="form-cont">
+      <div className={styles.formCont}>
         <h1>Forgot Password</h1>
         <form onSubmit={handleResetPassword}>
-          <label for="email">Email:</label>
+          <label for="email">Email</label>
           <input
             type="email"
             id="email"
@@ -45,14 +45,12 @@ function Resetpass() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className={styles.emailInput}
           />
           <br />
-          <input type="submit" value="Send Email" />
+          <button type="submit" className={styles.resetBtn}>Send Email</button>
         </form>
-
-        <a href="./Login" class="button-link">
-          Cancel
-        </a>
+        <button onClick={() => navigate("/login")} className={styles.cancelBtn}>Cancel</button>
       </div>
     </div>
   );
