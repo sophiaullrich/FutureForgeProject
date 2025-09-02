@@ -117,16 +117,42 @@ body {
   word-wrap: break-word;
 }
 
-.description-edit-icon {
-  position: absolute;
-  top: 85px; /* Adjust this value to align with the description text */
-  left: auto; /* Adjust this to move it to the left of the text -30px */
+.desc-inline { display: inline; white-space: pre-wrap; }
+.desc-inline-icon {
+  display: inline-flex;
+  margin-left: 6px;          
+  vertical-align: text-bottom;
+  opacity: 0;
+  transition: opacity .2s;
   cursor: pointer;
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.3s ease;
   font-size: 20px;
-  color: #252B2F;
+  color: #252b2f;
 }
+.desc-inline:hover .desc-inline-icon { 
+  opacity: 1; 
+}
+
+/* .desc-wrap { 
+  position: relative; 
+}
+
+.desc-icon {
+  position: absolute;
+  top: 8px;
+  right: 2px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity .2s ease, transform .2s ease;
+  cursor: pointer;
+  z-index: 2;
+  color: #252B2F;
+  font-size: 25px;
+}
+
+.desc-wrap:hover .desc-icon {
+  opacity: 1;
+  transform: translateY(0);
+} */
 
 /* Show the icon on hover over the profile-info container */
 .profile-info:hover .description-edit-icon {
@@ -201,7 +227,7 @@ body {
 }
 
 .socials-edit-icon {
-  font-size: 25px;
+  font-size: 30px;
   cursor: pointer;
   padding: 4px;
   color: #252B2F;

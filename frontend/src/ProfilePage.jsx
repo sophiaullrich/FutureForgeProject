@@ -137,13 +137,10 @@ function ProfilePage() {
             ) : (
             // View mode
             <>
-                <div className="description-row" />
-                {/* The new pen icon */}
-                <IoPencilSharp 
-                className="description-edit-icon" 
-                onClick={() => setIsEditingInfo(true)} 
-                />
-                <p>{description}</p>
+                <p className="desc-inline">
+                {description}
+                <IoPencilSharp className="desc-inline-icon" onClick={() => setIsEditingInfo(true)} />
+                </p>
             </>
             )}
             </div>
