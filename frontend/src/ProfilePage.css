@@ -272,7 +272,9 @@ body {
 /* Interests and badges scroll */
 .scrollable-row {
   display: flex;
+  flex-wrap: nowrap;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 10px;
   scrollbar-width: 0.01;
 }
