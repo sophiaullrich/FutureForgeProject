@@ -109,7 +109,7 @@ function App() {
 
   if (shouldHideUI) {
     return (
-      <div className="fullscreen-page">
+      <div>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
