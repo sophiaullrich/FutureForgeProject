@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
@@ -11,39 +11,88 @@ import ProfilePage from "./ProfilePage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
+import NotificationPanel from './notifications/NotificationPanel';
 import "./App.css";
-import {
-  IoNotificationsOutline,
-  IoPersonCircleOutline,
-  IoPersonCircle,
-} from "react-icons/io5";
-
+import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./Firebase";
+import { auth, db } from "./Firebase"; // Firestore
 import { ensureProfile } from "./teams-page/ProfileService.js";
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 function App() {
   const [hovered, setHovered] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
-  // Define which routes should hide navbar + icons
   const hideUIRoutes = ["/login", "/signup", "/resetpass"];
   const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
 
   useEffect(() => {
-    const off = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
+    let unsubscribeNotif = null;
+
+    const offAuth = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+
+      if (user) {
+        try {
           await ensureProfile();
+
+          // Real-time notifications
+          const notifQuery = query(
+            collection(db, "notifications"),
+            where("userId", "==", user.uid),
+            orderBy("timestamp", "desc")
+          );
+
+          unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
+            const newNotifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setNotifications(newNotifs);
+          });
+        } catch (err) {
+          console.error("Error ensuring profile or fetching notifications:", err);
         }
-      } catch (e) {
-        console.error("ensureProfile failed:", e);
+      } else {
+        setNotifications([]);
+        if (unsubscribeNotif) unsubscribeNotif();
       }
     });
-    return () => off();
+
+    return () => {
+      offAuth();
+      if (unsubscribeNotif) unsubscribeNotif();
+    };
   }, []);
+
+  const markRead = async (id) => {
+    if (!currentUser) return;
+    try {
+      const notifRef = doc(db, "notifications", id);
+      await updateDoc(notifRef, { read: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAllRead = async () => {
+    if (!currentUser) return;
+    try {
+      const unread = notifications.filter(n => !n.read);
+      await Promise.all(
+        unread.map(n => updateDoc(doc(db, "notifications", n.id), { read: true }))
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleNotif = () => setNotifOpen(s => !s);
+  const closeNotif = () => setNotifOpen(false);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const SafeTeamsWrapper = () => {
     try {
@@ -59,6 +108,18 @@ function App() {
     }
   };
 
+  if (shouldHideUI) {
+    return (
+      <div className="fullscreen-page">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/resetpass" element={<Resetpass />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Only show NavigationBar if not on login/signup/reset */}
@@ -72,9 +133,6 @@ function App() {
             <Route path="/rewards" element={<RewardsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/resetpass" element={<Resetpass />} />
             <Route path="/profilepage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/join/:teamId" element={<JoinTeamPage />} />
@@ -115,7 +173,6 @@ function App() {
           </div>
         </>
       )}
-    </div>
   );
 }
 

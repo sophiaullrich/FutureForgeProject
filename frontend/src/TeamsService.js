@@ -1,4 +1,4 @@
-// frontend/src/teams-page/TeamsService.js
+// frontend/src/TeamsService.js
 import {
   addDoc,
   arrayUnion,
@@ -15,7 +15,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { auth, db } from "../Firebase"; // <- keep this path/case
+import { auth, db } from "./Firebase"; // <- keep this path/case
 
 function requireUser() {
   const u = auth.currentUser;

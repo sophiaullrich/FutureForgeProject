@@ -2,6 +2,32 @@ import React, { useEffect, useRef } from 'react';
 import './NotificationPanel.css';
 import { IoClose, IoCheckmarkDoneOutline } from 'react-icons/io5';
 
+// Fixed timestamp formatting
+const formatTimestamp = (ts) => {
+  if (!ts) return "";
+
+  let date;
+
+  if (ts.toDate) {
+    date = ts.toDate();
+  } else if (ts._seconds != null) {
+    date = new Date(ts._seconds * 1000 + ts._nanoseconds / 1000000);
+  } else {
+    date = new Date(ts);
+  }
+
+  if (isNaN(date.getTime())) return "";
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
 export default function NotificationPanel({
   open,
   onClose,
@@ -11,7 +37,6 @@ export default function NotificationPanel({
 }) {
   const panelRef = useRef();
 
-  // use the esc key to close panel
   useEffect(() => {
     function handleKey(e) {
       if (e.key === 'Escape' && open) onClose();
@@ -20,7 +45,6 @@ export default function NotificationPanel({
     return () => window.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
-  // click outside the panel to close
   useEffect(() => {
     function handleClick(e) {
       if (!open) return;
@@ -63,27 +87,35 @@ export default function NotificationPanel({
             <div className="empty">You're all caught up!</div>
           )}
 
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              className={`notif-item ${n.read ? 'read' : 'unread'}`}
-              onClick={() => onMarkRead(n.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') onMarkRead(n.id);
-              }}
-            >
-              <div className="notif-left">
-                <div className="notif-title">{n.title}</div>
-                <div className="notif-meta">{n.message}</div>
+          {notifications.map((n) => {
+            // Include task due date if available
+            const dueDate =
+              n.taskDue && !isNaN(new Date(n.taskDue).getTime())
+                ? ` (Due: ${new Date(n.taskDue).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`
+                : "";
+
+            return (
+              <div
+                key={n.id}
+                className={`notif-item ${n.read ? 'read' : 'unread'}`}
+                onClick={() => onMarkRead(n.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') onMarkRead(n.id); }}
+              >
+                <div className="notif-left">
+                  <div className="notif-title" style={{ fontWeight: "bold" }}>
+                    {n.title}{dueDate}
+                  </div>
+                  <div className="notif-meta">{n.message}</div>
+                </div>
+                <div className="notif-right">
+                  <div className="notif-time">{formatTimestamp(n.timestamp)}</div>
+                  {!n.read && <span className="unread-dot" />}
+                </div>
               </div>
-              <div className="notif-right">
-                <div className="notif-time">{n.time}</div>
-                {!n.read && <span className="unread-dot" />}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </aside>
     </>
