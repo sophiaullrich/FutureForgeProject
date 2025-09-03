@@ -13,7 +13,6 @@ import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
 import NotificationPanel from './notifications/NotificationPanel';
 import "./App.css";
-
 import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./Firebase"; // Firestore
@@ -123,7 +122,8 @@ function App() {
 
   return (
     <div className="app-container">
-      <NavigationBar />
+      {/* Only show NavigationBar if not on login/signup/reset */}
+      {!shouldHideUI && <NavigationBar />}
 
       <div className="main-content-area">
         <div className="page-content-wrapper">
@@ -141,49 +141,38 @@ function App() {
         </div>
       </div>
 
-      {/* Notifications Icon */}
-      <div
-        className="notif-icon"
-        onClick={toggleNotif}
-        role="button"
-        aria-label="Open notifications"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleNotif(); }}
-      >
-        <IoNotificationsOutline size={45} />
-        {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-      </div>
+      {/* Only show icons if not on login/signup/reset */}
+      {!shouldHideUI && (
+        <>
+          {/* Notifications Icon */}
+          <div className="notif-icon">
+            <IoNotificationsOutline size={45} />
+          </div>
 
-      <NotificationPanel
-        open={notifOpen}
-        onClose={closeNotif}
-        notifications={notifications}
-        onMarkRead={markRead}
-        onMarkAllRead={markAllRead}
-      />
-
-      {/* Profile Icon */}
-      <div
-        className="profile-icon"
-        onClick={() => {
-          if (location.pathname === "/profilepage") {
-            navigate(profilePrevPath.current || "/dashboard");
-          } else {
-            profilePrevPath.current = location.pathname;
-            navigate("/profilepage");
-          }
-        }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        {(location.pathname === "/settings" && hovered) ||
-        (location.pathname !== "/settings" && !hovered) ? (
-          <IoPersonCircleOutline size={45} color="#252B2F" />
-        ) : (
-          <IoPersonCircle size={45} color="#252B2F" />
-        )}
-      </div>
-    </div>
+          {/* Profile Icon */}
+          <div
+            className="profile-icon"
+            onClick={() => {
+              if (location.pathname === "/profilepage") {
+                navigate(profilePrevPath.current || "/dashboard");
+              } else {
+                profilePrevPath.current = location.pathname;
+                navigate("/profilepage");
+              }
+            }}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            {(location.pathname === "/settings" && hovered) ||
+            (location.pathname !== "/settings" && !hovered) ? (
+              <IoPersonCircleOutline size={45} color="#252B2F" />
+            ) : (
+              <IoPersonCircle size={45} color="#252B2F" />
+            )}
+          </div>
+        </>
+      )}
   );
 }
 
