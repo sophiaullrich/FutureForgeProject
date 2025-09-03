@@ -11,13 +11,26 @@ import ProfilePage from "./ProfilePage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
-import NotificationPanel from './notifications/NotificationPanel';
+import NotificationPanel from "./notifications/NotificationPanel";
 import "./App.css";
-import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
+import {
+  IoNotificationsOutline,
+  IoPersonCircleOutline,
+  IoPersonCircle,
+} from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./Firebase"; // Firestore
 import { ensureProfile } from "./teams-page/ProfileService.js";
-import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import LandingPage from "./LandingPage.jsx";
 
 function App() {
   const [hovered, setHovered] = useState(false);
@@ -29,7 +42,7 @@ function App() {
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
-  const hideUIRoutes = ["/login", "/signup", "/resetpass"];
+  const hideUIRoutes = ["/","/login", "/signup", "/resetpass"];
   const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
 
   useEffect(() => {
@@ -50,11 +63,17 @@ function App() {
           );
 
           unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
-            const newNotifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const newNotifs = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
             setNotifications(newNotifs);
           });
         } catch (err) {
-          console.error("Error ensuring profile or fetching notifications:", err);
+          console.error(
+            "Error ensuring profile or fetching notifications:",
+            err
+          );
         }
       } else {
         setNotifications([]);
@@ -81,18 +100,20 @@ function App() {
   const markAllRead = async () => {
     if (!currentUser) return;
     try {
-      const unread = notifications.filter(n => !n.read);
+      const unread = notifications.filter((n) => !n.read);
       await Promise.all(
-        unread.map(n => updateDoc(doc(db, "notifications", n.id), { read: true }))
+        unread.map((n) =>
+          updateDoc(doc(db, "notifications", n.id), { read: true })
+        )
       );
     } catch (err) {
       console.error(err);
     }
   };
 
-  const toggleNotif = () => setNotifOpen(s => !s);
+  const toggleNotif = () => setNotifOpen((s) => !s);
   const closeNotif = () => setNotifOpen(false);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const SafeTeamsWrapper = () => {
     try {
@@ -110,12 +131,18 @@ function App() {
 
   if (shouldHideUI) {
     return (
-      <div className="fullscreen-page">
+      <div>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/resetpass" element={<Resetpass />} />
+        <Route path="/" element={<LandingPage />} />
         </Routes>
+      
+        <div className="fullscreen-page">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/resetpass" element={<Resetpass />} />
+          </Routes>
+        </div>
       </div>
     );
   }
@@ -128,7 +155,6 @@ function App() {
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
@@ -173,7 +199,7 @@ function App() {
           </div>
         </>
       )}
-      </div>
+    </div>
   );
 }
 
