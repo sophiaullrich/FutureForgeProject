@@ -8,6 +8,7 @@ import TeamsPage from "./teams-page/TeamsPage.jsx";
 import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
+import MakeFriendsPage from "./friends-page/MakeFriendsPage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
@@ -42,8 +43,11 @@ function App() {
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
+  // Routes where global UI should be hidden
+  const hideUIRoutes = ["/login", "/signup", "/resetpass"];
   const hideUIRoutes = ["/","/login", "/signup", "/resetpass"];
   const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
+
 
   useEffect(() => {
     let unsubscribeNotif = null;
@@ -114,6 +118,7 @@ function App() {
   const closeNotif = () => setNotifOpen(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Wrapper to avoid whole-app crash if TeamsPage throws
   const SafeTeamsWrapper = () => {
     try {
       return <TeamsPage />;
@@ -148,6 +153,7 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Only show NavigationBar + icons if not on login/signup/reset */}
       {/* Only show NavigationBar if not on login/signup/reset */}
       {!shouldHideUI && <NavigationBar />}
 
@@ -169,6 +175,8 @@ function App() {
       {/* Only show icons if not on login/signup/reset */}
       {!shouldHideUI && (
         <>
+          <NavigationBar />
+
           {/* Notifications Icon */}
         <div
           className="notif-icon"
@@ -211,9 +219,35 @@ function App() {
             ) : (
               <IoPersonCircle size={45} color="#252B2F" />
             )}
+            {(location.pathname === "/settings" && hovered) ||
+            (location.pathname !== "/settings" && !hovered) ? (
+              <IoPersonCircleOutline size={45} color="#252B2F" />
+            ) : (
+              <IoPersonCircle size={45} color="#252B2F" />
+            )}
           </div>
         </>
       )}
+
+      <div className="main-content-area">
+        <div className="page-content-wrapper">
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/rewards" element={<RewardsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/teams" element={<SafeTeamsWrapper />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/resetpass" element={<Resetpass />} />
+            <Route path="/profilepage" element={<ProfilePage />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/join/:teamId" element={<JoinTeamPage />} />
+            <Route path="/friends" element={<MakeFriendsPage />} />
+            <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+          </Routes>
+        </div>
+      </div>
     </div>
   );
 }
