@@ -3,6 +3,7 @@ const cors = require('cors');
 const taskRoutes = require("./tasks/tasks.routes");
 //const teamRoutes = require('./teams/teams.routes'); 
 const notificationRoutes = require('./notifications/notification.routes');
+const dashboardRoutes = require('./dashboard/dashboard.routes');
 
 const app = express();
 const PORT = 5000;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/tasks', taskRoutes);
 //app.use('/teams', teamRoutes); 
 app.use('/notifications', notificationRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 // Start the server
 app.listen(PORT, () => {
