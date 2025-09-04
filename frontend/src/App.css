@@ -60,7 +60,6 @@ body {
 }
 /* Fullscreen for login/signup/reset pages */
 .fullscreen-page {
-  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;

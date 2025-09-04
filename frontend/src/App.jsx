@@ -55,7 +55,6 @@ function App() {
         try {
           await ensureProfile();
 
-          // Real-time notifications
           const notifQuery = query(
             collection(db, "notifications"),
             where("userId", "==", user.uid),
@@ -171,9 +170,25 @@ function App() {
       {!shouldHideUI && (
         <>
           {/* Notifications Icon */}
-          <div className="notif-icon">
-            <IoNotificationsOutline size={45} />
+        <div
+          className="notif-icon"
+          onClick={toggleNotif}
+          role="button"
+          aria-label="Open notifications"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleNotif(); }}
+        >
+          <IoNotificationsOutline size={45} />
+          {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
           </div>
+
+          <NotificationPanel
+            open={notifOpen}
+            onClose={closeNotif}
+            notifications={notifications}
+            onMarkRead={markRead}
+            onMarkAllRead={markAllRead}
+          />
 
           {/* Profile Icon */}
           <div
