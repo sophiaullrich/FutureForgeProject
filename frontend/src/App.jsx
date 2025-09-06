@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
@@ -13,12 +14,16 @@ import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
 import NotificationPanel from "./notifications/NotificationPanel";
+import LandingPage from "./LandingPage.jsx";
+
 import "./App.css";
+
 import {
   IoNotificationsOutline,
   IoPersonCircleOutline,
   IoPersonCircle,
 } from "react-icons/io5";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./Firebase"; // Firestore
 import { ensureProfile } from "./teams-page/ProfileService.js";
@@ -31,7 +36,6 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import LandingPage from "./LandingPage.jsx";
 
 function App() {
   const [hovered, setHovered] = useState(false);
@@ -43,11 +47,11 @@ function App() {
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
-  // Routes where global UI should be hidden
-  const hideUIRoutes = ["/login", "/signup", "/resetpass"];
-  const hideUIRoutes = ["/","/login", "/signup", "/resetpass"];
-  const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
-
+  // Routes where global UI (nav, icons) should be hidden
+  const hideUIRoutes = ["/", "/login", "/signup", "/resetpass"];
+  const shouldHideUI = hideUIRoutes.includes(
+    location.pathname.toLowerCase()
+  );
 
   useEffect(() => {
     let unsubscribeNotif = null;
@@ -66,17 +70,14 @@ function App() {
           );
 
           unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
-            const newNotifs = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
+            const newNotifs = snapshot.docs.map((d) => ({
+              id: d.id,
+              ...d.data(),
             }));
             setNotifications(newNotifs);
           });
         } catch (err) {
-          console.error(
-            "Error ensuring profile or fetching notifications:",
-            err
-          );
+          console.error("Error ensuring profile or fetching notifications:", err);
         }
       } else {
         setNotifications([]);
@@ -105,9 +106,7 @@ function App() {
     try {
       const unread = notifications.filter((n) => !n.read);
       await Promise.all(
-        unread.map((n) =>
-          updateDoc(doc(db, "notifications", n.id), { read: true })
-        )
+        unread.map((n) => updateDoc(doc(db, "notifications", n.id), { read: true }))
       );
     } catch (err) {
       console.error(err);
@@ -133,113 +132,34 @@ function App() {
     }
   };
 
+  // --------- HIDDEN-UI ROUTES (Landing + Auth) ----------
   if (shouldHideUI) {
     return (
-      <div>
+      <div className="fullscreen-page">
         <Routes>
-        <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/resetpass" element={<Resetpass />} />
+          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>
-      
-        <div className="fullscreen-page">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/resetpass" element={<Resetpass />} />
-          </Routes>
-        </div>
       </div>
     );
   }
 
+  // --------- MAIN APP (with Navigation + Icons) ----------
   return (
     <div className="app-container">
-      {/* Only show NavigationBar + icons if not on login/signup/reset */}
-      {/* Only show NavigationBar if not on login/signup/reset */}
-      {!shouldHideUI && <NavigationBar />}
+      <NavigationBar />
 
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
+            {/* If users try "/", keep them on Dashboard inside the main app */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
-            <Route path="/profilepage" element={<ProfilePage />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/join/:teamId" element={<JoinTeamPage />} />
-            <Route path="*" element={<h2>404 - Page Not Found</h2>} />
-          </Routes>
-        </div>
-      </div>
-
-      {/* Only show icons if not on login/signup/reset */}
-      {!shouldHideUI && (
-        <>
-          <NavigationBar />
-
-          {/* Notifications Icon */}
-        <div
-          className="notif-icon"
-          onClick={toggleNotif}
-          role="button"
-          aria-label="Open notifications"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleNotif(); }}
-        >
-          <IoNotificationsOutline size={45} />
-          {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-          </div>
-
-          <NotificationPanel
-            open={notifOpen}
-            onClose={closeNotif}
-            notifications={notifications}
-            onMarkRead={markRead}
-            onMarkAllRead={markAllRead}
-          />
-
-          {/* Profile Icon */}
-          <div
-            className="profile-icon"
-            onClick={() => {
-              if (location.pathname === "/profilepage") {
-                navigate(profilePrevPath.current || "/dashboard");
-              } else {
-                profilePrevPath.current = location.pathname;
-                navigate("/profilepage");
-              }
-            }}
-            style={{ cursor: "pointer" }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
-            {(location.pathname === "/settings" && hovered) ||
-            (location.pathname !== "/settings" && !hovered) ? (
-              <IoPersonCircleOutline size={45} color="#252B2F" />
-            ) : (
-              <IoPersonCircle size={45} color="#252B2F" />
-            )}
-            {(location.pathname === "/settings" && hovered) ||
-            (location.pathname !== "/settings" && !hovered) ? (
-              <IoPersonCircleOutline size={45} color="#252B2F" />
-            ) : (
-              <IoPersonCircle size={45} color="#252B2F" />
-            )}
-          </div>
-        </>
-      )}
-
-      <div className="main-content-area">
-        <div className="page-content-wrapper">
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/rewards" element={<RewardsPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/teams" element={<SafeTeamsWrapper />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/resetpass" element={<Resetpass />} />
             <Route path="/profilepage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/join/:teamId" element={<JoinTeamPage />} />
@@ -247,6 +167,52 @@ function App() {
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
+      </div>
+
+      {/* Notifications Icon */}
+      <div
+        className="notif-icon"
+        onClick={toggleNotif}
+        role="button"
+        aria-label="Open notifications"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") toggleNotif();
+        }}
+      >
+        <IoNotificationsOutline size={45} />
+        {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
+      </div>
+
+      <NotificationPanel
+        open={notifOpen}
+        onClose={closeNotif}
+        notifications={notifications}
+        onMarkRead={markRead}
+        onMarkAllRead={markAllRead}
+      />
+
+      {/* Profile Icon */}
+      <div
+        className="profile-icon"
+        onClick={() => {
+          if (location.pathname === "/profilepage") {
+            navigate(profilePrevPath.current || "/dashboard");
+          } else {
+            profilePrevPath.current = location.pathname;
+            navigate("/profilepage");
+          }
+        }}
+        style={{ cursor: "pointer" }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {((location.pathname === "/settings") && hovered) ||
+        (location.pathname !== "/settings" && !hovered) ? (
+          <IoPersonCircleOutline size={45} color="#252B2F" />
+        ) : (
+          <IoPersonCircle size={45} color="#252B2F" />
+        )}
       </div>
     </div>
   );
