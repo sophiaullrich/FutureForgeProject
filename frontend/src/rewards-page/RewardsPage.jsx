@@ -1,27 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './RewardsPage.css';
+import { auth } from '../Firebase';
 
 const RewardsPage = () => {
-  const badges = [1, 2, 3, 4, 5, 6];
-  const leaderboard = [
-    { name: 'Stephen. T', points: 147 },
-    { name: 'Joseph. E', points: 139 },
-    { name: 'Sophia. U', points: 128 },
-    { name: 'Marcos. F', points: 102 },
-    { name: 'William. C', points: 73 },
-    { name: 'Willie. D', points: 65 },
-    { name: 'Diya. T', points: 11, rank: 32 },
-  ];
+  const [user, setUser] = useState(null);
+  const [points, setPoints] = useState(0);
+  const [redeemed, setRedeemed] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
 
   const rewards = [5, 10, 20, 25, 30, 50, 100, 300, 500];
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (u) => {
+      if (u) {
+        setUser(u);
+        const res = await fetch(`http://localhost:5000/api/rewards/${u.uid}`);
+        const data = await res.json();
+        setPoints(data.points || 0);
+        setRedeemed(data.redeemed || []);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const redeemReward = async (amount) => {
+    if (points < amount) return alert("Not enough points");
+
+    const newPoints = points - amount;
+    const updated = [...redeemed, amount];
+
+    await fetch(`http://localhost:5000/api/rewards/${user.uid}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ points: newPoints, redeemed: updated }),
+    });
+
+    setPoints(newPoints);
+    setRedeemed(updated);
+  };
 
   return (
     <div className="rewards-content">
       <section className="badges-section">
         <h2>Your Badges</h2>
         <div className="badges">
-          {badges.map((b, index) => (
-            <div key={index} className={`badge-placeholder badge-gradient-${index + 1}`} />
+          {[1, 2, 3, 4, 5, 6].map((b, i) => (
+            <div key={i} className={`badge-placeholder badge-gradient-${i + 1}`} />
           ))}
         </div>
       </section>
@@ -31,18 +56,14 @@ const RewardsPage = () => {
           <section className="leaderboard-section">
             <h2>Leaderboard</h2>
             <ol className="leaderboard">
-              {leaderboard.slice(0, 6).map((user, index) => (
-                <li key={index}>
-                  <span className="rank-number">{index + 1}</span>
+              {/* Placeholder users, replace with actual leaderboard data */}
+              {[{ name: 'User A', points: 200 }, { name: 'User B', points: 150 }].map((user, i) => (
+                <li key={i}>
+                  <span className="rank-number">{i + 1}</span>
                   <span>{user.name}</span>
                   <span>{user.points}</span>
                 </li>
               ))}
-              <li className="leaderboard-last">
-                <span className="rank-number">{leaderboard[6].rank}</span>
-                <span>{leaderboard[6].name}</span>
-                <span>{leaderboard[6].points}</span>
-              </li>
             </ol>
           </section>
         </div>
@@ -52,13 +73,14 @@ const RewardsPage = () => {
             <h2>Redeem Your Rewards</h2>
             <p>Click to Redeem Reward</p>
             <div className="rewards-list">
-              {rewards.map((points, index) => (
-                <div key={index} className="reward-item">
+              {rewards.map((amount, i) => (
+                <div key={i} className="reward-item" onClick={() => redeemReward(amount)}>
                   <div className="reward-circle" />
-                  <div className="reward-label">{points} Points</div>
+                  <div className="reward-label">{amount} Points</div>
                 </div>
               ))}
             </div>
+            <p style={{ marginTop: '1rem' }}>Your Points: {points}</p>
           </section>
         </div>
       </div>
