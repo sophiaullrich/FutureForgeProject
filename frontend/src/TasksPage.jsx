@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 import { observeMyTeams } from "./TeamsService";
 import { listProfiles } from "./teams-page/ProfileService";
 import { db } from "./Firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 export default function TasksPage() {
   const [activeTab, setActiveTab] = useState("myTasks");
@@ -143,16 +143,20 @@ export default function TasksPage() {
         setTasks([...tasks, { ...created, assignedUsers }]);
 
         await addDoc(collection(db, "notifications"), {
-          userId: profile?.uid || assignedEmail,
-          message: `You have been assigned a new task: ${created.name}. Due: ${new Date(created.due).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}`,
-          taskId: created.id,
-          read: false,
-          timestamp: serverTimestamp(),
-        });
+        userId: profile?.uid || assignedEmail,
+        notifId: "", 
+        message: `You have been assigned a new task: ${created.name}. Due: ${new Date(created.due).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`,
+      taskId: created.id,
+      type: "task",   
+      read: false,
+      timestamp: serverTimestamp(),
+      }).then(async (docRef) => {
+      await updateDoc(docRef, { notifId: docRef.id });
+    });
 
         setShowPopup(false);
         setNewTaskName("");
