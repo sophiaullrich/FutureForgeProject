@@ -5,10 +5,7 @@ import logo from "./assets/gobearlogo.png";
 import googleicon from "./assets/Google Icon.png";
 import githubicon from "./assets/GitHub Icon.png";
 import linkedinicon from "./assets/LinkedIn Icon.png";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -36,7 +33,7 @@ function Login() {
 
   return (
     <div className={styles.loginBody}>
-        <img src={logo} alt="GoBear Logo" className={styles.titleLogo}/>
+      <img src={logo} alt="GoBear Logo" className={styles.titleLogo} />
       <div className={styles.formCont}>
         <h1>Login</h1>
         <form onSubmit={handleLogin}>
@@ -60,21 +57,46 @@ function Login() {
             required
             className={styles.loginInput}
           />
-           <p className={styles.forgotPass}><a href="./Resetpass" >Forgot Password?</a></p>
-          <button type="submit" className={styles.loginBtn}>Sign In</button>
+          <p className={styles.forgotPass}>
+            <a href="./Resetpass">Forgot Password?</a>
+          </p>
+          <button
+            type="submit"
+            className={styles.loginBtn}
+            onClick={() => navigate("/dashboard")}
+          >
+            Sign In
+          </button>
           {error && <p className="error">{error}</p>}
         </form>
 
         <p className={styles.continuePara}>or continue with</p>
 
         <div className={styles.socialIconsCont}>
-          <img src={googleicon} alt="Continue with Google" className={styles.socialIcons}/>
-          <img src={githubicon} alt="Continue with GitHub" className={styles.socialIcons}/>
-          <img src={linkedinicon} alt="Continue with LinkedIn" className={styles.socialIcons}/>
+          <img
+            src={googleicon}
+            alt="Continue with Google"
+            className={styles.socialIcons}
+          />
+          <img
+            src={githubicon}
+            alt="Continue with GitHub"
+            className={styles.socialIcons}
+          />
+          <img
+            src={linkedinicon}
+            alt="Continue with LinkedIn"
+            className={styles.socialIcons}
+          />
         </div>
 
         <p className={styles.accountPara}>Don't have an account?</p>
-        <button onClick={() => navigate("/signup")} className={styles.signupBtn}>Sign Up</button>
+        <button
+          onClick={() => navigate("/signup")}
+          className={styles.signupBtn}
+        >
+          Sign Up
+        </button>
       </div>
     </div>
   );
