@@ -7,7 +7,7 @@ const profileRoutes = require('./profile-page/profile.routes');
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const startServer = (port) => {
     const server = app.listen(port, () => {
         console.log(`Server running on http://localhost:${port}`);
@@ -36,14 +36,19 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Routes
 app.use('/tasks', taskRoutes);
 //app.use('/teams', teamRoutes); 
 app.use('/notifications', notificationRoutes);
-app.use('/profile', profileRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
