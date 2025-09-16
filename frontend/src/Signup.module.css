@@ -1,0 +1,121 @@
+.titleCont {
+  display: flex;
+  justify-content: flex-start;
+  margin-left: 15px;
+  margin-top: 15px;
+}
+
+.titleCont img {
+  width: 204px;
+  height: 74px;
+  flex-shrink: 0;
+}
+
+.formCont {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: #252b2f;
+  width: 500px;
+  margin: 0 auto;
+}
+
+.formCont h1 {
+  color: #f5ebe0;
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.formLabel {
+  color: #f5ebe0;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-left: 26px;
+}
+
+.formLabel:after {
+  color: #ac4750;
+  content: " *";
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.formInput {
+  width: 460px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: #f3e7d3;
+  color: #252b2f;
+  font-family: "SF Pro Rounded";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-left: 20px;
+  margin-bottom: 18px;
+  border: none;
+}
+
+.signupBtn {
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 3px solid #f3e7d3;
+  background: #22336a;
+  color: #f3e7d3;
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin: 0 auto;
+  margin-top: 28px;
+}
+
+.signupBtn:hover {
+  border-radius: 5px;
+  border: 3px solid #22336a;
+  background: #f3e7d3;
+  color: #22336a;
+}
+
+.backBtn {
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  color: #6096ba;
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border-radius: 5px;
+  border: 3px solid #6096ba;
+  background: #f3e7d3;
+  margin: 0 auto;
+  margin-top: 28px;
+  margin-bottom: 28px;
+}
+
+.backBtn:hover {
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 3px solid #f3e7d3;
+  background: #6096ba;
+  color: #f3e7d3;
+}

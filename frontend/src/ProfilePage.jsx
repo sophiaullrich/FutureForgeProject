@@ -1,30 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { getAuth } from "firebase/auth";
 import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
+import axios from "axios";
 
 function ProfilePage() {
-  const defaultImg = "/defaultImage.png";
+    const [profile, setProfile] = useState(null);
 
-  const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+    // useEffect(() => {
+    //     const fetchProfile = async () => {
+    //         try {
+    //             const auth = getAuth();
+    //             const token = await auth.currentUser.getIdToken();
 
-  const [isEditingInterests, setIsEditingInterests] = useState(false);
-  const [interests, setInterests] = useState(["example"]);
-  const [newInterest, setNewInterest] = useState("");
+    //             const res = await fetch("http://localhost:5000/api/profile/me", {
+    //                 headers: { Authorization: `Bearer ${token}` },
+    //             });
+    //             const data = await res.json();
+    //             setProfile(data);
+    //         } catch (err) {
+    //             console.error("Error fetching profile:", err);
+    //         }
+    //     };
+    //     fetchProfile();
+    // }, []);
 
-  const [isEditingGoals, setIsEditingGoals] = useState(false);
-  const [isHoveringGoals, setIsHoveringGoals] = useState(false);
-  const [careerGoals, setCareerGoals] = useState([]);
-  const [tempGoalsText, setTempGoalsText] = useState("");
+    const defaultImg = "/defaultImage.png";
+    const [isEditingInfo, setIsEditingInfo] = useState(false);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
 
-  const [profileImg, setProfileImg] = useState(defaultImg);
+    const [isEditingInterests, setIsEditingInterests] = useState(false);
+    const [interests, setInterests] = useState(["example"]);
+    const [newInterest, setNewInterest] = useState("");
 
-  const [isHoveringSocials, setIsHoveringSocials] = useState(false);
-  const [isEditingSocials, setIsEditingSocials] = useState(false);
-  const [socials, setSocials] = useState({ google: "", github: "", linkedin: "" });
+    const [isEditingGoals, setIsEditingGoals] = useState(false);
+    const [isHoveringGoals, setIsHoveringGoals] = useState(false);
+    const [careerGoals, setCareerGoals] = useState([]);
+    const [tempGoalsText, setTempGoalsText] = useState("");
+
+    const [profileImg, setProfileImg] = useState(defaultImg);
+
+    const [isHoveringSocials, setIsHoveringSocials] = useState(false);
+    const [isEditingSocials, setIsEditingSocials] = useState(false);
+    const [socials, setSocials] = useState({ google: "", github: "", linkedin: "" });
 
   // Fetch profile data from backend on mount
   useEffect(() => {
@@ -82,7 +102,7 @@ function ProfilePage() {
       console.error("Error saving socials:", err);
     }
   };
-  
+
   const handleCancelSocials = () => {
     setIsEditingSocials(false);
     setIsHoveringSocials(false);
@@ -172,7 +192,7 @@ function ProfilePage() {
           </div>
 
           <div className="profile-info">
-            <h2>{name}</h2>
+            <h2>{profile?.displayName || "Loading..."}</h2>
             {isEditingInfo ? (
               <div>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
