@@ -1,0 +1,26 @@
+{
+  "name": "futureforgeproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently -n BACKEND,FRONTEND -c green,blue \"npm start --prefix backend\" \"npm start --prefix frontend\"",
+    "start:backend": "npm start --prefix backend",
+    "start:frontend": "npm start --prefix frontend",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sophiaullrich/FutureForgeProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sophiaullrich/FutureForgeProject/issues"
+  },
+  "homepage": "https://github.com/sophiaullrich/FutureForgeProject#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
