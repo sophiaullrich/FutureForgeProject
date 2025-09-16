@@ -1,15 +1,19 @@
 const { db, admin } = require("../firebase");
 const NOTIFICATIONS_COLLECTION = "notifications";
 
-async function createNotification(userId, title, message) {
+async function createNotification(userId, title, message, extra = {}) {
   const docRef = await db.collection(NOTIFICATIONS_COLLECTION).add({
     userId,
     title,
     message,
     read: false,
-    timestamp: admin.firestore.FieldValue.serverTimestamp()
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    ...extra
   });
-  return { id: docRef.id, title, message };
+
+  await docRef.update({ notifId: docRef.id });
+
+  return { id: docRef.id, notifId: docRef.id, title, message, ...extra };
 }
 
 async function getUserNotifications(userId) {
