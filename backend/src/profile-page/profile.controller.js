@@ -1,70 +1,50 @@
 const service = require('./profile.service');
 
-exports.getMe = async (req , res) => {
-    const data = await service.getProfileUID(req.user.uid);
-    res.json(data || {});
+exports.getMe = async (req, res) => {
+  try {
+    let profile = await service.getProfileUID(req.user.uid);
+
+    // If profile doesn't exist, create a base one
+    if (!profile) {
+      profile = {
+        uid: req.user.uid,
+        email: req.user.email,
+        emailLower: req.user.email.toLowerCase(),
+        displayName: req.user.email,
+        photoURL: req.user.picture || '',
+        createdAt: new Date()
+      };
+      await service.updateProfileUID(req.user.uid, profile);
+    }
+
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.patchMe = async (req, res) => {
+  try {
     const {
-        displayName, description,interests, careerGoals, socials, photoURL 
+      displayName,
+      description,
+      interests,
+      careerGoals,
+      socials,
+      photoURL
     } = req.body;
 
-    const clean = {};
-    if (displayName !== undefined) clean.displayName = displayName;
-    if (description !== undefined) clean.description = description;
-    if (Array.isArray(interests)) clean.interests = interests;
-    if (Array.isArray(careerGoals)) clean.careerGoals = careerGoals;
-    if (socials !== undefined) clean.socials = socials;
-    if (photoURL !== undefined) clean.photoURL = photoURL;
+    const updates = {};
+    if (displayName !== undefined) updates.displayName = displayName;
+    if (description !== undefined) updates.description = description;
+    if (Array.isArray(interests)) updates.interests = interests;
+    if (Array.isArray(careerGoals)) updates.careerGoals = careerGoals;
+    if (socials !== undefined) updates.socials = socials;
+    if (photoURL !== undefined) updates.photoURL = photoURL;
 
-    const doc = await service.updateProfileUID(req.user.uid, clean);
+    const doc = await service.updateProfileUID(req.user.uid, updates);
     res.json(doc);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
-
-/* const service = require('./profile.service');
-
-exports.getMe = async (req, res) => {
-    try {
-        const data = await service.getProfileUID(req.user.uid);
-        res.json(data || {});
-    } catch (error) {
-        res.status(404).json({ error: 'Profile not found' });
-    }
-};
-
-exports.patchMe = async (req, res) => {
-    try {
-        // Get existing profile or create base profile if it doesn't exist
-        let profile = await service.getProfileUID(req.user.uid).catch(() => ({
-            email: req.user.email,
-            emailLower: req.user.email.toLowerCase(),
-            displayName: req.user.email,
-            photoURL: req.user.picture || '',
-            uid: req.user.uid,
-            createdAt: new Date()
-        }));
-
-        // Update only the fields that are provided in the request
-        const updateFields = [
-            'displayName', 
-            'description', 
-            'interests', 
-            'careerGoals', 
-            'socials', 
-            'photoURL'
-        ];
-
-        const updates = {};
-        updateFields.forEach(field => {
-            if (req.body[field] !== undefined) {
-                updates[field] = req.body[field];
-            }
-        });
-
-        const doc = await service.updateProfileUID(req.user.uid, updates);
-        res.json(doc);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}; */
