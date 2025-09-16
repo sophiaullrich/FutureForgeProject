@@ -135,7 +135,7 @@ function App() {
   // --------- HIDDEN-UI ROUTES (Landing + Auth) ----------
   if (shouldHideUI) {
     return (
-      <div className="fullscreen-page">
+      <div>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
