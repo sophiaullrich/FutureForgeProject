@@ -1,6 +1,5 @@
-const { get } = require('react-native/Libraries/TurboModule/TurboModuleRegistry');
 const {db, admin} = require('../firebase');
-const col = db.collection('users');
+const col = db.collection('profiles');
 
 async function getProfileUID(uid) {
     const snap = await col.doc(uid).get();
