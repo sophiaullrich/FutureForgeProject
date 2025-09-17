@@ -10,17 +10,16 @@ function ProfilePage() {
     const [error, setError] = useState(null);
     const [user, setUser] = useState(null);
 
-    // Listen for auth state changes
+    // Auth listener
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
         });
-
         return () => unsubscribe();
     }, []);
 
-    // Fetch profile after auth is confirmed
+    // Fetch profile
     useEffect(() => {
         const fetchProfile = async () => {
             if (!user) {
@@ -38,31 +37,40 @@ function ProfilePage() {
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 setProfile(data);
+                setProfileImg(data.photoURL || defaultImg);
                 setDescription(data.description || "");
                 setOriginalDescription(data.description || "");
                 setInterests(data.interests || ["interests..."]);
                 setCareerGoals(data.careerGoals || []);
                 setSocials(data.socials || { google: "", github: "", linkedin: "" });
-            } catch (error) {
-                console.error('Fetch error:', error);
-                setError(error.message);
+            } catch (err) {
+                console.error('Fetch error:', err);
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProfile();
-    }, [user]); // Depend on user state
+    }, [user]);
 
-    const defaultImg = "/defaultImage.png";
+    const defaultImg = "/profileImages/defaultImage.png";
+    const profileImages = [
+        defaultImg,
+        "/profileImages/profileImage2.png",
+        "/profileImages/profileImage3.png",
+        "/profileImages/profileImage4.png",
+        "/profileImages/profileImage5.png",
+        "/profileImages/profileImage6.png"
+    ];
+
+    const [profileImg, setProfileImg] = useState(defaultImg);
+    const [showImageSelector, setShowImageSelector] = useState(false);
+
     const [isEditingInfo, setIsEditingInfo] = useState(false);
-    const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [originalDescription, setOriginalDescription] = useState("");
 
@@ -75,115 +83,65 @@ function ProfilePage() {
     const [careerGoals, setCareerGoals] = useState([]);
     const [tempGoalsText, setTempGoalsText] = useState("");
 
-    const [profileImg, setProfileImg] = useState(null);
-
     const [isHoveringSocials, setIsHoveringSocials] = useState(false);
     const [isEditingSocials, setIsEditingSocials] = useState(false);
     const [socials, setSocials] = useState({ google: "", github: "", linkedin: "" });
 
-    if (!user) {
-        return <div>Please log in to view your profile</div>;
-    }
+    const [name, setName] = useState("");
 
-    if (loading) {
-        return <div>Loading profile...</div>;
-    }
+    const selectProfileImage = (imgPath) => {
+        setProfileImg(imgPath);
+        setShowImageSelector(false);
+        setProfile(prev => ({ ...prev, photoURL: imgPath }));
+        // Optional: save to backend with PATCH
+    };
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
+    if (!user) return <div>Please log in to view your profile</div>;
+    if (loading) return <div>Loading profile...</div>;
+    if (error) return <div>Error: {error}</div>;
+    if (!profile) return <div>No profile data available</div>;
 
-    if (!profile) {
-        return <div>No profile data available</div>;
-    }
-
-    // Description
+    // Description handlers
+    const handleEditDescription = () => {
+        setOriginalDescription(description);
+        setIsEditingInfo(true);
+    };
+    const handleCancelDescription = () => {
+        setDescription(originalDescription);
+        setIsEditingInfo(false);
+    };
     const handleSaveDescription = async () => {
         try {
             const auth = getAuth();
             const token = await auth.currentUser.getIdToken();
-
             await fetch("http://localhost:5001/api/profile/me", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ description }),
             });
-
             setIsEditingInfo(false);
         } catch (err) {
             console.error("Error saving description:", err);
         }
     };
 
-    const handleEditDescription = () => {
-        setOriginalDescription(description); // Store current description
-        setIsEditingInfo(true);
-    };
-
-    const handleCancelDescription = () => {
-        setDescription(originalDescription); // Reset to original
-        setIsEditingInfo(false);
-    };
-
-    // Image handlers
-    const handleImageUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        try {
-            const auth = getAuth();
-            const token = await auth.currentUser.getIdToken();
-
-            // Create temporary URL for immediate display
-            const tempURL = URL.createObjectURL(file);
-            setProfileImg(tempURL);
-
-            // Create FormData for file upload
-            const formData = new FormData();
-            formData.append('photo', file);
-
-            const response = await fetch("http://localhost:5001/api/profile/me/photo", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('Failed to upload image');
-
-            const { photoURL } = await response.json();
-            setProfileImg(photoURL);
-            setProfile(prev => ({ ...prev, photoURL }));
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            // Revert to previous image if upload fails
-            setProfileImg(profile?.photoURL || defaultImg);
-        }
-    };
-    const handleImageError = () => setProfileImg(defaultImg);
-
     // Socials
     const handleSocialChange = (key, value) => setSocials(prev => ({ ...prev, [key]: value }));
-
     const handleSaveSocials = async () => {
         try {
             const auth = getAuth();
             const token = await auth.currentUser.getIdToken();
-
             await fetch("http://localhost:5001/api/profile/me", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ socials }),
             });
-
             setIsEditingSocials(false);
             setIsHoveringSocials(false);
         } catch (err) {
             console.error("Error saving socials:", err);
         }
     };
-
     const handleCancelSocials = () => {
         setIsEditingSocials(false);
         setIsHoveringSocials(false);
@@ -192,34 +150,30 @@ function ProfilePage() {
     // Interests
     const handleAddInterest = async () => {
         if (!newInterest.trim() || interests.includes(newInterest.trim())) return;
-
         const updated = [...interests, newInterest.trim()];
         setInterests(updated);
         setNewInterest("");
-
         try {
             const auth = getAuth();
             const token = await auth.currentUser.getIdToken();
             await fetch("http://localhost:5001/api/profile/me", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ interests: updated }),
             });
         } catch (err) {
             console.error("Error updating interests:", err);
         }
     };
-
     const handleDeleteInterest = async (index) => {
         const updated = interests.filter((_, i) => i !== index);
         setInterests(updated);
-
         try {
             const auth = getAuth();
             const token = await auth.currentUser.getIdToken();
             await fetch("http://localhost:5001/api/profile/me", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ interests: updated }),
             });
         } catch (err) {
@@ -233,18 +187,16 @@ function ProfilePage() {
         setIsEditingGoals(true);
         setIsHoveringGoals(false);
     };
-
     const handleSaveGoals = async () => {
         const updatedGoals = tempGoalsText.split("\n").map(g => g.trim()).filter(Boolean);
         setCareerGoals(updatedGoals);
         setIsEditingGoals(false);
-
         try {
             const auth = getAuth();
             const token = await auth.currentUser.getIdToken();
             await fetch("http://localhost:5001/api/profile/me", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ careerGoals: updatedGoals }),
             });
         } catch (err) {
@@ -255,35 +207,44 @@ function ProfilePage() {
 
     return (
         <div className="profile-page">
-            {/* Top heading */}
             <div className="top-header">
                 <h1>My Profile</h1>
             </div>
 
-            {/* Profile section */}
             <div className="profile-section">
                 {/* Left - Image and Info */}
                 <div className="profile-left">
                     <div className="profile-img-container">
-                        <img 
-                            src={profileImg || profile?.photoURL || defaultImg} 
-                            alt="Profile" 
-                            className="profile-img" 
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = defaultImg;
+                    <img
+                        src={profileImg || defaultImg}
+                        alt="Profile"
+                        className="profile-img"
+                    />
+
+                    {/* Edit pencil on top of the profile image */}
+                    {!showImageSelector && (
+                        <IoPencilSharp
+                        className="edit-img-btn"
+                        onClick={() => setShowImageSelector(true)}
+                        />
+                    )}
+
+                    {showImageSelector && (
+                        <div className="profile-images-selector">
+                        {profileImages.map((img, idx) => (
+                            <img
+                            key={idx}
+                            src={img}
+                            alt={`Profile ${idx}`}
+                            className="profile-image-option"
+                            onClick={() => {
+                                selectProfileImage(img);
+                                setIsEditingInfo(false); // exit edit mode
                             }}
-                        />
-                        <label htmlFor="photo-upload" className="edit-img-btn">
-                            <IoPencilSharp />
-                        </label>
-                        <input
-                            id="photo-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            style={{ display: 'none' }}
-                        />
+                            />
+                        ))}
+                        </div>
+                    )}
                     </div>
 
                     <div className="profile-info">
@@ -309,7 +270,7 @@ function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Right - Social accounts */}
+                {/* Right - Socials */}
                 <div className="social-section" onMouseEnter={() => setIsHoveringSocials(true)} onMouseLeave={() => setIsHoveringSocials(false)}>
                     <div className="social-header">
                         {isHoveringSocials && !isEditingSocials && <IoPencilSharp className="socials-edit-icon" onClick={() => setIsEditingSocials(true)} />}
@@ -401,7 +362,7 @@ function ProfilePage() {
             {/* Badges */}
             <div className="badge-box-name">{name ? `${name}'s Badges` : "My Badges"}</div>
             <div className="scrollable-row badges-row">{[...Array(8)].map((_, idx) => <div key={idx} className="badge-box" />)}</div>
-          </div>
+        </div>
     );
 }
 
