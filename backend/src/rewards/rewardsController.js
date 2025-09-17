@@ -1,16 +1,14 @@
 const { db, admin } = require('./firebase');
 
-// GET /api/rewards/:uid
 exports.getUserRewards = async (req, res) => {
   const uid = req.params.uid;
-  const { email } = req.query; // frontend passes ?email=user@example.com
+  const { email } = req.query;
 
   try {
     const docRef = db.collection('rewards').doc(uid);
     const doc = await docRef.get();
 
     if (!doc.exists) {
-      // Create a new rewards doc with email if provided
       await docRef.set({
         email: email || "unknown@example.com",
         points: 0,
@@ -31,7 +29,6 @@ exports.getUserRewards = async (req, res) => {
   }
 };
 
-// POST /api/rewards/:uid/redeem
 exports.redeemReward = async (req, res) => {
   const uid = req.params.uid;
   const { cost } = req.body;
@@ -51,7 +48,6 @@ exports.redeemReward = async (req, res) => {
     const newPoints = userData.points - cost;
     const updatedRedeemed = [...(userData.redeemed || []), cost];
 
-    // Award badges
     let newBadges = userData.badges || [];
     if (updatedRedeemed.length === 1 && !newBadges.includes("first_redeem")) {
       newBadges.push("first_redeem");
@@ -77,7 +73,6 @@ exports.redeemReward = async (req, res) => {
   }
 };
 
-// GET /api/rewards/leaderboard/all
 exports.getLeaderboard = async (req, res) => {
   try {
     const snapshot = await db.collection('rewards')
@@ -96,7 +91,6 @@ exports.getLeaderboard = async (req, res) => {
   }
 };
 
-// POST /api/rewards/:uid/badge
 exports.addBadge = async (req, res) => {
   const uid = req.params.uid;
   const { badge } = req.body;

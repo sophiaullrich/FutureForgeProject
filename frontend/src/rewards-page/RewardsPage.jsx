@@ -11,13 +11,11 @@ const RewardsPage = () => {
 
   const rewards = [5, 10, 20, 25, 30, 50, 100, 300, 500];
 
-  // Load user rewards when logged in
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (u) => {
       if (u) {
         setUser(u);
 
-        // Pass user email to backend so it gets stored in Firestore
         const res = await fetch(
           `http://localhost:5000/api/rewards/${u.uid}?email=${encodeURIComponent(u.email)}`
         );
@@ -30,7 +28,7 @@ const RewardsPage = () => {
     return () => unsubscribe();
   }, []);
 
-  // Load leaderboard (refresh whenever points change)
+  // Load leaderboard
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const res = await fetch(`http://localhost:5000/api/rewards/leaderboard/all`);
