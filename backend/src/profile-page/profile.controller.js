@@ -5,7 +5,6 @@ exports.getMe = async (req, res) => {
     let profile = await service.getProfileUID(req.user.uid);
 
     if (!profile) {
-      // Create minimal doc; avoid writing photoURL unless we have one.
       const base = {
         uid: req.user.uid,
         email: req.user.email || "",
@@ -70,15 +69,9 @@ exports.patchMe = async (req, res) => {
     if (Array.isArray(interests))   updates.interests    = interests;
     if (Array.isArray(careerGoals)) updates.careerGoals  = careerGoals;
     if (socials !== undefined)      updates.socials      = socials;
-
-    // IMPORTANT: respect presence, even if empty string (intentional clear)
     if (photoURL !== undefined)     updates.photoURL     = photoURL;
-
     if (darkMode !== undefined)     updates.darkMode     = darkMode;
     if (textSize !== undefined)     updates.textSize     = textSize;
-
-    // Optional guard: block accidental empty overwrite unless explicitly allowed
-    // if (photoURL === "") delete updates.photoURL;
 
     console.log("patchMe received updates:", updates);
     const doc = await service.updateProfileUID(req.user.uid, updates);

@@ -19,14 +19,6 @@ async function updateProfileUID(uid, patch) {
 
   const now = admin.firestore.FieldValue.serverTimestamp();
 
-  // Audit — helps you see who/what overwrote photoURL
-  const audit = {
-    _lastWrite: {
-      at: now,
-      fields: Object.keys(patch || {}),
-    }
-  };
-
   await col.doc(uid).set({ ...patch, ...audit, updatedAt: now }, { merge: true });
 
   const updated = await col.doc(uid).get();

@@ -3,9 +3,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "./Firebase"; // Adjust the import based on your firebase config file
-
 
 function ProfilePage() {
     const [profile, setProfile] = useState(null);
