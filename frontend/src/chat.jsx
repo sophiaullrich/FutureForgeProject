@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ref, push, onValue } from "firebase/database";
 import { FiSearch } from "react-icons/fi";
 import { IoIosArrowForward } from "react-icons/io";
-import { db } from "./Firebase";
 import "./chat.css";
+
+const BACKEND_URL = "http://localhost:5001/api/chat/messages";
 
 const avatarColors = [
   "linear-gradient(135deg, #4e54c8, #8f94fb)",
@@ -33,30 +33,37 @@ const Chat = () => {
       chat.preview.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Listen for messages in Realtime Database
+  // Fetch messages from backend
   useEffect(() => {
-    const messagesRef = ref(db, "messages");
-    onValue(messagesRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedMessages = data ? Object.values(data) : [];
-      setMessages(loadedMessages);
-    });
+    fetch(BACKEND_URL)
+      .then((res) => res.json())
+      .then((data) => {
+        const loadedMessages = data ? Object.values(data) : [];
+        setMessages(loadedMessages);
+      });
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message to Realtime Database
+  // Send message to backend
   const sendMessage = async (e) => {
     e.preventDefault();
     if (newMessage.trim() === "") return;
-    const message = {
-      text: newMessage,
-      timestamp: Date.now(),
-    };
-    await push(ref(db, "messages"), message);
+    await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: newMessage }),
+    });
     setNewMessage("");
+    // Refetch messages after sending
+    fetch(BACKEND_URL)
+      .then((res) => res.json())
+      .then((data) => {
+        const loadedMessages = data ? Object.values(data) : [];
+        setMessages(loadedMessages);
+      });
   };
 
   return (
