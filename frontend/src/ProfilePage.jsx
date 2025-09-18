@@ -3,6 +3,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "./Firebase"; // Adjust the import based on your firebase config file
+
 
 function ProfilePage() {
     const [profile, setProfile] = useState(null);
@@ -88,12 +91,29 @@ function ProfilePage() {
     const [socials, setSocials] = useState({ google: "", github: "", linkedin: "" });
 
     const [name, setName] = useState("");
+    
+    const selectProfileImage = async (imgPath) => {
+    setProfileImg(imgPath);
+    setShowImageSelector(false);
+    setProfile(prev => ({ ...prev, photoURL: imgPath }));
 
-    const selectProfileImage = (imgPath) => {
-        setProfileImg(imgPath);
-        setShowImageSelector(false);
-        setProfile(prev => ({ ...prev, photoURL: imgPath }));
-        // Optional: save to backend with PATCH
+    try {
+        const auth = getAuth();
+        const token = await auth.currentUser.getIdToken();
+
+        await fetch("http://localhost:5001/api/profile/me", {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ photoURL: imgPath })
+        });
+
+        console.log("Profile image saved!");
+    } catch (err) {
+        console.error("Error saving profile image:", err);
+    }
     };
 
     if (!user) return <div>Please log in to view your profile</div>;
