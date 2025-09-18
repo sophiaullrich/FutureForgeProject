@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
+import ChatsPage from './chat.jsx';
 import Signup from "./Signup.jsx";
 import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx";
@@ -159,6 +160,7 @@ function App() {
             {/* If users try "/", keep them on Dashboard inside the main app */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
+            <Route path="/chat" element={<ChatsPage />} />     
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
             <Route path="/profilepage" element={<ProfilePage />} />
