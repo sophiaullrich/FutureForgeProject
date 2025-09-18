@@ -1,76 +1,49 @@
-const { v4: uuidv4 } = require('uuid');
+const { db } = require('../firebase');
 
-class TaskService {
-  constructor() {
-    this.tasks = [];
-  }
+const TASK_COLLECTION = 'tasks'; // updated
 
-  validateTask(task, isUpdate = false) {
-    const requiredFields = ['title', 'dueDate', 'assignee'];
-    if (!isUpdate) {
-      for (let field of requiredFields) {
-        if (!task[field]) return `${field} is required`;
-      }
-    }
-    return null; 
-  }
-
-  create(taskDto) {
-    const error = this.validateTask(taskDto);
-    if (error) throw { status: 400, message: error };
-
-    const task = {
-      id: uuidv4(),
-      title: taskDto.title,
-      dueDate: taskDto.dueDate,
-      assignee: taskDto.assignee,
-      assigneeType: taskDto.assigneeType || 'team',
-      priority: taskDto.priority || 'Medium',
-      status: taskDto.status || 'To Do'
-    };
-
-    this.tasks.push(task);
-    return task;
-  }
-
-  findAll() {
-    return this.tasks;
-  }
-
-  findById(id) {
-    const task = this.tasks.find(t => t.id === id);
-    if (!task) throw { status: 404, message: 'Task not found' };
-    return task;
-  }
-
-  update(id, updates) {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) throw { status: 404, message: 'Task not found' };
-
-    const error = this.validateTask(updates, true);
-    if (error) throw { status: 400, message: error };
-
-    this.tasks[index] = { ...this.tasks[index], ...updates };
-    return this.tasks[index];
-  }
-
-  delete(id) {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) throw { status: 404, message: 'Task not found' };
-    this.tasks.splice(index, 1);
-  }
-
-  assign(id, payload) {
-    const task = this.findById(id);
-    const { assignee } = payload;
-
-    if (!assignee) {
-      throw { status: 400, message: 'Assignee is required' };
-    }
-
-    task.assignee = assignee;
-    return task;
+async function getAllTasks() {
+  try {
+    const snapshot = await db.collection(TASK_COLLECTION).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error getting tasks:', error);
+    throw error;
   }
 }
 
-module.exports = new TaskService();
+async function createTask(taskData) {
+  try {
+    const taskRef = db.collection(TASK_COLLECTION).doc();
+    const assignedEmails = taskData.assignedUsers.map(u => u.email);
+    await taskRef.set({ ...taskData, assignedEmails });
+    return { id: taskRef.id, ...taskData };
+  } catch (error) {
+    console.error('Error creating task:', error);
+    throw error;
+  }
+}
+
+async function updateTask(taskId, updateData) {
+  try {
+    const taskRef = db.collection(TASK_COLLECTION).doc(taskId);
+    await taskRef.update(updateData);
+    const updatedDoc = await taskRef.get();
+    return { id: updatedDoc.id, ...updatedDoc.data() };
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error;
+  }
+}
+
+async function deleteTask(taskId) {
+  try {
+    await db.collection(TASK_COLLECTION).doc(taskId).delete();
+    return true;
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    throw error;
+  }
+}
+
+module.exports = { getAllTasks, createTask, updateTask, deleteTask };
