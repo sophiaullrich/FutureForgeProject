@@ -1,6 +1,9 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getDatabase } from "firebase/database";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -16,14 +19,30 @@ const firebaseConfig = {
   measurementId: "G-PE3YGMH0W3",
 };
 
-const app = initializeApp(firebaseConfig);
+// ✅ singleton app (prevents multiple Firebase instances)
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
+
+// ✅ singletons exported everywhere
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Make auth persist across refreshes for this origin
+setPersistence(auth, browserLocalPersistence).catch(() => {
+  // ignore if already set or unsupported
+});
+
+// Analytics only when supported (and in the browser)
 export let analytics = null;
 isSupported().then((ok) => {
   if (ok) analytics = getAnalytics(app);
 });
+
+// handy debug hook (DevTools):
+//   window.__fb.auth.currentUser?.uid
+//   window.__fb.app.options.projectId
+if (typeof window !== "undefined") {
+  window.__fb = { app, auth, db };
+}
 
 export default app;

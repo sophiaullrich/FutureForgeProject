@@ -1,6 +1,6 @@
 import React from "react";
 import firebaseApp from "./Firebase.js";
-import "./Signup.css";
+import styles from"./Signup.module.css";
 import logo from "./assets/gobearlogo.png";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
@@ -44,15 +44,15 @@ function Signup() {
   };
 
   return (
-    <div id="body">
-      <div id="title-cont">
+    <div className={styles.signupBody}>
+      <div className={styles.titleCont}>
         <img src={logo} alt="GoBear Logo" />
       </div>
 
-      <div id="form-cont">
+      <div className={styles.formCont}>
         <h1>Sign Up</h1>
         <form onSubmit={handleSignup}>
-          <label htmlFor="fname">Firstname:</label>
+          <label htmlFor="fname" className={styles.formLabel}>Firstname</label>
           <input
             type="text"
             id="fname"
@@ -61,9 +61,9 @@ function Signup() {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
+            className={styles.formInput}
           />
-          <br />
-          <label htmlFor="lname">Last Name:</label>
+          <label htmlFor="lname" className={styles.formLabel}>Last Name</label>
           <input
             type="text"
             id="lname"
@@ -72,9 +72,9 @@ function Signup() {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
+            className={styles.formInput}
           />
-          <br />
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="email" className={styles.formLabel}>Email</label>
           <input
             type="email"
             id="email"
@@ -83,9 +83,9 @@ function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className={styles.formInput}
           />
-          <br />
-          <label htmlFor="pword">Password:</label>
+          <label htmlFor="pword" className={styles.formLabel}>Password</label>
           <input
             type="password"
             id="pword"
@@ -94,24 +94,22 @@ function Signup() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className={styles.formInput}
           />
-          <br />
-          <label htmlFor="pword2">Password:</label>
+          <label htmlFor="pword2" className={styles.formLabel}>Confirm Password</label>
           <input
             type="password"
             id="pword2"
             name="pword2"
             placeholder="Confirm Password"
             required
+            className={styles.formInput}
           />
-          <br />
-          <input type="submit" value="Sign Up" />
+          <button type="submit" className={styles.signupBtn}>Sign Up</button>
           {error && <p className="error">{error}</p>}
         </form>
 
-        <a href="./Login" className="button-link">
-          Back To Login
-        </a>
+        <button onClick={() => navigate("/login")} className={styles.backBtn}>Back To Login</button>
       </div>
     </div>
   );

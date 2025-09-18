@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
 import ChatsPage from './chat.jsx';
@@ -12,14 +13,31 @@ import ProfilePage from "./ProfilePage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
-import NotificationPanel from './notifications/NotificationPanel';
+import NotificationPanel from "./notifications/NotificationPanel";
+import LandingPage from "./LandingPage.jsx";
+import FriendRequestsPage from "./friends-page/FriendRequestsPage.jsx";
+import PendingRequestsPage from "./friends-page/PendingRequestsPage.jsx";
+import MakeFriendsPage from "./friends-page/MakeFriendsPage.jsx";
 import "./App.css";
 
-import { IoNotificationsOutline, IoPersonCircleOutline, IoPersonCircle } from "react-icons/io5";
+import {
+  IoNotificationsOutline,
+  IoPersonCircleOutline,
+  IoPersonCircle,
+} from "react-icons/io5";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./Firebase"; // Firestore
 import { ensureProfile } from "./teams-page/ProfileService.js";
-import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 function App() {
   const [hovered, setHovered] = useState(false);
@@ -31,8 +49,11 @@ function App() {
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
-  const hideUIRoutes = ["/login", "/signup", "/resetpass"];
-  const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
+  // Routes where global UI (nav, icons) should be hidden
+  const hideUIRoutes = ["/", "/login", "/signup", "/resetpass"];
+  const shouldHideUI = hideUIRoutes.includes(
+    location.pathname.toLowerCase()
+  );
 
   useEffect(() => {
     let unsubscribeNotif = null;
@@ -44,7 +65,6 @@ function App() {
         try {
           await ensureProfile();
 
-          // Real-time notifications
           const notifQuery = query(
             collection(db, "notifications"),
             where("userId", "==", user.uid),
@@ -52,7 +72,10 @@ function App() {
           );
 
           unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
-            const newNotifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const newNotifs = snapshot.docs.map((d) => ({
+              id: d.id,
+              ...d.data(),
+            }));
             setNotifications(newNotifs);
           });
         } catch (err) {
@@ -83,19 +106,20 @@ function App() {
   const markAllRead = async () => {
     if (!currentUser) return;
     try {
-      const unread = notifications.filter(n => !n.read);
+      const unread = notifications.filter((n) => !n.read);
       await Promise.all(
-        unread.map(n => updateDoc(doc(db, "notifications", n.id), { read: true }))
+        unread.map((n) => updateDoc(doc(db, "notifications", n.id), { read: true }))
       );
     } catch (err) {
       console.error(err);
     }
   };
 
-  const toggleNotif = () => setNotifOpen(s => !s);
+  const toggleNotif = () => setNotifOpen((s) => !s);
   const closeNotif = () => setNotifOpen(false);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Wrapper to avoid whole-app crash if TeamsPage throws
   const SafeTeamsWrapper = () => {
     try {
       return <TeamsPage />;
@@ -110,18 +134,22 @@ function App() {
     }
   };
 
+  // --------- HIDDEN-UI ROUTES (Landing + Auth) ----------
   if (shouldHideUI) {
     return (
-      <div className="fullscreen-page">
+      <div>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/resetpass" element={<Resetpass />} />
+          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>
       </div>
     );
   }
 
+  // --------- MAIN APP (with Navigation + Icons) ----------
   return (
     <div className="app-container">
       <NavigationBar />
@@ -129,7 +157,7 @@ function App() {
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
+            {/* If users try "/", keep them on Dashboard inside the main app */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
             <Route path="/chat" element={<ChatsPage />} />     
@@ -138,6 +166,9 @@ function App() {
             <Route path="/profilepage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/join/:teamId" element={<JoinTeamPage />} />
+            <Route path="/friends" element={<MakeFriendsPage />} />
+            <Route path="/friends/requests" element={<FriendRequestsPage />} />
+            <Route path="/friends/pending" element={<PendingRequestsPage />} />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>
@@ -150,7 +181,9 @@ function App() {
         role="button"
         aria-label="Open notifications"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleNotif(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") toggleNotif();
+        }}
       >
         <IoNotificationsOutline size={45} />
         {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
@@ -175,10 +208,11 @@ function App() {
             navigate("/profilepage");
           }
         }}
+        style={{ cursor: "pointer" }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {(location.pathname === "/settings" && hovered) ||
+        {((location.pathname === "/settings") && hovered) ||
         (location.pathname !== "/settings" && !hovered) ? (
           <IoPersonCircleOutline size={45} color="#252B2F" />
         ) : (

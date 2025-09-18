@@ -2,12 +2,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f3e7d3; 
-  padding: 15px; 
+  background: #f3e7d3;
+  padding: 15px;
+  padding-top: 46px;
   font-family: "SF Pro Rounded", Arial, sans-serif;
   color: #22336A;
-  padding-top: 46px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .top-section {
@@ -19,37 +20,50 @@
 .teams-section,
 .tasks-due-section {
   flex: 1;
-  background: #252B2F; 
+  background: #252B2F;
   color: #F5EBE0;
   border-radius: 8px;
-  padding: 12px; 
+  padding: 12px;
   min-width: 260px;
+  height: 300px; 
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .teams-section h3,
-.tasks-due-section h3,
-.progress-section h3 {
+.tasks-due-section h3 {
   font-size: 20px;
   font-weight: 500;
-  margin-bottom: 6px; 
+  margin-top: 0px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .team-card {
   background: #F5EBE0;
   color: #22336A;
   border-radius: 5px;
-  margin: 4px 0; 
-  padding: 6px 10px; 
+  margin: 4px 0;
+  padding: 6px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   border: 2px solid #22336A;
   font-size: 18px;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.team-card:hover {
+.team-card:hover,
+.team-card:focus {
   background: #e4d3b8;
+  transform: translateY(-1px);
 }
 
 .arrow {
@@ -61,7 +75,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 4px 0; 
+  margin: 4px 0;
   padding: 4px 0;
   border-bottom: 1px solid #F5EBE0;
 }
@@ -78,15 +92,18 @@
 .task-team {
   font-weight: bold;
   font-size: 16px;
+  color: #F5EBE0;
 }
 
 .task-name {
   font-size: 14px;
+  color: #ffffff;
 }
 
 .task-date {
   text-align: center;
   font-size: 14px;
+  color: #F5EBE0;
 }
 
 .task-date strong {
@@ -94,22 +111,28 @@
   font-weight: 700;
 }
 
+.progress-section h3 {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center; 
+}
+
 .progress-section {
-  margin-top: 15px; 
+  margin-top: 15px;
   background: #F5EBE0;
-  padding: 12px; 
+  padding: 12px;
   border-radius: 8px;
   border: 2px solid #22336A;
 }
 
 .progress-bar {
-  margin: 8px 0; 
+  margin: 8px 0;
 }
 
 .label {
   font-weight: 500;
   font-size: 16px;
-  margin-bottom: 3px; 
+  margin-bottom: 3px;
   display: block;
 }
 
@@ -125,5 +148,27 @@
   background: #6096BA;
   height: 100%;
   width: 0%;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease-in-out;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }

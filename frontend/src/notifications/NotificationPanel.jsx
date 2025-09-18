@@ -1,13 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import './NotificationPanel.css';
-import { IoClose, IoCheckmarkDoneOutline } from 'react-icons/io5';
+import React, { useEffect, useRef } from "react";
+import "./NotificationPanel.css";
+import { IoClose, IoCheckmarkDoneOutline } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
-// Fixed timestamp formatting
 const formatTimestamp = (ts) => {
   if (!ts) return "";
 
   let date;
-
   if (ts.toDate) {
     date = ts.toDate();
   } else if (ts._seconds != null) {
@@ -24,7 +23,7 @@ const formatTimestamp = (ts) => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: true
+    hour12: true,
   });
 };
 
@@ -36,13 +35,14 @@ export default function NotificationPanel({
   onMarkAllRead,
 }) {
   const panelRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     function handleKey(e) {
-      if (e.key === 'Escape' && open) onClose();
+      if (e.key === "Escape" && open) onClose();
     }
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
   useEffect(() => {
@@ -52,16 +52,31 @@ export default function NotificationPanel({
         onClose();
       }
     }
-    window.addEventListener('mousedown', handleClick);
-    return () => window.removeEventListener('mousedown', handleClick);
+    window.addEventListener("mousedown", handleClick);
+    return () => window.removeEventListener("mousedown", handleClick);
   }, [open, onClose]);
+
+  const handleNotificationClick = (n) => {
+    onMarkRead(n.id);
+
+    if (n.type === "task" && n.taskId) {
+      navigate(`/tasks?notifId=${n.notifId}&taskId=${n.taskId}`);
+    } else if (n.type === "team" && n.teamId) {
+      navigate(`/teams?notifId=${n.notifId}&teamId=${n.teamId}`);
+    } 
+
+    onClose();
+  };
 
   return (
     <>
-      <div className={`notif-overlay ${open ? 'open' : ''}`} aria-hidden={!open} />
+      <div
+        className={`notif-overlay ${open ? "open" : ""}`}
+        aria-hidden={!open}
+      />
       <aside
         ref={panelRef}
-        className={`notification-panel ${open ? 'open' : ''}`}
+        className={`notification-panel ${open ? "open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label="Notifications"
@@ -88,29 +103,37 @@ export default function NotificationPanel({
           )}
 
           {notifications.map((n) => {
-            // Include task due date if available
             const dueDate =
               n.taskDue && !isNaN(new Date(n.taskDue).getTime())
-                ? ` (Due: ${new Date(n.taskDue).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`
+                ? ` (Due: ${new Date(n.taskDue).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })})`
                 : "";
 
             return (
               <div
                 key={n.id}
-                className={`notif-item ${n.read ? 'read' : 'unread'}`}
-                onClick={() => onMarkRead(n.id)}
+                className={`notif-item ${n.read ? "read" : "unread"}`}
+                onClick={() => handleNotificationClick(n)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') onMarkRead(n.id); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleNotificationClick(n);
+                }}
               >
                 <div className="notif-left">
                   <div className="notif-title" style={{ fontWeight: "bold" }}>
-                    {n.title}{dueDate}
+                    {n.title}
+                    {dueDate}
                   </div>
                   <div className="notif-meta">{n.message}</div>
                 </div>
                 <div className="notif-right">
-                  <div className="notif-time">{formatTimestamp(n.timestamp)}</div>
+                  <div className="notif-time">
+                    {formatTimestamp(n.timestamp)}
+                  </div>
                   {!n.read && <span className="unread-dot" />}
                 </div>
               </div>
