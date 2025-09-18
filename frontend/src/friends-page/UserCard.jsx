@@ -1,11 +1,18 @@
 import React from "react";
 
-export default function UserCard({ user, onAdd, onAccept, onDecline, onCancel }) {
-  const { id, name, avatar, isFriend, pendingIncoming, pendingOutgoing } = user;
+export default function UserCard({ user, onAdd, onAccept, onDecline, onCancel, onUnfriend }) {
+  const { id, name, avatar, isFriend, pendingIncoming, pendingOutgoing, email } = user;
 
   let action = null;
   if (isFriend) {
-    action = <span className="tag">Friends</span>;
+    action = (
+      <div className="actions">
+        <span className="tag">Friends</span>
+        {onUnfriend && (
+          <button onClick={() => onUnfriend(id)} className="danger secondary">Unfriend</button>
+        )}
+      </div>
+    );
   } else if (pendingIncoming) {
     action = (
       <div className="actions">
@@ -30,6 +37,7 @@ export default function UserCard({ user, onAdd, onAccept, onDecline, onCancel })
       </div>
       <div className="meta">
         <div className="name">{name}</div>
+        {email ? <div className="sub">{email}</div> : null}
       </div>
       <div className="cta">{action}</div>
     </div>
