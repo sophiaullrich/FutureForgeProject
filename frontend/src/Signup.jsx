@@ -41,7 +41,7 @@ function Signup() {
         darkMode: false,
         textSize: "normal",
         photoURL: defaultProfilePic,
-        displayName: `${firstName}`,
+        displayName: `${firstName} ${lastName}`,
       });
 
       navigate("/Login");
