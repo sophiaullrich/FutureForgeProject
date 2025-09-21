@@ -1,6 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import './RewardsPage.css';
-import { auth } from '../Firebase';
+import React, { useEffect, useState } from "react";
+import "./RewardsPage.css";
+import { auth, db } from "../Firebase";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot as onCollectionSnapshot,
+} from "firebase/firestore";
 
 const RewardsPage = () => {
   const [user, setUser] = useState(null);
@@ -16,46 +28,83 @@ const RewardsPage = () => {
       if (u) {
         setUser(u);
 
-        const res = await fetch(
-          `http://localhost:5000/api/rewards/${u.uid}?email=${encodeURIComponent(u.email)}`
-        );
-        const data = await res.json();
-        setPoints(data.points || 0);
-        setRedeemed(data.redeemed || []);
-        setBadges(data.badges || []);
+        const userRef = doc(db, "rewards", u.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email: u.email,
+            points: 0,
+            redeemed: [],
+            badges: [],
+          });
+        }
+
+        onSnapshot(userRef, (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            setPoints(data.points || 0);
+            setRedeemed(data.redeemed || []);
+            setBadges(data.badges || []);
+          }
+        });
       }
     });
+
     return () => unsubscribe();
   }, []);
 
-  // Load leaderboard
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      const res = await fetch(`http://localhost:5000/api/rewards/leaderboard/all`);
-      const data = await res.json();
-      setLeaderboard(data);
-    };
-    fetchLeaderboard();
-  }, [points]);
+    const leaderboardQuery = query(
+      collection(db, "rewards"),
+      orderBy("points", "desc"),
+      limit(10)
+    );
 
-  // Redeem reward
+    const unsubscribe = onCollectionSnapshot(leaderboardQuery, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        uid: doc.id,
+        ...doc.data(),
+      }));
+      setLeaderboard(data);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const redeemReward = async (amount) => {
     if (points < amount) return alert("Not enough points");
 
-    const res = await fetch(`http://localhost:5000/api/rewards/${user.uid}/redeem`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cost: amount }),
-    });
+    const userRef = doc(db, "rewards", user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) return;
 
-    const data = await res.json();
-    if (data.error) {
-      alert(data.error);
-    } else {
-      setPoints(data.points);
-      setRedeemed(data.redeemed);
-      setBadges(data.badges);
+    const userData = userSnap.data();
+    const newPoints = userData.points - amount;
+    const updatedRedeemed = [...(userData.redeemed || []), amount];
+    let newBadges = [...(userData.badges || [])];
+
+    // Award first redeem badge
+    if (updatedRedeemed.length === 1 && !newBadges.includes("first_redeem")) {
+      newBadges.push("first_redeem");
     }
+
+    // Award 100 points badge
+    if (newPoints >= 100 && !newBadges.includes("100_points")) {
+      newBadges.push("100_points");
+    }
+
+    // Award 500 redeemed badge
+    const totalRedeemed = updatedRedeemed.reduce((a, b) => a + b, 0);
+    if (totalRedeemed >= 500 && !newBadges.includes("500_redeemed")) {
+      newBadges.push("500_redeemed");
+    }
+
+    await updateDoc(userRef, {
+      points: newPoints,
+      redeemed: updatedRedeemed,
+      badges: newBadges,
+    });
   };
 
   return (
@@ -66,13 +115,16 @@ const RewardsPage = () => {
         <div className="badges">
           {badges.length > 0 ? (
             badges.map((badge, i) => (
-              <div key={i} className={`badge-placeholder badge-gradient-${(i % 6) + 1}`}>
+              <div
+                key={i}
+                className={`badge-placeholder badge-gradient-${(i % 6) + 1}`}
+              >
                 <p
                   style={{
-                    textAlign: 'center',
-                    paddingTop: '40px',
-                    fontWeight: 'bold',
-                    color: '#fff',
+                    textAlign: "center",
+                    paddingTop: "40px",
+                    fontWeight: "bold",
+                    color: "#fff",
                   }}
                 >
                   {badge}
@@ -91,11 +143,11 @@ const RewardsPage = () => {
           <section className="leaderboard-section">
             <h2>Leaderboard</h2>
             <ol className="leaderboard">
-              {leaderboard.map((lbUser, i) => (
-                <li key={lbUser.uid}>
+              {leaderboard.map((entry, i) => (
+                <li key={entry.uid}>
                   <span className="rank-number">{i + 1}</span>
-                  <span>{lbUser.email || lbUser.uid}</span>
-                  <span>{lbUser.points}</span>
+                  <span>{entry.email || entry.uid}</span>
+                  <span>{entry.points}</span>
                 </li>
               ))}
             </ol>
@@ -119,7 +171,7 @@ const RewardsPage = () => {
                 </div>
               ))}
             </div>
-            <p style={{ marginTop: '1rem' }}>Your Points: {points}</p>
+            <p style={{ marginTop: "1rem" }}>Your Points: {points}</p>
           </section>
         </div>
       </div>
