@@ -1,248 +1,172 @@
-* {
-    overflow-x: hidden;
-  }
- 
- 
- /* Body and layout */
- #body {
-    max-width: 1280px;
-    padding: 40px;
-    background: #f3e7d3;
-    font-family: "SF Pro Rounded", sans-serif;
-    color: #252b2f;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    min-height: 100vh;
- }
- 
- 
- h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
- }
- 
- 
- /* Account info container */
- #account-info {
-    width: 855px;
-    flex-shrink: 0;
-    border-radius: 5px;
-    border: 2px solid #6096BA;
-    background: #F5EBE0;
- }
- 
- 
- #account-info h2 {
-    font-size: 24px;
-    margin: 15px 0px 0px 25px
- }
- 
- 
- #account-info hr {
-    height: 1px;
-    background: #252b2f;
-    border: none;
-    width: 805px;
- }
- 
- 
- .info-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 40px;
-    flex-wrap: wrap;
- }
- 
- 
- /* Form inputs */
- #form-inputs {
-    flex: 1 1 60%;
-    display: flex;
+/* Body and layout */
+#body {
+  background: #f3e7d3;
+  font-family: "SF Pro Rounded", sans-serif;
+  color: #252b2f;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+/* Account info container */
+#account-info {
+  width: 855px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 2px solid #6096ba;
+  background: #f5ebe0;
+}
+
+#account-info h2 {
+  font-size: 24px;
+  margin: 15px 0px 0px 25px;
+}
+
+#account-info hr {
+  height: 1px;
+  background: #252b2f;
+  border: none;
+  width: 805px;
+}
+
+.info-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* Form inputs */
+#form-inputs {
+  flex: 1 1 60%;
+  display: flex;
+  flex-direction: column;
+}
+
+#form-inputs label {
+  font-size: 13px;
+  margin: 0px 25px;
+}
+
+#form-inputs input,
+.resetBtn,
+.emailDisplay,
+.displayName {
+  height: 25px;
+  border-radius: 5px;
+  border: 2px solid #6096ba;
+  background: #f3e7d3;
+  padding: 0 10px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  margin-left: 25px;
+}
+
+.desc-inline-icon {
+  display: inline-flex;
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #252b2f;
+}
+
+.displayName {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 25px;
+  padding-right: 10px;
+}
+.displayName:hover .desc-inline-icon {
+  opacity: 1;
+}
+
+/* Linked accounts section */
+#linked-accounts {
+  flex: 1 1 35%;
+}
+
+#linked-accounts h3 {
+  position: relative;
+  width: 140px;
+  color: #252b2f;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  left: 60px;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#linked-accounts img {
+  width: 30px;
+  height: 30px;
+}
+
+/* Button styles */
+.connected-btn {
+  background-color: #51905a;
+  color: #f3e7d3;
+  padding: 6px 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  border: 3px solid #f3e7d3;
+  width: 150px;
+  height: 35px;
+  text-align: center;
+  margin: 10px !important;
+  transition: all 0.25s ease;
+}
+
+.connected-btn:hover {
+  background-color: #42794a;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.connect-btn {
+  background: transparent;
+  color: #51905a;
+  padding: 6px 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  border: 3px solid #51905a;
+  width: 147px;
+  height: 32px;
+  text-align: center;
+  margin: 10px !important;
+  transition: all 0.25s ease;
+}
+
+.connect-btn:hover {
+  cursor: pointer;
+  background-color: #51905a;
+  color: #f3e7d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .info-container {
     flex-direction: column;
- }
- 
- 
- #form-inputs label {
-    font-size: 13px;
-    margin: 0px 25px;
- }
- 
- 
- #form-inputs input {
-    height: 25px;
-    border-radius: 5px;
-    border: 2px solid #6096ba;
-    background: #f3e7d3;
-    padding: 0 10px;
-    font-size: 14px;
-    margin-bottom: 15px;
-    margin-left: 25px;
- }
- 
- 
- /* Linked accounts section */
- #linked-accounts {
-    flex: 1 1 35%;
- }
- 
- 
- #linked-accounts h3 {
-    position: relative;
-    width: 140px;
-    color: #252B2F;
-    font-family: "SF Pro Rounded";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-align: center;
-    left: 60px;
- }
- 
- 
- .account-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
- }
- 
- 
- #linked-accounts img {
-    width: 30px;
-    height: 30px;
- }
- 
- 
- /* Button styles */
- .connected-btn {
-    background-color: #51905a;
-    color: #f3e7d3;
-    padding: 6px 16px;
-    border-radius: 10px;
-    font-size: 16px;
-    border: 3px solid #f3e7d3;
-    width: 150px;
-    height: 35px;
-    text-align: center;
-    margin: 10px !important;
- }
- 
- 
- .connect-btn {
-    background: transparent;
-    color: #51905a;
-    padding: 6px 16px;
-    border-radius: 10px;
-    font-size: 16px;
-    border: 3px solid #51905a;
-    width: 147px;
-    height: 32px;
-    text-align: center;
-    margin: 10px !important;
- }
- 
- 
- /* Responsive design */
- @media (max-width: 768px) {
-    .info-container {
-        flex-direction: column;
-    }
- 
- 
-    #form-inputs,
-    #linked-accounts {
-        width: 100%;
-    }
- }
- 
- 
- #accessibility-settings {
-    width: 855px;
-    flex-shrink: 0;
-    border-radius: 5px;
-    border: 2px solid #6096BA;
-    background: #F5EBE0;
-    margin-top: 32px;
   }
-   #accessibility-settings h2 {
-    font-size: 24px;
-    margin: 5px 10px 0px 10px;
-    font-family: "SF Pro Rounded", sans-serif;
+
+  #form-inputs,
+  #linked-accounts {
+    width: 100%;
   }
-   #accessibility-settings hr {
-    height: 1px;
-    background: #252b2f;
-    border: none;
-    width: 805px;
-  }
-   .accessibility-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-  }
-   .accessibility-option h4 {
-    font-size: 18px;
-    margin: 0;
-    font-weight: 500;
-    margin-left: 10px;
-  }
-   .accessibility-option p {
-    font-size: 14px;
-    color: #5e5e5e;
-    margin: 1px 0 0;
-    max-width: 400px;
-    margin-left: 9px;
-  }
-   /* Toggle switch styling */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 26px;
-    right: 44px;
-  }
-   .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-   .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #252b2f;
-    border-radius: 34px;
-    transition: 0.4s;
-  }
-   .slider::before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 4px;
-    bottom: 4px;
-    background-color: #f3e7d3;
-    border-radius: 50%;
-    transition: 0.4s;
-  }
- 
- 
-  .slider:after{
-    background-color: #51905A;
-  }
-   .switch input:checked + .slider::before {
-    transform: translateX(22px);
-   
-  }
- 
- 
-  .switch input:checked + .slider{
-    background-color: #51905A;
-  }
-  
- 
+}
