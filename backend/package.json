@@ -13,8 +13,9 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "firebase-admin": "^13.4.0",
+    "firebase-admin": "^13.5.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

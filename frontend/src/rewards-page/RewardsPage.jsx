@@ -1,64 +1,125 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './RewardsPage.css';
+import { auth } from '../Firebase';
 
 const RewardsPage = () => {
-  const badges = [1, 2, 3, 4, 5, 6];
-  const leaderboard = [
-    { name: 'Stephen. T', points: 147 },
-    { name: 'Joseph. E', points: 139 },
-    { name: 'Sophia. U', points: 128 },
-    { name: 'Marcos. F', points: 102 },
-    { name: 'William. C', points: 73 },
-    { name: 'Willie. D', points: 65 },
-    { name: 'Diya. T', points: 11, rank: 32 },
-  ];
+  const [user, setUser] = useState(null);
+  const [points, setPoints] = useState(0);
+  const [redeemed, setRedeemed] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
 
   const rewards = [5, 10, 20, 25, 30, 50, 100, 300, 500];
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (u) => {
+      if (u) {
+        setUser(u);
+
+        const res = await fetch(
+          `http://localhost:5000/api/rewards/${u.uid}?email=${encodeURIComponent(u.email)}`
+        );
+        const data = await res.json();
+        setPoints(data.points || 0);
+        setRedeemed(data.redeemed || []);
+        setBadges(data.badges || []);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Load leaderboard
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const res = await fetch(`http://localhost:5000/api/rewards/leaderboard/all`);
+      const data = await res.json();
+      setLeaderboard(data);
+    };
+    fetchLeaderboard();
+  }, [points]);
+
+  // Redeem reward
+  const redeemReward = async (amount) => {
+    if (points < amount) return alert("Not enough points");
+
+    const res = await fetch(`http://localhost:5000/api/rewards/${user.uid}/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cost: amount }),
+    });
+
+    const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+    } else {
+      setPoints(data.points);
+      setRedeemed(data.redeemed);
+      setBadges(data.badges);
+    }
+  };
+
   return (
     <div className="rewards-content">
+      {/* Badges Section */}
       <section className="badges-section">
         <h2>Your Badges</h2>
         <div className="badges">
-          {badges.map((b, index) => (
-            <div key={index} className={`badge-placeholder badge-gradient-${index + 1}`} />
-          ))}
+          {badges.length > 0 ? (
+            badges.map((badge, i) => (
+              <div key={i} className={`badge-placeholder badge-gradient-${(i % 6) + 1}`}>
+                <p
+                  style={{
+                    textAlign: 'center',
+                    paddingTop: '40px',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                  }}
+                >
+                  {badge}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p>No badges yet...</p>
+          )}
         </div>
       </section>
 
       <div className="sections-row">
+        {/* Leaderboard Section */}
         <div className="left-column">
           <section className="leaderboard-section">
             <h2>Leaderboard</h2>
             <ol className="leaderboard">
-              {leaderboard.slice(0, 6).map((user, index) => (
-                <li key={index}>
-                  <span className="rank-number">{index + 1}</span>
-                  <span>{user.name}</span>
-                  <span>{user.points}</span>
+              {leaderboard.map((lbUser, i) => (
+                <li key={lbUser.uid}>
+                  <span className="rank-number">{i + 1}</span>
+                  <span>{lbUser.email || lbUser.uid}</span>
+                  <span>{lbUser.points}</span>
                 </li>
               ))}
-              <li className="leaderboard-last">
-                <span className="rank-number">{leaderboard[6].rank}</span>
-                <span>{leaderboard[6].name}</span>
-                <span>{leaderboard[6].points}</span>
-              </li>
             </ol>
           </section>
         </div>
 
+        {/* Rewards Section */}
         <div className="right-column">
           <section className="rewards-grid">
             <h2>Redeem Your Rewards</h2>
             <p>Click to Redeem Reward</p>
             <div className="rewards-list">
-              {rewards.map((points, index) => (
-                <div key={index} className="reward-item">
+              {rewards.map((amount, i) => (
+                <div
+                  key={i}
+                  className="reward-item"
+                  onClick={() => redeemReward(amount)}
+                >
                   <div className="reward-circle" />
-                  <div className="reward-label">{points} Points</div>
+                  <div className="reward-label">{amount} Points</div>
                 </div>
               ))}
             </div>
+            <p style={{ marginTop: '1rem' }}>Your Points: {points}</p>
           </section>
         </div>
       </div>

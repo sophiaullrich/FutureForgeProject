@@ -4,6 +4,7 @@ const taskRoutes = require("./tasks/tasks.routes");
 //const teamRoutes = require('./teams/teams.routes'); 
 const notificationRoutes = require('./notifications/notification.routes');
 const profileRoutes = require('./profile-page/profile.routes');
+const dashboardRoutes = require('./dashboard/dashboard.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -33,6 +34,8 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
+=======
+app.use('/dashboard', dashboardRoutes);
 
 // start ONCE
 const server = app.listen(PORT, () => {

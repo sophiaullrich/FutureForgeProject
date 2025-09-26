@@ -1,0 +1,153 @@
+/* FriendsPage.css */
+
+.friends-page {
+  background: #efe4cf; /* same warm beige as Teams */
+  min-height: 100vh;
+  padding: 28px 24px 40px;
+  font-family: 'Helvetica Neue', sans-serif;
+  color: #22336A;
+}
+
+.friends-header {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.subhead {
+  margin-top: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2b2d63;
+}
+
+/* Search bar */
+.friends-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.friends-search input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid #2b2d63;
+  border-radius: 8px;
+  background: #fff;
+}
+.friends-search button {
+  background: #2b2d63;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.friends-search button:hover {
+  background: #3a4a9e;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+.tab {
+  padding: 8px 14px;
+  border: 2px solid #2b2d63;
+  border-radius: 20px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.tab.active {
+  background: #2b2d63;
+  color: #fff;
+}
+.badge {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #2b2d63;
+  color: #fff;
+}
+
+/* Cards */
+.list {
+  display: grid;
+  gap: 12px;
+}
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 2px solid #cfc8b6;
+  border-radius: 12px;
+  background: #fff;
+  transition: box-shadow 0.2s, transform 0.05s;
+}
+.user-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f2f2f2;
+  font-weight: 600;
+}
+.name {
+  font-weight: 600;
+  flex: 1;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.user-card button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #2b2d63;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.user-card button.secondary {
+  background: #efe9d9;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2b2d63;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+
+/* Demo buttons */
+.demo {
+  display: flex;
+  gap: 10px;
+}
+.demo button {
+  background: #22336A;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.demo button:hover {
+  background: #3a4a9e;
+}

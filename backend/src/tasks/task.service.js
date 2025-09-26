@@ -1,13 +1,11 @@
 const { db } = require('../firebase');
-const { v4: uuidv4 } = require('uuid');
 
-const TASK_COLLECTION = 'taskCollection';
+const TASK_COLLECTION = 'tasks'; // updated
 
 async function getAllTasks() {
   try {
     const snapshot = await db.collection(TASK_COLLECTION).get();
-    const tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return tasks;
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Error getting tasks:', error);
     throw error;
@@ -17,9 +15,9 @@ async function getAllTasks() {
 async function createTask(taskData) {
   try {
     const taskRef = db.collection(TASK_COLLECTION).doc();
-    await taskRef.set(taskData);
-    const createdTask = { id: taskRef.id, ...taskData };
-    return createdTask;
+    const assignedEmails = taskData.assignedUsers.map(u => u.email);
+    await taskRef.set({ ...taskData, assignedEmails });
+    return { id: taskRef.id, ...taskData };
   } catch (error) {
     console.error('Error creating task:', error);
     throw error;
@@ -48,9 +46,4 @@ async function deleteTask(taskId) {
   }
 }
 
-module.exports = {
-  getAllTasks,
-  createTask,
-  updateTask,
-  deleteTask,
-};
+module.exports = { getAllTasks, createTask, updateTask, deleteTask };

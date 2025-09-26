@@ -18,6 +18,7 @@ function Signup() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState("");
+  const defaultProfilePic = "/defaultImage.png"
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -40,6 +41,8 @@ function Signup() {
         createdAt: serverTimestamp(),
         darkMode: false,
         textSize: "normal",
+        photoURL: defaultProfilePic,
+        displayName: `${firstName} ${lastName}`,
       });
       navigate("/Login");
     } catch (err) {
@@ -131,7 +134,7 @@ function Signup() {
           <button type="submit" className={styles.signupBtn}>
             Sign Up
           </button>
-          {error && <p className="error">{error}</p>}
+          {error && <p className="error">{error}</p>}{" "}
         </form>
         <button onClick={() => navigate("/login")} className={styles.backBtn}>
           Back To Login
@@ -140,5 +143,4 @@ function Signup() {
     </div>
   );
 }
-
 export default Signup;

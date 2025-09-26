@@ -61,6 +61,7 @@ function Login() {
           <button
             type="submit"
             className={styles.loginBtn}
+            onClick={() => navigate("/dashboard")}
           >
             Sign In
           </button>
