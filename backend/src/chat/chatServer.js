@@ -15,21 +15,23 @@ admin.initializeApp({
 
 const db = admin.database();
 
-// Get all messages
-app.get("/api/chat/messages", async (req, res) => {
+// Get messages for a specific chat
+app.get("/api/chat/messages/:chatName", async (req, res) => {
   try {
-    const snapshot = await db.ref("messages").once("value");
+    const chatName = req.params.chatName;
+    const snapshot = await db.ref(`messages/${chatName}`).once("value");
     res.json(snapshot.val() || {});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Post a new message
-app.post("/api/chat/messages", async (req, res) => {
+// Post a new message to a specific chat
+app.post("/api/chat/messages/:chatName", async (req, res) => {
   try {
+    const chatName = req.params.chatName;
     const { text } = req.body;
-    const newMsgRef = db.ref("messages").push();
+    const newMsgRef = db.ref(`messages/${chatName}`).push();
     await newMsgRef.set({
       text,
       timestamp: Date.now(),
