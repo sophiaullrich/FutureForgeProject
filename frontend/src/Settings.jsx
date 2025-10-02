@@ -1,115 +1,259 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Settings.css";
 import googleicon from "./assets/Google Icon.png";
 import githubicon from "./assets/GitHub Icon.png";
 import linkedinicon from "./assets/LinkedIn Icon.png";
+import { auth, db } from "./Firebase";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  linkWithPopup,
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { IoPencilSharp } from "react-icons/io5";
 
+function Settings() {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
 
-const Settings = () => (
- <div id="body">
-   <h1>Settings</h1>
-   <div id="account-info">
-     <h2>Account Information</h2>
-     <hr />
-     <div className="info-container">
-       <div id="form-inputs">
-         <label>First Name</label>
-         <input placeholder="First Name" />
+  // Profile fields
+  const [displayName, setDisplayName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
 
+  // Originals for cancel
+  const [originalDisplayName, setOriginalDisplayName] = useState("");
+  const [originalFirstName, setOriginalFirstName] = useState("");
+  const [originalLastName, setOriginalLastName] = useState("");
 
-         <label>Last Name</label>
-         <input placeholder="Last Name" />
+  // Edit modes
+  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+  const [isEditingFirstName, setIsEditingFirstName] = useState(false);
+  const [isEditingLastName, setIsEditingLastName] = useState(false);
 
+  // Linked Accounts
+  const [linkedProviders, setLinkedProviders] = useState([]);
 
-         <label>Email</label>
-         <input placeholder="Email" />
+  // Fetch current user
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCurrentUser(user);
+        setEmail(user.email || "");
+        setLinkedProviders(user.providerData.map((p) => p.providerId));
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
+  // Fetch profile data from Firestore
+  useEffect(() => {
+    if (!currentUser) return;
+    const fetchProfile = async () => {
+      try {
+        const profileRef = doc(db, "profiles", currentUser.uid);
+        const docSnap = await getDoc(profileRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          console.log("Fetched profile data:", data);
+          setDisplayName(data.displayName || "");
+          setFirstName(data.firstName || "");
+          setLastName(data.lastName || "");
+          setOriginalDisplayName(data.displayName || "");
+          setOriginalFirstName(data.firstName || "");
+          setOriginalLastName(data.lastName || "");
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+    fetchProfile();
+  }, [currentUser]);
 
-         <label>Password</label>
-         <input placeholder="********" />
-       </div>
+  // Save profile to Firestore
+  const saveProfile = async () => {
+    if (!currentUser) return;
+    try {
+      const profileRef = doc(db, "profiles", currentUser.uid);
+      await updateDoc(profileRef, {
+        displayName,
+        firstName,
+        lastName,
+      });
+      setOriginalDisplayName(displayName);
+      setOriginalFirstName(firstName);
+      setOriginalLastName(lastName);
+      setIsEditingDisplayName(false);
+      setIsEditingFirstName(false);
+      setIsEditingLastName(false);
+      alert("Profile updated!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update profile.");
+    }
+  };
 
+  const cancelEdits = () => {
+    setDisplayName(originalDisplayName);
+    setFirstName(originalFirstName);
+    setLastName(originalLastName);
+    setIsEditingDisplayName(false);
+    setIsEditingFirstName(false);
+    setIsEditingLastName(false);
+  };
 
-       <div id="linked-accounts">
-         <h3>Linked Accounts</h3>
+  // Linking accounts
+  const linkGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await linkWithPopup(auth.currentUser, provider);
+      setLinkedProviders(
+        auth.currentUser.providerData.map((p) => p.providerId)
+      );
+      alert("Google account linked!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to link Google account.");
+    }
+  };
 
+  const isProviderLinked = (providerId) => linkedProviders.includes(providerId);
 
-         <div className="account-row connected">
-           <img src={googleicon} alt="Google Icon" />
-           <p className="connected-btn">Connected</p>
-         </div>
+  return (
+    <div id="body">
+      <h1>Settings</h1>
 
+      <div id="account-info">
+        <h2>Account Information</h2>
+        <hr />
+        <div className="info-container">
+          <div id="form-inputs">
+            {/* Display Name */}
+            <label>Display Name</label>
+            {isEditingDisplayName ? (
+              <div>
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
+                <div>
+                  <button onClick={saveProfile} className="save-btn">
+                    Save
+                  </button>
+                  <button onClick={cancelEdits} className="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="displayName">
+                {displayName || "Loading..."}
+                <IoPencilSharp
+                  className="desc-inline-icon"
+                  onClick={() => setIsEditingDisplayName(true)}
+                />
+              </p>
+            )}
 
-         <div className="account-row connected">
-           <img src={githubicon} alt="GitHub Icon" />
-           <p className="connected-btn">Connected</p>
-         </div>
+            {/* First Name */}
+            <label>First Name</label>
+            {isEditingFirstName ? (
+              <div>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                <div>
+                  <button onClick={saveProfile} className="save-btn">
+                    Save
+                  </button>
+                  <button onClick={cancelEdits} className="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="displayName">
+                {firstName || "Loading..."}
+                <IoPencilSharp
+                  className="desc-inline-icon"
+                  onClick={() => setIsEditingFirstName(true)}
+                />
+              </p>
+            )}
 
+            {/* Last Name */}
+            <label>Last Name</label>
+            {isEditingLastName ? (
+              <div>
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+                <div>
+                  <button onClick={saveProfile} className="save-btn">
+                    Save
+                  </button>
+                  <button onClick={cancelEdits} className="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="displayName">
+                {lastName || "Loading..."}
+                <IoPencilSharp
+                  className="desc-inline-icon"
+                  onClick={() => setIsEditingLastName(true)}
+                />
+              </p>
+            )}
 
-         <div className="account-row not-connected">
-           <img src={linkedinicon} alt="LinkedIn Icon" />
-           <p className="connect-btn">Connect...</p>
-         </div>
-       </div>
-     </div>
-   </div>
-   <div id="accessibility-settings">
-     <h2>Accessibility</h2>
-     <hr />
+            {/* Email */}
+            <label>Email</label>
+            <input value={email || "Loading..."} readOnly />
 
+            {/* Password Reset */}
+            <label>Password</label>
+            <button
+              className="resetBtn"
+              onClick={() => {
+                sendPasswordResetEmail(auth, currentUser.email);
+                alert("Password reset email sent.");
+                navigate("/login");
+              }}
+            >
+              Reset Password
+            </button>
+          </div>
 
-     <div className="accessibility-option">
-       <div>
-         <h4>Font Size</h4>
-         <p>Increase the text size for better readability.</p>
-       </div>
-       <label className="switch">
-         <input type="checkbox" />
-         <span className="slider"></span>
-       </label>
-     </div>
+          {/* Linked Accounts */}
+          <div id="linked-accounts">
+            <h3>Linked Accounts</h3>
 
-
-     <div className="accessibility-option">
-       <div>
-         <h4>High Contrast Mode</h4>
-         <p>Toggle to turn on high constrast.</p>
-       </div>
-       <label className="switch">
-         <input type="checkbox" />
-         <span className="slider"></span>
-       </label>
-     </div>
-
-
-     <div className="accessibility-option">
-       <div>
-         <h4>Enlarge Cursor</h4>
-         <p>Make the cursor larger for better visibility.</p>
-       </div>
-       <label className="switch">
-         <input type="checkbox" />
-         <span className="slider"></span>
-       </label>
-     </div>
-
-
-     <div className="accessibility-option">
-       <div>
-         <h4>Dark Mode</h4>
-         <p>Toggle to turn on Dark Mode.</p>
-       </div>
-       <label className="switch">
-         <input type="checkbox" />
-         <span className="slider"></span>
-       </label>
-     </div>
-   </div>
- </div>
-);
-
+            <div className="account-row">
+              <img src={googleicon} alt="Google Icon" />
+              <p
+                className={
+                  isProviderLinked("google.com")
+                    ? "connected-btn"
+                    : "connect-btn"
+                }
+                onClick={
+                  !isProviderLinked("google.com") ? linkGoogle : undefined
+                }
+              >
+                {isProviderLinked("google.com") ? "Connected" : "Connect…"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Settings;
-
-
-
