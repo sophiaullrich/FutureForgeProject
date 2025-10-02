@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateProfile } from "firebase/auth";
 import { auth } from "./Firebase";
+
 function Signup() {
   const db = getFirestore(firebaseApp);
   const [firstName, setFirstName] = useState("");
@@ -43,7 +44,6 @@ function Signup() {
         photoURL: defaultProfilePic,
         displayName: `${firstName} ${lastName}`,
       });
-
       navigate("/Login");
     } catch (err) {
       let message = err.message;
@@ -57,20 +57,18 @@ function Signup() {
       alert(message);
     }
   };
+
   return (
     <div className={styles.signupBody}>
       <div className={styles.titleCont}>
-        {" "}
         <img src={logo} alt="GoBear Logo" />
       </div>
       <div className={styles.formCont}>
-        {" "}
         <h1>Sign Up</h1>
         <form onSubmit={handleSignup}>
           <label htmlFor="fname" className={styles.formLabel}>
-            {" "}
             Firstname
-          </label>{" "}
+          </label>
           <input
             type="text"
             id="fname"
@@ -82,9 +80,8 @@ function Signup() {
             className={styles.formInput}
           />
           <label htmlFor="lname" className={styles.formLabel}>
-            {" "}
             Last Name
-          </label>{" "}
+          </label>
           <input
             type="text"
             id="lname"
@@ -96,9 +93,8 @@ function Signup() {
             className={styles.formInput}
           />
           <label htmlFor="email" className={styles.formLabel}>
-            {" "}
             Email
-          </label>{" "}
+          </label>
           <input
             type="email"
             id="email"
@@ -110,9 +106,8 @@ function Signup() {
             className={styles.formInput}
           />
           <label htmlFor="pword" className={styles.formLabel}>
-            {" "}
             Password
-          </label>{" "}
+          </label>
           <input
             type="password"
             id="pword"
@@ -124,9 +119,8 @@ function Signup() {
             className={styles.formInput}
           />
           <label htmlFor="pword2" className={styles.formLabel}>
-            {" "}
             Confirm Password
-          </label>{" "}
+          </label>
           <input
             type="password"
             id="pword2"
@@ -138,15 +132,13 @@ function Signup() {
             className={styles.formInput}
           />
           <button type="submit" className={styles.signupBtn}>
-            {" "}
             Sign Up
           </button>
           {error && <p className="error">{error}</p>}{" "}
         </form>
         <button onClick={() => navigate("/login")} className={styles.backBtn}>
-          {" "}
           Back To Login
-        </button>{" "}
+        </button>
       </div>
     </div>
   );

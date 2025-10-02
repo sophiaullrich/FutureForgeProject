@@ -3,19 +3,21 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import TasksPage from "./TasksPage.jsx";
 import Login from "./Login.jsx";
+import ChatsPage from './chat.jsx';
 import Signup from "./Signup.jsx";
 import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx";
 import NavigationBar from "./NavigationBar.jsx";
 import DashboardPage from "./dashboard/DashboardPage.jsx";
 import ProfilePage from "./ProfilePage.jsx";
-import MakeFriendsPage from "./friends-page/MakeFriendsPage.jsx";
 import RewardsPage from "./rewards-page/RewardsPage";
 import Settings from "./Settings.jsx";
 import JoinTeamPage from "./teams-page/JoinTeamPage";
 import NotificationPanel from "./notifications/NotificationPanel";
 import LandingPage from "./LandingPage.jsx";
-
+import FriendRequestsPage from "./friends-page/FriendRequestsPage.jsx";
+import PendingRequestsPage from "./friends-page/PendingRequestsPage.jsx";
+import MakeFriendsPage from "./friends-page/MakeFriendsPage.jsx";
 import "./App.css";
 
 import {
@@ -158,12 +160,15 @@ function App() {
             {/* If users try "/", keep them on Dashboard inside the main app */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
+            <Route path="/chat" element={<ChatsPage />} />     
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
             <Route path="/profilepage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/join/:teamId" element={<JoinTeamPage />} />
             <Route path="/friends" element={<MakeFriendsPage />} />
+            <Route path="/friends/requests" element={<FriendRequestsPage />} />
+            <Route path="/friends/pending" element={<PendingRequestsPage />} />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </div>

@@ -1,27 +1,49 @@
-// Firebase-powered FriendsService (Firestore).
-// Requires: db, auth from your Firebase config.
+// frontend/src/friends-page/FriendsService.firebase.js
 import { auth, db } from "../Firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import {
-  addDoc, collection, deleteDoc, doc, getDoc, getDocs,
-  onSnapshot, orderBy, query, serverTimestamp, updateDoc, where,
-  writeBatch, limit
+  addDoc, collection, doc, getDoc, getDocs, orderBy, query,
+  serverTimestamp, updateDoc, where, writeBatch, limit
 } from "firebase/firestore";
 
-function meId() {
-  const uid = auth.currentUser?.uid;
-  if (!uid) throw new Error("Not signed in");
-  return uid;
+/** Wait until Firebase Auth delivers a user (or timeout). */
+async function waitForUser(timeoutMs = 8000) {
+  // fast path
+  if (auth.currentUser) return auth.currentUser;
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      off();
+      resolve(null); // resolve null on timeout; caller will throw a friendly error
+    }, timeoutMs);
+
+    const off = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        clearTimeout(timer);
+        off();
+        resolve(u);
+      }
+      // if u is null, keep waiting — auth may not be hydrated yet
+    });
+  });
 }
 
-// ---- helpers ----
+async function meId() {
+  const u = await waitForUser();
+  if (!u?.uid) throw new Error("Not signed in");
+  return u.uid;
+}
+
 async function getProfile(uid) {
   const snap = await getDoc(doc(db, "profiles", uid));
   if (!snap.exists()) return { id: uid, displayName: "Unknown", email: "" };
   return { id: uid, ...snap.data() };
 }
+
 function toUserCard(p) {
   return { id: p.id, name: p.displayName || p.name || "Unknown", email: p.email || "" };
 }
+
 function prefixRange(val) {
   const q = (val || "").trim().toLowerCase();
   if (!q) return null;
@@ -29,9 +51,8 @@ function prefixRange(val) {
 }
 
 const FriendsService = {
-  // --- SEARCH real users by name/email (prefix) ---
   async search(queryStr) {
-    const my = meId();
+    const my = await meId();
     const rng = prefixRange(queryStr);
     let nameMatches = [], emailMatches = [];
 
@@ -52,31 +73,23 @@ const FriendsService = {
       nameMatches = s1.docs.map(d => ({ id: d.id, ...d.data() }));
       emailMatches = s2.docs.map(d => ({ id: d.id, ...d.data() }));
     } else {
-      // empty query -> show a few suggestions (excluding self)
       const qAny = query(collection(db, "profiles"), orderBy("displayName"), limit(10));
       const s = await getDocs(qAny);
       nameMatches = s.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
-    // merge & unique, drop self
     const map = new Map();
-    [...nameMatches, ...emailMatches].forEach(p => {
-      if (p.id !== my) map.set(p.id, p);
-    });
+    [...nameMatches, ...emailMatches].forEach(p => { if (p.id !== my) map.set(p.id, p); });
     const candidates = [...map.values()];
 
-    // annotate friend / pending states
-    // outgoing pending
     const outQ = query(collection(db, "friendRequests"),
       where("fromId", "==", my), where("status", "==", "pending"));
     const inQ = query(collection(db, "friendRequests"),
       where("toId", "==", my), where("status", "==", "pending"));
     const [outS, inS] = await Promise.all([getDocs(outQ), getDocs(inQ)]);
-
     const outSet = new Set(outS.docs.map(d => d.data().toId));
     const inSet  = new Set(inS.docs.map(d => d.data().fromId));
 
-    // friends subcollection
     const friendsSnap = await getDocs(collection(db, "users", my, "friends"));
     const friendSet = new Set(friendsSnap.docs.map(d => d.id));
 
@@ -88,27 +101,23 @@ const FriendsService = {
     }));
   },
 
-  // --- LISTS ---
   async listFriends() {
-    const my = meId();
+    const my = await meId();
     const s = await getDocs(collection(db, "users", my, "friends"));
     const ids = s.docs.map(d => d.id);
     if (ids.length === 0) return [];
-    // Firestore 'in' supports up to 10 IDs; chunk if needed
-    const chunks = [];
-    for (let i = 0; i < ids.length; i += 10) chunks.push(ids.slice(i, i + 10));
     const results = [];
-    for (const chunk of chunks) {
+    for (let i = 0; i < ids.length; i += 10) {
+      const chunk = ids.slice(i, i + 10);
       const qx = query(collection(db, "profiles"), where("__name__", "in", chunk));
       const sx = await getDocs(qx);
       sx.forEach(d => results.push(toUserCard({ id: d.id, ...d.data() })));
     }
-    // keep original order not guaranteed — fine for now
     return results;
   },
 
   async listIncoming() {
-    const my = meId();
+    const my = await meId();
     const qx = query(
       collection(db, "friendRequests"),
       where("toId", "==", my),
@@ -116,17 +125,16 @@ const FriendsService = {
       orderBy("createdAt", "desc")
     );
     const s = await getDocs(qx);
-    const rows = await Promise.all(
+    return Promise.all(
       s.docs.map(async d => {
         const from = await getProfile(d.data().fromId);
         return { id: d.id, from: toUserCard(from) };
       })
     );
-    return rows;
   },
 
   async listOutgoing() {
-    const my = meId();
+    const my = await meId();
     const qx = query(
       collection(db, "friendRequests"),
       where("fromId", "==", my),
@@ -134,30 +142,26 @@ const FriendsService = {
       orderBy("createdAt", "desc")
     );
     const s = await getDocs(qx);
-    const rows = await Promise.all(
+    return Promise.all(
       s.docs.map(async d => {
         const to = await getProfile(d.data().toId);
         return { id: d.id, to: toUserCard(to) };
       })
     );
-    return rows;
   },
 
-  // --- COMMANDS ---
   async sendRequest(toUserId) {
-    const my = meId();
+    const my = await meId();
     if (my === toUserId) throw new Error("Can't friend yourself");
 
-    // already friends?
     const friendDoc = await getDoc(doc(db, "users", my, "friends", toUserId));
     if (friendDoc.exists()) throw new Error("Already friends");
 
-    // pending duplicate?
     const [outS, inS] = await Promise.all([
       getDocs(query(collection(db, "friendRequests"),
         where("fromId", "==", my), where("toId", "==", toUserId), where("status", "==", "pending"))),
       getDocs(query(collection(db, "friendRequests"),
-        where("fromId", "==", toUserId), where("toId", "==", my), where("status", "==", "pending"))),
+        where("fromId", "==", toUserId), where("toId", "==", my), where("status", "==", "pending")))
     ]);
     if (!outS.empty) throw new Error("Request already pending");
     if (!inS.empty) throw new Error("They already requested you");
@@ -172,7 +176,7 @@ const FriendsService = {
   },
 
   async accept(requestId) {
-    const my = meId();
+    const my = await meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
@@ -188,7 +192,7 @@ const FriendsService = {
   },
 
   async decline(requestId) {
-    const my = meId();
+    const my = await meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
@@ -199,7 +203,7 @@ const FriendsService = {
   },
 
   async cancel(requestId) {
-    const my = meId();
+    const my = await meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
@@ -210,7 +214,7 @@ const FriendsService = {
   },
 
   async unfriend(otherId) {
-    const my = meId();
+    const my = await meId();
     const batch = writeBatch(db);
     batch.delete(doc(db, "users", my, "friends", otherId));
     batch.delete(doc(db, "users", otherId, "friends", my));
