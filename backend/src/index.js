@@ -5,6 +5,7 @@ const taskRoutes = require("./tasks/tasks.routes");
 const notificationRoutes = require('./notifications/notification.routes');
 const profileRoutes = require('./profile-page/profile.routes');
 const dashboardRoutes = require('./dashboard/dashboard.routes');
+const rewardsRoutes = require('./rewards/rewardsRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -36,6 +37,7 @@ app.use((err, req, res, next) => {
 });
 =======
 app.use('/dashboard', dashboardRoutes);
+app.use('/api/rewards', rewardsRoutes);
 
 // start ONCE
 const server = app.listen(PORT, () => {
