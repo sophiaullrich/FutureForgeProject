@@ -1,0 +1,88 @@
+.task-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(50, 50, 50, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.task-popup-form {
+  background: #f3e7d3;
+  padding: 20px 40px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 700px;
+  max-width: 90%;
+  position: relative;
+}
+
+.task-popup-form h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.popup-fields-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.popup-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.popup-field label {
+  font-size: 14px;
+  color: #6096BA;
+  margin-bottom: 4px;
+}
+
+.popup-field input,
+.popup-field select,
+.popup-field textarea {
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.popup-field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.radio-field {
+  margin-top: 10px;
+}
+
+.popup-button-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.popup-submit-btn {
+  background: none;
+  color: #6096BA;
+  border: 2px solid #6096BA;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-submit-btn:hover {
+  background: #6096BA;
+  color: white;
+}

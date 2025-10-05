@@ -28,10 +28,7 @@ export default function DashboardPage() {
     const tasksRef = collection(db, "tasks");
     const q = query(
       tasksRef,
-      where("assignedUsers", "array-contains", {
-        email: currentUser.email,
-        displayName: currentUser.displayName || currentUser.email,
-      })
+      where("assignedEmails", "array-contains", currentUser.email.toLowerCase())
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -46,7 +43,6 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-main-content">
       <section className="top-section">
-        {/* Teams Section */}
         <div className="teams-section">
           <h3>Your Teams</h3>
           <div className="scrollable-content">
@@ -69,7 +65,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Tasks Section */}
         <div className="tasks-due-section">
           <h3>Tasks Due Soon</h3>
           <div className="scrollable-content">
@@ -85,10 +80,12 @@ export default function DashboardPage() {
                   : "—";
                 const day = dateObj ? dateObj.getDate() : "";
 
+                const taskTitle = task.type === "private" ? "Private Task" : task.team || "—";
+
                 return (
                   <div key={task.id} className="task-due-card">
                     <div className="task-info">
-                      <div className="task-team">{task.team}</div>
+                      <div className="task-team">{taskTitle}</div>
                       <div className="task-name">{task.name}</div>
                     </div>
                     <div className="task-date">
@@ -103,7 +100,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Progress Section */}
       <section className="progress-section">
         <h3 style={{ textAlign: "center" }}>Progress Overview</h3>
         {!currentUser ? (

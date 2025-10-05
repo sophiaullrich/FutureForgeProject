@@ -1,6 +1,6 @@
 const { db } = require('../firebase');
 
-const TASK_COLLECTION = 'tasks'; // updated
+const TASK_COLLECTION = 'tasks';
 
 async function getAllTasks() {
   try {
