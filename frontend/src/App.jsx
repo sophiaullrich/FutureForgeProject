@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
-import TasksPage from "./TasksPage.jsx";
+import TasksPage from "./tasks/TasksPage.jsx";
 import Login from "./Login.jsx";
 import ChatsPage from './chat.jsx';
 import Signup from "./Signup.jsx";
