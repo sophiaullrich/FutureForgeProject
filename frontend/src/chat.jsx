@@ -99,18 +99,20 @@ const MessageModal = React.memo(({
           })}
           <div ref={messagesEndRef} />
         </div>
-        <form onSubmit={sendMessage} className="messaging-form chat-input-bar">
-          <input
-            type="text"
-            placeholder="Message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            className="messaging-input chat-input"
-          />
-          <button type="submit" className="messaging-send-btn chat-send-btn" aria-label="Send">
-            <FiArrowUp size={22} />
-          </button>
-        </form>
+        <div className="chat-input-row">
+          <form id="chat-send-form" onSubmit={sendMessage} className="messaging-form chat-input-bar" autoComplete="off">
+            <input
+              type="text"
+              placeholder="Message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="messaging-input chat-input"
+            />
+            <button type="submit" className="chat-send-inside" aria-label="Send">
+              <FiArrowUp size={18} />
+            </button>
+          </form>
+         </div>
       </div>
     </div>
   );
