@@ -4,6 +4,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import "./chat.css";
 import FriendsService from "./friends-page/FriendsService";
 import { auth } from "./Firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const BACKEND_URL = "http://localhost:5001/api/chat/messages";
 const USER_SEARCH_URL = "http://localhost:5001/api/users/search";
@@ -132,6 +133,29 @@ const Chat = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [messagedUsers, setMessagedUsers] = useState([]);
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const key = `messagedUsers_${user.uid}`;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          try { setMessagedUsers(JSON.parse(raw)); } catch { setMessagedUsers([]); }
+        }
+      } else {
+        setMessagedUsers([]);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      localStorage.setItem(`messagedUsers_${user.uid}`, JSON.stringify(messagedUsers));
+    } catch {}
+  }, [messagedUsers]);
+
   const chatList = [
     { name: "Sophia", preview: "Hey what..." },
     { name: "Developer Forum", preview: "Yes" },
@@ -167,7 +191,7 @@ const Chat = () => {
       .then((res) => res.json())
       .then((data) => {
         let loadedMessages = data ? Object.values(data) : [];
-        // Only show messages between me and the selected user
+        // Only show messages between the two users
         loadedMessages = loadedMessages.filter(
           (msg) =>
             (msg.from === myId && msg.to === otherId) ||
