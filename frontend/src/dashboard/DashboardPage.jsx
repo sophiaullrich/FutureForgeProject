@@ -3,13 +3,24 @@ import "./DashboardPage.css";
 import { auth, db } from "../Firebase";
 import TeamDetailsModal from "../teams-page/TeamDetailsModal";
 import { observeMyTeams } from "../TeamsService";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 
 export default function DashboardPage() {
   const [teams, setTeams] = useState([]);
   const [tasksDue, setTasksDue] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [points, setPoints] = useState(0);
+  const [badges, setBadges] = useState([]);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => setCurrentUser(user));
@@ -32,13 +43,49 @@ export default function DashboardPage() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedTasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const fetchedTasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       fetchedTasks.sort((a, b) => new Date(a.due) - new Date(b.due));
       setTasksDue(fetchedTasks);
     });
 
     return () => unsubscribe();
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const rewardsRef = doc(db, "rewards", currentUser.uid);
+
+    const setup = async () => {
+      const snap = await getDoc(rewardsRef);
+      if (!snap.exists()) {
+        await setDoc(rewardsRef, {
+          email: currentUser.email,
+          points: 0,
+          redeemed: [],
+          badges: [],
+        });
+      }
+
+      onSnapshot(rewardsRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setPoints(data.points || 0);
+          setBadges(data.badges || []);
+        }
+      });
+    };
+
+    setup();
+  }, [currentUser]);
+
+  const pointsGoal = 500; 
+  const badgeGoal = 10; 
+  const pointsPct = Math.min((points / pointsGoal) * 100, 100);
+  const badgePct = Math.min((badges.length / badgeGoal) * 100, 100);
 
   return (
     <div className="dashboard-main-content">
@@ -79,8 +126,8 @@ export default function DashboardPage() {
                   ? dateObj.toLocaleString("en-US", { month: "short" }).toUpperCase()
                   : "—";
                 const day = dateObj ? dateObj.getDate() : "";
-
-                const taskTitle = task.type === "private" ? "Private Task" : task.team || "—";
+                const taskTitle =
+                  task.type === "private" ? "Private Task" : task.team || "—";
 
                 return (
                   <div key={task.id} className="task-due-card">
@@ -102,20 +149,28 @@ export default function DashboardPage() {
 
       <section className="progress-section">
         <h3 style={{ textAlign: "center" }}>Progress Overview</h3>
+
         {!currentUser ? (
           <p>Login to view progress</p>
         ) : (
           <>
             <div className="progress-bar">
-              <span className="label">POINTS</span>
+              <span className="label">POINTS: {points} / {pointsGoal}</span>
               <div className="bar-bg">
-                <div className="bar-fill" style={{ width: "0%" }}></div>
+                <div
+                  className="bar-fill"
+                  style={{ width: `${pointsPct}%`, backgroundColor: "#6aa6ff" }}
+                />
               </div>
             </div>
+
             <div className="progress-bar">
-              <span className="label">BADGE</span>
+              <span className="label">BADGES: {badges.length} / {badgeGoal}</span>
               <div className="bar-bg">
-                <div className="bar-fill" style={{ width: "0%" }}></div>
+                <div
+                  className="bar-fill"
+                  style={{ width: `${badgePct}%`, backgroundColor: "#f9a825" }}
+                />
               </div>
             </div>
           </>

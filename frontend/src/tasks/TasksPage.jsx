@@ -6,6 +6,13 @@ import { observeMyTeams } from "../TeamsService";
 import { listProfiles } from "../teams-page/ProfileService";
 import TaskModal from "./TaskModal";
 import TaskDetailModal from "./TaskDetailModal";
+import { db } from "../Firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 
 const API_URL = "http://localhost:5001/tasks";
 
@@ -74,33 +81,28 @@ export default function TasksPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    const fetchTasks = async () => {
-      try {
-        const token = await currentUser.getIdToken();
-        const res = await fetch(API_URL, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to fetch tasks");
-        const data = await res.json();
-        setTasks(data);
-      } catch (err) {
-        console.error("Error fetching tasks:", err);
-      }
-    };
-    fetchTasks();
-  }, [currentUser]);
+    const userEmail = currentUser.email.toLowerCase();
 
-  const filteredTasks =
-    activeTab === "myTasks"
-      ? tasks.filter((task) =>
-          task.assignedEmails?.includes(currentUser?.email?.toLowerCase())
-        )
-      : tasks.filter((task) => task.team === selectedTeam);
+    const q = query(collection(db, "tasks"), orderBy("timestamp", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const allTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      const visible = allTasks.filter(
+        (t) =>
+          t.assignedEmails?.includes(userEmail) ||
+          (t.type === "team" && teams.some((team) => team.name === t.team))
+      );
+
+      setTasks(visible);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser, teams]);
 
   const handleTaskToggle = async (taskId, currentDone) => {
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch(`${API_URL}/${taskId}`, {
+      await fetch(`${API_URL}/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -108,9 +110,6 @@ export default function TasksPage() {
         },
         body: JSON.stringify({ done: !currentDone }),
       });
-      if (!res.ok) throw new Error("Failed to update task");
-      const updated = await res.json();
-      setTasks(tasks.map((t) => (t.id === taskId ? updated : t)));
     } catch (err) {
       console.error("Error updating task:", err);
     }
@@ -118,9 +117,9 @@ export default function TasksPage() {
 
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
-
     const dueDateISO = taskData.due ? new Date(taskData.due).toISOString() : null;
-    if (!taskData.name || !dueDateISO) return alert("Task name and due date are required");
+    if (!taskData.name || !dueDateISO)
+      return alert("Task name and due date are required");
 
     const formattedDate = new Date(dueDateISO)
       .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
@@ -129,7 +128,7 @@ export default function TasksPage() {
     const payload = {
       name: taskData.name,
       due: formattedDate,
-      description: taskData.description ?? "", 
+      description: taskData.description ?? "",
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
       assignedUsers: [],
       type: taskData.type,
@@ -158,10 +157,9 @@ export default function TasksPage() {
       }
     }
 
-
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch(API_URL, {
+      await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,20 +167,6 @@ export default function TasksPage() {
         },
         body: JSON.stringify(payload),
       });
-
-      const raw = await res.clone().text();
-      console.log("📬 [FE] Raw API response:", raw);
-
-      if (!res.ok) {
-        let errObj = {};
-        try {
-          errObj = JSON.parse(raw);
-        } catch {}
-        throw new Error(errObj.error || `Failed to create task (status ${res.status})`);
-      }
-
-      const created = JSON.parse(raw);
-      setTasks([...tasks, created]);
       setShowTaskModal(false);
     } catch (error) {
       console.error("Error adding task:", error);
@@ -198,7 +182,7 @@ export default function TasksPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete task");
-      setTasks(tasks.filter((t) => t.id !== taskId));
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
     }
@@ -206,18 +190,18 @@ export default function TasksPage() {
 
   const formatDate = (date) => {
     if (!date) return "—";
-
-    let parsedDate;
-    if (typeof date === "object" && date.seconds) parsedDate = new Date(date.seconds * 1000);
-    else if (typeof date === "object" && typeof date.toDate === "function")
-      parsedDate = date.toDate();
-    else if (typeof date === "string" && !isNaN(Date.parse(date))) parsedDate = new Date(date);
-    else return date;
-
+    const parsedDate = new Date(date);
     return parsedDate
       .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
       .toUpperCase();
   };
+
+  const filteredTasks =
+    activeTab === "myTasks"
+      ? tasks.filter((task) =>
+          task.assignedEmails?.includes(currentUser?.email?.toLowerCase())
+        )
+      : tasks.filter((task) => task.team === selectedTeam);
 
   return (
     <div className="tasks-page">
@@ -250,9 +234,7 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div
-          className={`tasks-table ${activeTab === "teamTasks" ? "team-tasks" : "my-tasks"}`}
-        >
+        <div className={`tasks-table ${activeTab === "teamTasks" ? "team-tasks" : "my-tasks"}`}>
           <div className="table-header">
             <div className="header-cell">Done?</div>
             <div className="header-cell">Task Name</div>
@@ -263,12 +245,7 @@ export default function TasksPage() {
           </div>
 
           {filteredTasks.map((task) => (
-            <div
-              key={task.id}
-              className="table-row"
-              onClick={() => setDetailTask(task)}
-              style={{ cursor: "pointer" }}
-            >
+            <div key={task.id} className="table-row" onClick={() => setDetailTask(task)}>
               <div
                 className="table-cell checkbox-cell"
                 onClick={(e) => {

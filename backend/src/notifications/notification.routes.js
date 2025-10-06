@@ -4,7 +4,7 @@ const { authenticate } = require("../middleware/authenticate");
 
 const router = express.Router();
 
-router.use(authenticate); 
+router.use(authenticate);
 
 router.post("/", controller.create);
 router.get("/", controller.list);

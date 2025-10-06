@@ -2,118 +2,93 @@ const { db, admin } = require("../firebase");
 const notificationService = require("../notifications/notification.service");
 
 async function createTask(req, res) {
-  const { name, due, team, assignedUsers, type, description } = req.body;
+  const { name, due, description, team, assignedUsers, type } = req.body;
   const user = req.user;
 
-  console.log("Incoming task creation:", { name, due, team, type, description });
-
   if (!name || !due || !Array.isArray(assignedUsers) || assignedUsers.length === 0) {
-    console.warn("Validation failed: Missing or invalid fields");
     return res.status(400).json({ error: "Missing or invalid fields" });
   }
 
-  if (type === "team" && !team) {
-    console.warn("Validation failed: Missing team for team task");
-    return res.status(400).json({ error: "Missing team for team task" });
-  }
-
   try {
-    const assignedEmails = assignedUsers.map((u) => u.email?.toLowerCase());
-    const taskData = {
+    const assignedEmails = assignedUsers.map((u) => u.email.toLowerCase());
+    const newTaskRef = await db.collection("tasks").add({
       name,
       due,
       description: description || "",
-      team: type === "team" ? team : "",
+      team: team || "",
       assignedUsers,
       assignedEmails,
       done: false,
       userId: user.uid,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      type: type || "private",
-    };
+      type: type || (team ? "team" : "private"),
+    });
 
-    console.log("📦 Final task data to Firestore:", taskData);
-
-    const newTaskRef = await db.collection("tasks").add(taskData);
-    console.log("✅ Task created with ID:", newTaskRef.id);
-
-    for (const u of assignedUsers) {
-      console.log(`Notifying ${u.email}...`);
+    for (const assignee of assignedUsers) {
       await notificationService.createNotification(
-        u.email,
-        "New Task Assigned",
-        `You have been assigned a new task: "${name}"`
+        assignee.uid,
+        `New Task Assigned: ${name}`,
+        `You have been assigned a task${team ? ` in team "${team}"` : ""}.`,
+        {
+          taskId: newTaskRef.id,
+          taskDue: due,
+          taskName: name,
+          type: "task",
+        }
       );
+      console.log(`Notification sent to: ${assignee.email}`);
     }
 
-    const createdTask = { id: newTaskRef.id, ...taskData };
-    console.log("Returning created task:", createdTask);
-
-    return res.status(201).json(createdTask);
+    const createdDoc = await newTaskRef.get();
+    res.status(201).json({ id: newTaskRef.id, ...createdDoc.data() });
   } catch (err) {
     console.error("Error creating task:", err);
-    return res.status(500).json({ error: "Failed to create task" });
+    res.status(500).json({ error: "Failed to create task" });
   }
 }
 
 async function listTasks(req, res) {
+  const user = req.user;
   try {
-    const snapshot = await db.collection("tasks").get();
+    const snapshot = await db
+      .collection("tasks")
+      .where("assignedEmails", "array-contains", user.email.toLowerCase())
+      .orderBy("timestamp", "desc")
+      .get();
     const tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return res.json(tasks);
+    res.json(tasks);
   } catch (err) {
-    console.error("Error fetching tasks:", err);
-    return res.status(500).json({ error: "Failed to fetch tasks" });
+    res.status(500).json({ error: "Failed to list tasks" });
   }
 }
 
 async function updateTask(req, res) {
-  const taskId = req.params.taskId;
-  const updateData = req.body;
-
+  const { taskId } = req.params;
+  const updates = req.body;
   try {
     const taskRef = db.collection("tasks").doc(taskId);
-    const taskDoc = await taskRef.get();
-
-    if (!taskDoc.exists) return res.status(404).json({ error: "Task not found" });
-
-    const task = taskDoc.data();
-    const userEmail = req.user.email;
-
-    if (req.user.uid !== task.userId && !task.assignedEmails.includes(userEmail)) {
-      return res.status(403).json({ error: "Unauthorized" });
-    }
-
-    await taskRef.update(updateData);
+    await taskRef.update(updates);
     const updatedDoc = await taskRef.get();
-    return res.json({ id: updatedDoc.id, ...updatedDoc.data() });
-  } catch (err) {
-    console.error("Error updating task:", err);
-    return res.status(500).json({ error: "Failed to update task" });
+    res.json({ id: taskId, ...updatedDoc.data() });
+  } catch {
+    res.status(500).json({ error: "Failed to update task" });
   }
 }
 
 async function deleteTask(req, res) {
-  const taskId = req.params.taskId;
-
+  const { taskId } = req.params;
+  if (!taskId || typeof taskId !== "string" || taskId.trim() === "") {
+    return res.status(400).json({ error: "Invalid task ID" });
+  }
   try {
     const taskRef = db.collection("tasks").doc(taskId);
-    const taskDoc = await taskRef.get();
-
-    if (!taskDoc.exists) return res.status(404).json({ error: "Task not found" });
-
-    const task = taskDoc.data();
-    const userEmail = req.user.email;
-
-    if (req.user.uid !== task.userId && !task.assignedEmails.includes(userEmail)) {
-      return res.status(403).json({ error: "Unauthorized" });
-    }
-
+    const doc = await taskRef.get();
+    if (!doc.exists) return res.status(404).json({ error: "Task not found" });
     await taskRef.delete();
-    return res.json({ success: true });
-  } catch (err) {
-    console.error("Error deleting task:", err);
-    return res.status(500).json({ error: "Failed to delete task" });
+    console.log(`Deleted task ${taskId}`);
+    res.json({ success: true, message: "Task deleted successfully" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete task" });
   }
 }
 
