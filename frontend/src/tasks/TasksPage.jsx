@@ -2,20 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./TasksPage.css";
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
 import { getAuth } from "firebase/auth";
-import { db } from "../Firebase";
-import {
-  collection,
-  query,
-  onSnapshot,
-  addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import { observeMyTeams } from "../TeamsService";
 import { listProfiles } from "../teams-page/ProfileService";
 import TaskModal from "./TaskModal";
 import TaskDetailModal from "./TaskDetailModal";
+
+const API_URL = "http://localhost:5001/tasks";
 
 export default function TasksPage() {
   const [activeTab, setActiveTab] = useState("myTasks");
@@ -82,27 +74,43 @@ export default function TasksPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-
-    const tasksRef = collection(db, "tasks");
-
-    const unsubscribe = onSnapshot(tasksRef, (snapshot) => {
-      const fetchedTasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setTasks(fetchedTasks);
-    });
-
-    return () => unsubscribe();
+    const fetchTasks = async () => {
+      try {
+        const token = await currentUser.getIdToken();
+        const res = await fetch(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch tasks");
+        const data = await res.json();
+        setTasks(data);
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+      }
+    };
+    fetchTasks();
   }, [currentUser]);
 
   const filteredTasks =
     activeTab === "myTasks"
-      ? tasks.filter((task) => task.assignedEmails?.includes(currentUser?.email.toLowerCase()))
+      ? tasks.filter((task) =>
+          task.assignedEmails?.includes(currentUser?.email?.toLowerCase())
+        )
       : tasks.filter((task) => task.team === selectedTeam);
 
   const handleTaskToggle = async (taskId, currentDone) => {
     try {
-      const taskRef = doc(db, "tasks", taskId);
-      await updateDoc(taskRef, { done: !currentDone });
-      setTasks(tasks.map((t) => (t.id === taskId ? { ...t, done: !currentDone } : t)));
+      const token = await currentUser.getIdToken();
+      const res = await fetch(`${API_URL}/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ done: !currentDone }),
+      });
+      if (!res.ok) throw new Error("Failed to update task");
+      const updated = await res.json();
+      setTasks(tasks.map((t) => (t.id === taskId ? updated : t)));
     } catch (err) {
       console.error("Error updating task:", err);
     }
@@ -118,15 +126,13 @@ export default function TasksPage() {
       .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
       .toUpperCase();
 
-    let payload = {
+    const payload = {
       name: taskData.name,
       due: formattedDate,
-      description: taskData.description || "",
-      type: taskData.type,
+      description: taskData.description ?? "", 
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
-      userId: currentUser.uid,
-      done: false,
-      createdAt: new Date().toISOString(),
+      assignedUsers: [],
+      type: taskData.type,
     };
 
     if (taskData.type === "private") {
@@ -137,23 +143,46 @@ export default function TasksPage() {
           displayName: currentUser.displayName || currentUser.email,
         },
       ];
-      payload.assignedEmails = [currentUser.email.toLowerCase()];
     } else if (taskData.type === "team") {
       const selectedUser = teamMembers.find(
         (m) => m.email === taskData.assignedUsers?.[0]?.email
       );
-      payload.assignedUsers = [
-        {
-          uid: selectedUser?.uid || null,
-          email: selectedUser?.email?.toLowerCase() || "",
-          displayName: selectedUser?.displayName || selectedUser?.email || "",
-        },
-      ];
-      payload.assignedEmails = payload.assignedUsers.map((u) => u.email);
+      if (selectedUser) {
+        payload.assignedUsers = [
+          {
+            uid: selectedUser.uid,
+            email: selectedUser.email.toLowerCase(),
+            displayName: selectedUser.displayName || selectedUser.email,
+          },
+        ];
+      }
     }
 
+
     try {
-      await addDoc(collection(db, "tasks"), payload);
+      const token = await currentUser.getIdToken();
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const raw = await res.clone().text();
+      console.log("📬 [FE] Raw API response:", raw);
+
+      if (!res.ok) {
+        let errObj = {};
+        try {
+          errObj = JSON.parse(raw);
+        } catch {}
+        throw new Error(errObj.error || `Failed to create task (status ${res.status})`);
+      }
+
+      const created = JSON.parse(raw);
+      setTasks([...tasks, created]);
       setShowTaskModal(false);
     } catch (error) {
       console.error("Error adding task:", error);
@@ -163,7 +192,12 @@ export default function TasksPage() {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await deleteDoc(doc(db, "tasks", taskId));
+      const token = await currentUser.getIdToken();
+      const res = await fetch(`${API_URL}/${taskId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete task");
       setTasks(tasks.filter((t) => t.id !== taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
@@ -174,16 +208,11 @@ export default function TasksPage() {
     if (!date) return "—";
 
     let parsedDate;
-
-    if (typeof date === "object" && date.seconds) {
-      parsedDate = new Date(date.seconds * 1000);
-    } else if (typeof date === "object" && typeof date.toDate === "function") {
+    if (typeof date === "object" && date.seconds) parsedDate = new Date(date.seconds * 1000);
+    else if (typeof date === "object" && typeof date.toDate === "function")
       parsedDate = date.toDate();
-    } else if (typeof date === "string" && !isNaN(Date.parse(date))) {
-      parsedDate = new Date(date);
-    } else {
-      return date;
-    }
+    else if (typeof date === "string" && !isNaN(Date.parse(date))) parsedDate = new Date(date);
+    else return date;
 
     return parsedDate
       .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
@@ -269,7 +298,9 @@ export default function TasksPage() {
 
       <button
         className="add-task-btn"
-        onClick={() => (currentUser ? setShowTaskModal(true) : alert("Please login to add a task"))}
+        onClick={() =>
+          currentUser ? setShowTaskModal(true) : alert("Please login to add a task")
+        }
       >
         Add New Task
       </button>
@@ -289,4 +320,3 @@ export default function TasksPage() {
     </div>
   );
 }
- 
