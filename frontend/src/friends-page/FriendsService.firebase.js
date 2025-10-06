@@ -11,7 +11,7 @@ async function waitForUser(timeoutMs = 8000) {
   // fast path
   if (auth.currentUser) return auth.currentUser;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const timer = setTimeout(() => {
       off();
       resolve(null); // resolve null on timeout; caller will throw a friendly error
@@ -48,6 +48,19 @@ function prefixRange(val) {
   const q = (val || "").trim().toLowerCase();
   if (!q) return null;
   return { gte: q, lt: q + "\uf8ff" };
+}
+
+async function createNotification(userId, title, message, extra = {}) {
+  if (!userId) return;
+  const notifRef = await addDoc(collection(db, "notifications"), {
+    userId,
+    title,
+    message,
+    read: false,
+    timestamp: serverTimestamp(),
+    ...extra,
+  });
+  await updateDoc(notifRef, { notifId: notifRef.id });
 }
 
 const FriendsService = {
@@ -172,6 +185,15 @@ const FriendsService = {
       status: "pending",
       createdAt: serverTimestamp(),
     });
+
+    const fromProfile = await getProfile(my);
+    await createNotification(
+      toUserId,
+      "New Friend Request",
+      `${fromProfile.displayName || "Someone"} sent you a friend request.`,
+      { type: "friendRequest", fromId: my }
+    );
+
     return { ok: true };
   },
 
@@ -188,6 +210,15 @@ const FriendsService = {
     batch.set(doc(db, "users", my, "friends", fromId), { since: serverTimestamp() });
     batch.set(doc(db, "users", fromId, "friends", my), { since: serverTimestamp() });
     await batch.commit();
+
+    const myProfile = await getProfile(my);
+    await createNotification(
+      fromId,
+      "Friend Request Accepted",
+      `${myProfile.displayName || "User"} accepted your friend request.`,
+      { type: "friendAccepted", toId: my }
+    );
+
     return { ok: true };
   },
 
@@ -196,9 +227,18 @@ const FriendsService = {
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
-    const { toId, status } = snap.data();
+    const { fromId, toId, status } = snap.data();
     if (toId !== my || status !== "pending") throw new Error("Invalid request");
     await updateDoc(ref, { status: "declined" });
+
+    const myProfile = await getProfile(my);
+    await createNotification(
+      fromId,
+      "Friend Request Declined",
+      `${myProfile.displayName || "User"} declined your friend request.`,
+      { type: "friendDeclined", toId: my }
+    );
+
     return { ok: true };
   },
 
@@ -219,6 +259,15 @@ const FriendsService = {
     batch.delete(doc(db, "users", my, "friends", otherId));
     batch.delete(doc(db, "users", otherId, "friends", my));
     await batch.commit();
+
+    const myProfile = await getProfile(my);
+    await createNotification(
+      otherId,
+      "Friend Removed",
+      `${myProfile.displayName || "User"} removed you from their friends.`,
+      { type: "friendRemoved", fromId: my }
+    );
+
     return { ok: true };
   },
 };
