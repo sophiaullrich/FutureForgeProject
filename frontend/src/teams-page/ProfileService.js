@@ -31,6 +31,7 @@ export async function ensureProfile() {
     email: email || "",                           // keep original casing for display
     emailLower: (email || "").toLowerCase(),      // for ordering/search
     displayName: displayName || email || uid,     // never blank
+    nameLower: (displayName || email || uid).toLowerCase(),
     photoURL: photoURL || "",
     updatedAt: serverTimestamp(),
   };
@@ -150,6 +151,7 @@ export async function bulkUpsertProfiles(users = []) {
         email,
         emailLower: email.toLowerCase(),
         displayName: u.displayName || email || uid,
+        nameLower: (u.displayName || email || uid).toLowerCase(),
         photoURL: u.photoURL || "",
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(), // merge keeps existing createdAt if present
