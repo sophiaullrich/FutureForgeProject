@@ -33,25 +33,18 @@ body, html {
 }
 
 .sidebar-title {
-  background: #222;
   color: #fff;
-  font-size: 1.4rem;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 10px 32px;
+  font-size: 1.5rem;             /* Match button text size */
+  font-weight: bold;
   margin: 0;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  display: inline-block;
+  flex: 1;
+  text-align: left;
 }
 
 .sidebar-arrow {
+  font-size: 2rem;               /* Larger arrow */
+  margin-left: 0.7rem;
   color: #fff;
-  background: #222;
-  border-radius: 0 8px 8px 0;
-  font-size: 1.7rem;
-  margin-left: -12px;
-  padding: 6px 8px 6px 0;
 }
 
 .search-box.elevated {
@@ -422,4 +415,81 @@ body, html {
 .chat-list {
   overflow-y: auto;
   max-height: calc(95vh - 200px); 
+}
+
+.forums-button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  background: #0b93f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.forum-modal, .join-forum-modal {
+  max-width: 400px;
+  margin: 0 auto;
+  background: #f9ecd7;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.forum-list {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.forum-list-item {
+  width: 100%;
+  margin: 8px 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #d4c9b4;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.join-forum-btn {
+  margin-top: 1.5rem;
+  padding: 12px 32px;
+  background: #0b93f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* Center and enlarge the Find Forums button */
+.forum-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #232323;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem 2.5rem;
+  margin: 28px auto 24px auto;   /* Center horizontally with auto margins */
+  cursor: pointer;
+  width: 275px;                  /* Make it wider */
+  max-width: 90%;
+  min-width: 220px;
+  transition: background 0.2s;
+  font-size: 1.5rem;             /* Larger text */
+  box-shadow: none;
+}
+
+.forum-bar-btn:hover,
+.forum-bar-btn:focus {
+  background: #181717;
 }

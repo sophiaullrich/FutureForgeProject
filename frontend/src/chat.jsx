@@ -150,6 +150,8 @@ const Chat = () => {
 	const [userResults, setUserResults] = useState([]);
 	const [loadingUsers, setLoadingUsers] = useState(false);
 	const [messagedUsers, setMessagedUsers] = useState([]);
+	const [showForumModal, setShowForumModal] = useState(false);
+	const [selectedForum, setSelectedForum] = useState(null);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, (user) => {
@@ -280,70 +282,6 @@ const Chat = () => {
 			chat.preview.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
-	// Fetch messages from backend
-	useEffect(() => {
-		fetch(BACKEND_URL)
-			.then((res) => res.json())
-			.then(async (data) => {
-				const loadedMessages = data ? Object.values(data) : [];
-				setMessages(loadedMessages);
-
-				// If a user is logged in, derive contact IDs from messages
-				const uid = auth.currentUser?.uid;
-				if (!uid) return;
-
-				// gather contact IDs from loaded messages
-				const contactIds = new Set();
-				for (const m of loadedMessages) {
-					if (!m || (!m.from && !m.to)) continue;
-					if (m.from === uid && m.to && m.to !== uid) contactIds.add(m.to);
-					if (m.to === uid && m.from && m.from !== uid) contactIds.add(m.from);
-				}
-				if (contactIds.size === 0) return;
-
-				// determine which contacts are already saved (check localStorage first then state)
-				let existingIds = new Set();
-				try {
-					const raw = localStorage.getItem(`messagedUsers_${uid}`);
-					if (raw) {
-						const parsed = JSON.parse(raw);
-						for (const p of parsed || []) existingIds.add(p.id);
-					} else {
-						for (const u of (messagedUsers || [])) existingIds.add(u.id);
-					}
-				} catch {
-					for (const u of (messagedUsers || [])) existingIds.add(u.id);
-				}
-
-				const missing = [...contactIds].filter((id) => !existingIds.has(id));
-				if (missing.length === 0) return;
-
-				// fetch profiles for missing IDs and add them to messagedUsers
-				try {
-					const profiles = await Promise.all(
-						missing.map(async (id) => {
-							try {
-								const snap = await getDoc(doc(db, "profiles", id));
-								const p = snap.data() || {};
-								return normalizeUser({ id, name: p.displayName ? p.displayName.split(" ")[0] : (p.email ? p.email.split("@")[0] : id),
-									email: p.email || "" });
-							} catch {
-								return normalizeUser({ id, name: id, email: "" });
-							}
-						})
-					);
-					setMessagedUsers((prev = []) => {
-						const map = new Map(prev.map((u) => [u.id, u]));
-						for (const pr of profiles) if (pr && pr.id) map.set(pr.id, pr);
-						const next = [...map.values()];
-						persistMessagedUsers(next);
-						return next;
-					});
-				} catch {
-				}
-			});
-	}, []);
-
 	// Fetch messages for selected chat
 	useEffect(() => {
 		// Only fetch when a user chat with a real id is selected.
@@ -368,96 +306,78 @@ const Chat = () => {
 
 	// Fetch users from Firestore for searching user to message
 	useEffect(() => {
-		let ignore = false;
-		async function searchUsers(qstr) {
-			if (!qstr || qstr.trim() === "") return [];
-			const q = (qstr || "").trim().toLowerCase();
-			const gte = q;
-			const lt = q + "\uf8ff";
+	let ignore = false;
+	async function searchUsers(qstr) {
+		if (!qstr || qstr.trim() === "") return [];
+		const q = (qstr || "").trim().toLowerCase();
 
-			try {
-				// Try prefix queries on both emailLower and displayNameLower
-				const qEmail = query(
-					collection(db, "profiles"),
-					where("emailLower", ">=", gte),
-					where("emailLower", "<=", lt),
-					limit(50)
-				);
-				const qName = query(
-					collection(db, "profiles"),
-					where("displayNameLower", ">=", gte),
-					where("displayNameLower", "<=", lt),
-					limit(50)
-				);
-
-				const [sEmail, sName] = await Promise.all([
-					getDocs(qEmail).catch(() => ({ docs: [] })),
-					getDocs(qName).catch(() => ({ docs: [] }))
-				]);
-
-				const map = new Map();
-				for (const d of [...(sEmail.docs || []), ...(sName.docs || [])]) {
-					if (d.id === auth.currentUser?.uid) continue;
-					const p = d.data() || {};
-					map.set(d.id, {
-						id: d.id,
-						name: p.displayName ? p.displayName.split(" ")[0] : (p.email ? p.email.split("@")[0] : d.id),
-						email: p.email || ""
-					});
-				}
-
-				if (map.size > 0) {
-					return [...map.values()];
-				}
-
-				const snapAll = await getDocs(collection(db, "profiles"));
-				const results = [];
-				for (const d of snapAll.docs) {
-					if (d.id === auth.currentUser?.uid) continue;
-					const p = d.data() || {};
-					const nameLower = (p.displayName || "").toLowerCase();
-					const emailLower = (p.email || "").toLowerCase();
-					if (nameLower.includes(q) || emailLower.includes(q)) {
-						results.push({ id: d.id, name: p.displayName || p.email || d.id, email: p.email || "" });
-					}
-				}
-				return results;
-			} catch (err) {
-				return [];
+		try {
+		// Fetch all profiles (for small user bases)
+		const snapAll = await getDocs(collection(db, "profiles"));
+		const results = [];
+		for (const d of snapAll.docs) {
+			if (d.id === auth.currentUser?.uid) continue;
+			const p = d.data() || {};
+			const email = (p.email || "").toLowerCase();
+			const firstName = (p.firstName || "").toLowerCase();
+			const lastName = (p.lastName || "").toLowerCase();
+			if (
+			email.includes(q) ||
+			firstName.includes(q) ||
+			lastName.includes(q)
+			) {
+			results.push({
+				id: d.id,
+				name: p.firstName
+				? `${capitalize(p.firstName)}${p.lastName ? " " + capitalize(p.lastName) : ""}`
+				: p.email || d.id,
+				email: p.email || "",
+			});
 			}
 		}
+		return results;
+		} catch (err) {
+		return [];
+		}
+	}
 
-		let cancelled = false;
-		(async () => {
-			// If query is empty, fetch a suggestion page of profiles so the UI
-			// shows available users to message with.
-			if (searchQuery.trim() === "") {
-				setLoadingUsers(true);
-				try {
-					const snap = await getDocs(query(collection(db, "profiles"), orderBy("emailLower"), limit(100)));
-					const results = snap.docs
-						.filter(d => d.id !== auth.currentUser?.uid)
-						.map(d => ({ id: d.id, name: (d.data()?.displayName) || d.data()?.email || d.id, email: d.data()?.email || "" }));
-					if (!cancelled && !ignore) setUserResults(results);
-				} catch (err) {
-					console.warn("Failed to load profile suggestions:", err.message);
-					if (!cancelled && !ignore) setUserResults([]);
-				} finally {
-					if (!cancelled && !ignore) setLoadingUsers(false);
-				}
-				return;
-			}
+	let cancelled = false;
+	(async () => {
+		if (searchQuery.trim() === "") {
+		setLoadingUsers(true);
+		try {
+			const snap = await getDocs(query(collection(db, "profiles"), orderBy("email"), limit(100)));
+			const results = snap.docs
+			.filter(d => d.id !== auth.currentUser?.uid)
+			.map(d => {
+				const p = d.data() || {};
+				return {
+				id: d.id,
+				name: p.firstName
+					? `${capitalize(p.firstName)}${p.lastName ? " " + capitalize(p.lastName) : ""}`
+					: p.email || d.id,
+				email: p.email || "",
+				};
+			});
+			if (!cancelled && !ignore) setUserResults(results);
+		} catch (err) {
+			if (!cancelled && !ignore) setUserResults([]);
+		} finally {
+			if (!cancelled && !ignore) setLoadingUsers(false);
+		}
+		return;
+		}
 
-			setLoadingUsers(true);
-			try {
-				const res = await searchUsers(searchQuery);
-				if (!cancelled && !ignore) setUserResults(res);
-			} finally {
-				if (!cancelled && !ignore) setLoadingUsers(false);
-			}
-		})();
+		setLoadingUsers(true);
+		try {
+		const res = await searchUsers(searchQuery);
+		if (!cancelled && !ignore) setUserResults(res);
+		} finally {
+		if (!cancelled && !ignore) setLoadingUsers(false);
+		}
+	})();
 
-		return () => { cancelled = true; ignore = true; };
+	return () => { cancelled = true; ignore = true; };
 	}, [searchQuery]);
 
 	// Send message to backend for selected chat
@@ -507,20 +427,24 @@ const Chat = () => {
 		searchQuery.trim() === ""
 			? allChats
 			: userResults.map((user) => ({
-					name: user.name,
-					preview: user.email || "",
-					id: user.id,
-					isFriend: user.isFriend
-				}));
+        name: user.name,
+        preview: user.email || user.name || "",
+        id: user.id,
+      }));
 
 	return (
 		<div className="chat-app">
 			<div className="chat-sidebar">
 				<div className="sidebar-title-bar">
-					<h1 className="sidebar-title">Find Forums</h1>
-					<IoIosArrowForward className="sidebar-arrow" />
-				</div>
-				<div className="search-box elevated">
+					<button
+						className="sidebar-title-bar forum-bar-btn"
+						onClick={() => setShowForumModal(true)}
+					>
+						<h1 className="sidebar-title">Find Forums</h1>
+						<IoIosArrowForward className="sidebar-arrow" />
+					</button>
+					</div>
+					<div className="search-box elevated">
 					<FiSearch className="search-icon" />
 					<input
 						type="text"
@@ -566,8 +490,81 @@ const Chat = () => {
 				sendMessage={sendMessage}
 				setMessages={setMessages}
 			/>
+			{showForumModal && (
+  <div className="modal-overlay">
+    <div className="modal-content forum-modal" style={{ position: "relative" }}>
+      <button
+        className="modal-close"
+        style={{ position: "absolute", top: 18, right: 24 }}
+        onClick={() => setShowForumModal(false)}
+        aria-label="Close"
+      >
+        ×
+      </button>
+      <h2 className="forum-modal-title">Find Forums</h2>
+      <input
+        className="forum-search"
+        placeholder="Search forums and topics...."
+      />
+      <div className="forum-list">
+        {[
+          { id: "general", name: "General Discussion" },
+          { id: "development", name: "Development" },
+          { id: "jobs", name: "Developer Jobs" },
+          { id: "cv", name: "CV Help" },
+          { id: "conferences", name: "Conferences Auckland" },
+		  { id: "Job Opportunities", name: "Job Opportunities Overseas" },
+		  { id: "UI Design", name: "UI Design Help" },
+		  { id: "Web Dev", name: "Web Designer Jobs" },
+        ].map((forum) => (
+          <button
+            key={forum.id}
+            className="forum-list-item"
+            onClick={() => setSelectedForum(forum)}
+          >
+            {forum.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+{selectedForum && (
+  <div className="modal-overlay">
+    <div className="modal-content join-forum-modal">
+      <button className="modal-close" onClick={() => setSelectedForum(null)}>
+        ×
+      </button>
+      <h2>{selectedForum.name}</h2>
+      <p>
+        A forum for discussing {selectedForum.name.toLowerCase()}.<br />
+        Would you like to join?
+      </p>
+      <button
+        className="join-forum-btn"
+        onClick={() => {
+          // Add the forum to the user's chat list
+          addAndPersistUser({
+            id: selectedForum.id,
+            name: selectedForum.name,
+            email: "", // or a group email if you want
+          });
+          setSelectedForum(null);
+          setShowForumModal(false);
+        }}
+      >
+        Join Forum
+      </button>
+    </div>
+  </div>
+)}
 		</div>
 	);
 };
+
+function capitalize(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
 export default Chat;
