@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const formatTimestamp = (ts) => {
   if (!ts) return "";
-
   let date;
   if (ts.toDate) {
     date = ts.toDate();
@@ -14,9 +13,7 @@ const formatTimestamp = (ts) => {
   } else {
     date = new Date(ts);
   }
-
   if (isNaN(date.getTime())) return "";
-
   return date.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
@@ -33,6 +30,7 @@ export default function NotificationPanel({
   notifications = [],
   onMarkRead,
   onMarkAllRead,
+  onNotificationClick,
 }) {
   const panelRef = useRef();
   const navigate = useNavigate();
@@ -56,16 +54,22 @@ export default function NotificationPanel({
     return () => window.removeEventListener("mousedown", handleClick);
   }, [open, onClose]);
 
-  const handleNotificationClick = (n) => {
-    onMarkRead(n.id);
+  const handleClickNotification = (n) => {
+    if (onNotificationClick) {
+      onNotificationClick(n);
+    } else {
+      onMarkRead(n.id);
 
-    if (n.type === "task" && n.taskId) {
-      navigate(`/tasks?notifId=${n.notifId}&taskId=${n.taskId}`);
-    } else if (n.type === "team" && n.teamId) {
-      navigate(`/teams?notifId=${n.notifId}&teamId=${n.teamId}`);
-    } 
+      if (n.type === "task" && n.taskId) {
+        navigate(`/tasks?notifId=${n.notifId}&taskId=${n.taskId}`);
+      } else if (n.type === "team" && n.teamId) {
+        navigate(`/teams?notifId=${n.notifId}&teamId=${n.teamId}`);
+      } else {
+        navigate("/dashboard");
+      }
 
-    onClose();
+      onClose();
+    }
   };
 
   return (
@@ -116,11 +120,11 @@ export default function NotificationPanel({
               <div
                 key={n.id}
                 className={`notif-item ${n.read ? "read" : "unread"}`}
-                onClick={() => handleNotificationClick(n)}
+                onClick={() => handleClickNotification(n)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleNotificationClick(n);
+                  if (e.key === "Enter") handleClickNotification(n);
                 }}
               >
                 <div className="notif-left">

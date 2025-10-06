@@ -216,7 +216,7 @@ const FriendsService = {
       fromId,
       "Friend Request Accepted",
       `${myProfile.displayName || "User"} accepted your friend request.`,
-      { type: "friendAccepted", toId: my }
+      { type: "friendRequest", toId: my }
     );
 
     return { ok: true };
@@ -236,7 +236,7 @@ const FriendsService = {
       fromId,
       "Friend Request Declined",
       `${myProfile.displayName || "User"} declined your friend request.`,
-      { type: "friendDeclined", toId: my }
+      { type: "friendRequest", toId: my }
     );
 
     return { ok: true };
@@ -265,7 +265,7 @@ const FriendsService = {
       otherId,
       "Friend Removed",
       `${myProfile.displayName || "User"} removed you from their friends.`,
-      { type: "friendRemoved", fromId: my }
+      { type: "friendRequest", fromId: my }
     );
 
     return { ok: true };

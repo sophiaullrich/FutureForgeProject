@@ -56,7 +56,7 @@ function App() {
   useEffect(() => {
     const offAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      setAuthChecked(true); 
+      setAuthChecked(true);
       if (user) {
         try {
           await ensureProfile();
@@ -67,6 +67,7 @@ function App() {
     });
     return () => offAuth();
   }, []);
+
   useEffect(() => {
     if (!authChecked || !currentUser) return;
 
@@ -89,7 +90,7 @@ function App() {
     );
 
     return () => unsubscribeNotif();
-  }, [authChecked, currentUser]); 
+  }, [authChecked, currentUser]);
 
   if (!authChecked) {
     return (
@@ -126,6 +127,21 @@ function App() {
   const toggleNotif = () => setNotifOpen((s) => !s);
   const closeNotif = () => setNotifOpen(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const handleNotificationClick = (notification) => {
+    markRead(notification.id);
+
+    if (notification.type === "friendRequest") {
+      navigate("/friends");
+    } else if (notification.type === "teamInvite" || notification.type === "teamJoined") {
+      navigate("/teams");
+    } else if (notification.type === "task" && notification.taskId) {
+      navigate(`/tasks?notifId=${notification.notifId}&taskId=${notification.taskId}`);
+    } else {
+      navigate("/dashboard");
+    }
+
+    closeNotif();
+  };
 
   const SafeTeamsWrapper = () => {
     try {
@@ -199,6 +215,7 @@ function App() {
         notifications={notifications}
         onMarkRead={markRead}
         onMarkAllRead={markAllRead}
+        onNotificationClick={handleNotificationClick}
       />
 
       {/* Profile Icon */}
