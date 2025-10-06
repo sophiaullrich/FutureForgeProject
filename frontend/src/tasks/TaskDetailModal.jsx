@@ -16,7 +16,10 @@ export default function TaskDetailModal({ task, onClose }) {
           {task.due ? new Date(task.due).toLocaleDateString() : "No due date"}
         </p>
         <p>
-          <strong>Description:</strong> {task.description || "No description"}
+          <strong>Description:</strong>{" "}
+          {task.description && task.description.trim() !== ""
+            ? task.description
+            : "No description"}
         </p>
         <p>
           <strong>Team:</strong> {task.team || "Private Task"}
