@@ -69,7 +69,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
       return;
     }
 
-    // Ensure creator is always in the team
+    // Ensure owner of the group is always in the team
     const creatorUid = auth.currentUser?.uid;
     const uids = Array.from(selectedUids);
     if (creatorUid && !uids.includes(creatorUid)) uids.push(creatorUid);

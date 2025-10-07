@@ -20,7 +20,7 @@ import RewardsPage from "./rewards-page/RewardsPage.jsx";
 import MakeFriendsPage from "./friends-page/MakeFriendsPage.jsx";
 import FriendRequestsPage from "./friends-page/FriendRequestsPage.jsx";
 import PendingRequestsPage from "./friends-page/PendingRequestsPage.jsx";
-import Chat from "./chat.jsx"; // Add this import
+import ChatPage from "./chat/chat.jsx";
 
 import "./App.css";
 
@@ -48,7 +48,7 @@ function App() {
           <Route path="/friends" element={<MakeFriendsPage />} />
           <Route path="/friends/requests" element={<FriendRequestsPage />} />
           <Route path="/friends/pending" element={<PendingRequestsPage />} />
-          <Route path="/chat" element={<Chat />} /> {/* Add this line */}
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
 
         <Route path="*" element={<h2>404 - Page Not Found</h2>} />
