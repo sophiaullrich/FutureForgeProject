@@ -1,38 +1,28 @@
 import React, { useEffect, useState } from "react";
 import "./DashboardPage.css";
-import { auth, db } from "../Firebase";
+import { db } from "../Firebase";
 import TeamDetailsModal from "../teams-page/TeamDetailsModal";
 import { observeMyTeams } from "../TeamsService";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
+import { useOutletContext } from "react-router-dom";
 
 export default function DashboardPage() {
+  const { currentUser } = useOutletContext();
+
   const [teams, setTeams] = useState([]);
   const [tasksDue, setTasksDue] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState([]);
 
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => setCurrentUser(user));
-    return () => unsub();
-  }, []);
-
+  // Observe teams
   useEffect(() => {
     if (!currentUser) return;
     const unsubscribe = observeMyTeams(setTeams);
     return () => unsubscribe && unsubscribe();
   }, [currentUser]);
 
+  // Fetch tasks
   useEffect(() => {
     if (!currentUser) return;
 
@@ -54,6 +44,7 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [currentUser]);
 
+  // Fetch rewards
   useEffect(() => {
     if (!currentUser) return;
 
@@ -82,8 +73,8 @@ export default function DashboardPage() {
     setup();
   }, [currentUser]);
 
-  const pointsGoal = 500; 
-  const badgeGoal = 10; 
+  const pointsGoal = 500;
+  const badgeGoal = 10;
   const pointsPct = Math.min((points / pointsGoal) * 100, 100);
   const badgePct = Math.min((badges.length / badgeGoal) * 100, 100);
 

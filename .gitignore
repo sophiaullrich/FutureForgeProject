@@ -27,3 +27,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /backend/gobear-c15ba-firebase-adminsdk-fbsvc-0ebf01fe78.json
+/backend/node_modules

@@ -1,64 +1,43 @@
 import React, { useEffect, useState } from "react";
 import "./Settings.css";
 import googleicon from "./assets/Google Icon.png";
-import githubicon from "./assets/GitHub Icon.png";
-import linkedinicon from "./assets/LinkedIn Icon.png";
-import { auth, db } from "./Firebase";
+import { db, auth } from "./Firebase";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
-import {
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  linkWithPopup,
-} from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { sendPasswordResetEmail, GoogleAuthProvider, linkWithPopup } from "firebase/auth";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { IoPencilSharp } from "react-icons/io5";
 
 function Settings() {
+  const { currentUser } = useOutletContext();
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null);
 
-  // Profile fields
   const [displayName, setDisplayName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
-  // Originals for cancel
   const [originalDisplayName, setOriginalDisplayName] = useState("");
   const [originalFirstName, setOriginalFirstName] = useState("");
   const [originalLastName, setOriginalLastName] = useState("");
 
-  // Edit modes
   const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
   const [isEditingFirstName, setIsEditingFirstName] = useState(false);
   const [isEditingLastName, setIsEditingLastName] = useState(false);
 
-  // Linked Accounts
   const [linkedProviders, setLinkedProviders] = useState([]);
 
-  // Fetch current user
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setCurrentUser(user);
-        setEmail(user.email || "");
-        setLinkedProviders(user.providerData.map((p) => p.providerId));
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch profile data from Firestore
   useEffect(() => {
     if (!currentUser) return;
+
+    setEmail(currentUser.email || "");
+    setLinkedProviders(currentUser.providerData.map(p => p.providerId));
+
     const fetchProfile = async () => {
       try {
         const profileRef = doc(db, "profiles", currentUser.uid);
         const docSnap = await getDoc(profileRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          console.log("Fetched profile data:", data);
           setDisplayName(data.displayName || "");
           setFirstName(data.firstName || "");
           setLastName(data.lastName || "");
@@ -70,19 +49,15 @@ function Settings() {
         console.error("Error fetching profile:", err);
       }
     };
+
     fetchProfile();
   }, [currentUser]);
 
-  // Save profile to Firestore
   const saveProfile = async () => {
     if (!currentUser) return;
     try {
       const profileRef = doc(db, "profiles", currentUser.uid);
-      await updateDoc(profileRef, {
-        displayName,
-        firstName,
-        lastName,
-      });
+      await updateDoc(profileRef, { displayName, firstName, lastName });
       setOriginalDisplayName(displayName);
       setOriginalFirstName(firstName);
       setOriginalLastName(lastName);
@@ -105,14 +80,11 @@ function Settings() {
     setIsEditingLastName(false);
   };
 
-  // Linking accounts
   const linkGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await linkWithPopup(auth.currentUser, provider);
-      setLinkedProviders(
-        auth.currentUser.providerData.map((p) => p.providerId)
-      );
+      await linkWithPopup(currentUser, provider);
+      setLinkedProviders(currentUser.providerData.map(p => p.providerId));
       alert("Google account linked!");
     } catch (err) {
       console.error(err);
@@ -121,6 +93,8 @@ function Settings() {
   };
 
   const isProviderLinked = (providerId) => linkedProviders.includes(providerId);
+
+  if (!currentUser) return <div>Loading...</div>;
 
   return (
     <div id="body">
@@ -135,26 +109,16 @@ function Settings() {
             <label>Display Name</label>
             {isEditingDisplayName ? (
               <div>
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                />
+                <input value={displayName} onChange={e => setDisplayName(e.target.value)} />
                 <div>
-                  <button onClick={saveProfile} className="save-btn">
-                    Save
-                  </button>
-                  <button onClick={cancelEdits} className="cancel-btn">
-                    Cancel
-                  </button>
+                  <button onClick={saveProfile} className="save-btn">Save</button>
+                  <button onClick={cancelEdits} className="cancel-btn">Cancel</button>
                 </div>
               </div>
             ) : (
               <p className="displayName">
                 {displayName || "Loading..."}
-                <IoPencilSharp
-                  className="desc-inline-icon"
-                  onClick={() => setIsEditingDisplayName(true)}
-                />
+                <IoPencilSharp className="desc-inline-icon" onClick={() => setIsEditingDisplayName(true)} />
               </p>
             )}
 
@@ -162,26 +126,16 @@ function Settings() {
             <label>First Name</label>
             {isEditingFirstName ? (
               <div>
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
+                <input value={firstName} onChange={e => setFirstName(e.target.value)} />
                 <div>
-                  <button onClick={saveProfile} className="save-btn">
-                    Save
-                  </button>
-                  <button onClick={cancelEdits} className="cancel-btn">
-                    Cancel
-                  </button>
+                  <button onClick={saveProfile} className="save-btn">Save</button>
+                  <button onClick={cancelEdits} className="cancel-btn">Cancel</button>
                 </div>
               </div>
             ) : (
               <p className="displayName">
                 {firstName || "Loading..."}
-                <IoPencilSharp
-                  className="desc-inline-icon"
-                  onClick={() => setIsEditingFirstName(true)}
-                />
+                <IoPencilSharp className="desc-inline-icon" onClick={() => setIsEditingFirstName(true)} />
               </p>
             )}
 
@@ -189,26 +143,16 @@ function Settings() {
             <label>Last Name</label>
             {isEditingLastName ? (
               <div>
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
+                <input value={lastName} onChange={e => setLastName(e.target.value)} />
                 <div>
-                  <button onClick={saveProfile} className="save-btn">
-                    Save
-                  </button>
-                  <button onClick={cancelEdits} className="cancel-btn">
-                    Cancel
-                  </button>
+                  <button onClick={saveProfile} className="save-btn">Save</button>
+                  <button onClick={cancelEdits} className="cancel-btn">Cancel</button>
                 </div>
               </div>
             ) : (
               <p className="displayName">
                 {lastName || "Loading..."}
-                <IoPencilSharp
-                  className="desc-inline-icon"
-                  onClick={() => setIsEditingLastName(true)}
-                />
+                <IoPencilSharp className="desc-inline-icon" onClick={() => setIsEditingLastName(true)} />
               </p>
             )}
 
@@ -233,18 +177,11 @@ function Settings() {
           {/* Linked Accounts */}
           <div id="linked-accounts">
             <h3>Linked Accounts</h3>
-
             <div className="account-row">
               <img src={googleicon} alt="Google Icon" />
               <p
-                className={
-                  isProviderLinked("google.com")
-                    ? "connected-btn"
-                    : "connect-btn"
-                }
-                onClick={
-                  !isProviderLinked("google.com") ? linkGoogle : undefined
-                }
+                className={isProviderLinked("google.com") ? "connected-btn" : "connect-btn"}
+                onClick={!isProviderLinked("google.com") ? linkGoogle : undefined}
               >
                 {isProviderLinked("google.com") ? "Connected" : "Connect…"}
               </p>

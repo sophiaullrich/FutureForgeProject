@@ -6,12 +6,11 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  onSnapshot,
   collection,
   query,
   orderBy,
   limit,
-  onSnapshot as onCollectionSnapshot,
+  onSnapshot,
 } from "firebase/firestore";
 
 const RewardsPage = () => {
@@ -23,37 +22,40 @@ const RewardsPage = () => {
 
   const rewards = [5, 10, 20, 25, 30, 50, 100, 300, 500];
 
+  // User auth & profile subscription
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (u) => {
-      if (u) {
-        setUser(u);
+      if (!u) return;
 
-        const userRef = doc(db, "rewards", u.uid);
-        const userSnap = await getDoc(userRef);
+      setUser(u);
 
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            email: u.email,
-            points: 0,
-            redeemed: [],
-            badges: [],
-          });
-        }
+      const userRef = doc(db, "rewards", u.uid);
+      const userSnap = await getDoc(userRef);
 
-        onSnapshot(userRef, (snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            setPoints(data.points || 0);
-            setRedeemed(data.redeemed || []);
-            setBadges(data.badges || []);
-          }
+      // Initialize if not exists
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          email: u.email,
+          points: 0,
+          redeemed: [],
+          badges: [],
         });
       }
+
+      // Listen for real-time updates
+      onSnapshot(userRef, (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        setPoints(data.points || 0);
+        setRedeemed(data.redeemed || []);
+        setBadges(data.badges || []);
+      });
     });
 
     return () => unsubscribe();
   }, []);
 
+  // Leaderboard subscription
   useEffect(() => {
     const leaderboardQuery = query(
       collection(db, "rewards"),
@@ -61,40 +63,35 @@ const RewardsPage = () => {
       limit(10)
     );
 
-    const unsubscribe = onCollectionSnapshot(leaderboardQuery, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        uid: doc.id,
-        ...doc.data(),
-      }));
+    const unsubscribe = onSnapshot(leaderboardQuery, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
       setLeaderboard(data);
     });
 
     return () => unsubscribe();
   }, []);
 
+  // Redeem reward
   const redeemReward = async (amount) => {
+    if (!user) return;
     if (points < amount) return alert("Not enough points");
 
     const userRef = doc(db, "rewards", user.uid);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) return;
 
-    const userData = userSnap.data();
-    const newPoints = userData.points - amount;
-    const updatedRedeemed = [...(userData.redeemed || []), amount];
-    let newBadges = [...(userData.badges || [])];
+    const data = userSnap.data();
+    const newPoints = data.points - amount;
+    const updatedRedeemed = [...(data.redeemed || []), amount];
+    const newBadges = [...(data.badges || [])];
 
-    // Award first redeem badge
+    // Badges logic
     if (updatedRedeemed.length === 1 && !newBadges.includes("first_redeem")) {
       newBadges.push("first_redeem");
     }
-
-    // Award 100 points badge
     if (newPoints >= 100 && !newBadges.includes("100_points")) {
       newBadges.push("100_points");
     }
-
-    // Award 500 redeemed badge
     const totalRedeemed = updatedRedeemed.reduce((a, b) => a + b, 0);
     if (totalRedeemed >= 500 && !newBadges.includes("500_redeemed")) {
       newBadges.push("500_redeemed");
@@ -113,7 +110,7 @@ const RewardsPage = () => {
       <section className="badges-section">
         <h2>Your Badges</h2>
         <div className="badges">
-          {badges.length > 0 ? (
+          {badges.length ? (
             badges.map((badge, i) => (
               <div
                 key={i}
