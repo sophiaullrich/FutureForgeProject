@@ -1,6 +1,7 @@
 // modal for creating a new team
 import React, { useEffect, useMemo, useState } from "react";
-import { listProfiles } from "./ProfileService"; // make sure filename matches
+import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
+import { collection, doc, setDoc } from "firebase/firestore";
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   // form fields
@@ -83,7 +84,6 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     }
   };
 
-  // render modal ui
   return (
     <div className="modal-backdrop">
       <div className="create-modal">
