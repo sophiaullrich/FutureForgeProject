@@ -117,6 +117,7 @@ export async function bulkUpsertProfiles(users = []) {
         uid,
         email,
         displayName: u.displayName || email || uid,
+        nameLower: (u.displayName || email || uid).toLowerCase(),
         photoURL: u.photoURL || "",
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),

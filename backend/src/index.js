@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const taskRoutes = require("./tasks/tasks.routes");
-//const teamRoutes = require('./teams/teams.routes'); 
 const notificationRoutes = require('./notifications/notification.routes');
 const profileRoutes = require('./profile-page/profile.routes');
 const dashboardRoutes = require('./dashboard/dashboard.routes');
 const rewardsRoutes = require('./rewards/rewardsRoutes');
+const chatRoutes = require('./chat/chatServer'); 
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -29,6 +29,11 @@ app.use(express.json());
 app.use('/tasks', taskRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/chat', chatRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Backend server is running on port 3000.');
+});
 
 // error middleware
 app.use((err, req, res, next) => {
