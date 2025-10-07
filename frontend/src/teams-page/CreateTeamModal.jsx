@@ -1,6 +1,7 @@
 // frontend/src/teams-page/CreateTeamModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
+import { collection, doc, setDoc } from "firebase/firestore";
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   const [teamName, setTeamName] = useState("");
@@ -77,7 +78,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
       setSubmitError(e?.message || "Failed to create team.");
     }
   };
-
+  
   return (
     <div className="modal-backdrop">
       <div className="create-modal">

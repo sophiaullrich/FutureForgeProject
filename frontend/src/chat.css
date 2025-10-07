@@ -10,14 +10,14 @@ body, html {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background: #f9ecd7;
+  background: #F3E7D3;
   padding-top: 40px;
 }
 
 .chat-sidebar {
   width: 420px;
   max-width: 95vw;
-  background: #f9ecd7;
+  background: #F3E7D3;
   border-radius: 0;
   box-shadow: none;
   padding: 0;

@@ -3,11 +3,22 @@ import { FiSearch, FiArrowUp } from "react-icons/fi";
 import { IoIosArrowForward } from "react-icons/io";
 import "./chat.css";
 import { db, auth } from "./Firebase";
-import { collection, getDocs, limit, orderBy, query, where, doc, getDoc } from "firebase/firestore";
+import {
+  collection as fsCollection,
+  query as fsQuery,
+  orderBy as fsOrderBy,
+  onSnapshot,
+  getDocs,
+  limit,
+  where,
+  doc,
+  getDoc,
+  addDoc
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-const BACKEND_URL = "http://localhost:5000/api/chat/messages";
-const USER_SEARCH_URL = "http://localhost:5000/api/chat/messagedUsers";
+const BACKEND_URL = "http://localhost:5001/api/chat/messages";
+const USER_SEARCH_URL = "http://localhost:5001/api/chat/messagedUsers";
 
 const avatarColors = [
   "linear-gradient(135deg, #4e54c8, #8f94fb)",
@@ -38,36 +49,30 @@ const MessageModal = React.memo(({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [localMessages]);
 
+  // Firestore real-time listener for live updates
   useEffect(() => {
-    let cancelled = false;
-    // Only fetch when modal is open and we have a valid chat id and user.
     if (!open || !chat?.id || !auth.currentUser) return;
-    (async () => {
-      try {
-        const myId = auth.currentUser.uid;
-        const otherId = chat.id;
-        const chatKey = getChatKey(myId, otherId);
-        const res = await fetch(`${BACKEND_URL}/${encodeURIComponent(chatKey)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (cancelled) return;
-        const loadedMessages = data ? Object.values(data) : [];
-        setLocalMessages(loadedMessages);
-        setMessages?.(loadedMessages);
-      } catch (err) {
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [open, chat?.id, setMessages]);
+    const myId = auth.currentUser.uid;
+    const otherId = chat.id;
+    const chatKey = getChatKey(myId, otherId);
 
-  // keep localMessages in sync with external messages prop 
-  useEffect(() => {
-    if (!open) return;
-    // Only sync into localMessages if parent provided non-empty messages.
-    if (messages && messages.length > 0) {
-      setLocalMessages(messages);
-    }
-  }, [messages, open]);
+    const q = fsQuery(
+      fsCollection(db, "messages", chatKey, "items"),
+      fsOrderBy("timestamp")
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      let loadedMessages = snap.docs.map(doc => doc.data());
+      loadedMessages = loadedMessages.filter(
+        (msg) =>
+          (msg.from === myId && msg.to === otherId) ||
+          (msg.from === otherId && msg.to === myId)
+      );
+      setLocalMessages(loadedMessages);
+      setMessages?.(loadedMessages);
+    });
+
+    return () => unsub();
+  }, [open, chat?.id, setMessages]);
 
   if (!open) return null;
 
@@ -152,6 +157,7 @@ const Chat = () => {
 	const [messagedUsers, setMessagedUsers] = useState([]);
 	const [showForumModal, setShowForumModal] = useState(false);
 	const [selectedForum, setSelectedForum] = useState(null);
+	const [groupChats, setGroupChats] = useState([]);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, (user) => {
@@ -235,7 +241,6 @@ const Chat = () => {
 		setMessagedUsers((prev = []) => {
 			if (prev.find((x) => x.id === norm.id)) return prev;
 			const next = [...prev, norm];
-			// Save to backend
 			const uid = auth.currentUser?.uid;
 			if (uid) {
 				fetch(`${BACKEND_URL.replace("/messages", "")}/messagedUsers/${uid}`, {
@@ -282,26 +287,29 @@ const Chat = () => {
 			chat.preview.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
-	// Fetch messages for selected chat
 	useEffect(() => {
-		// Only fetch when a user chat with a real id is selected.
-		if (!selectedChat?.id || !auth.currentUser) return;
-		const myId = auth.currentUser.uid;
-		const otherId = selectedChat.id;
-		const chatKey = getChatKey(myId, otherId);
+	// Only listen when a user chat with a real id is selected.
+	if (!selectedChat?.id || !auth.currentUser) return;
+	const myId = auth.currentUser.uid;
+	const otherId = selectedChat.id;
+	const chatKey = getChatKey(myId, otherId);
 
-		fetch(`${BACKEND_URL}/${encodeURIComponent(chatKey)}`)
-			.then((res) => res.json())
-			.then((data) => {
-				let loadedMessages = data ? Object.values(data) : [];
-				// Only show messages between the two users
-				loadedMessages = loadedMessages.filter(
-					(msg) =>
-						(msg.from === myId && msg.to === otherId) ||
-						(msg.from === otherId && msg.to === myId)
-				);
-				setMessages(loadedMessages);
-			});
+	const q = fsQuery(
+		fsCollection(db, "messages", chatKey, "items"),
+		fsOrderBy("timestamp")
+	);
+	const unsub = onSnapshot(q, (snap) => {
+		let loadedMessages = snap.docs.map(doc => doc.data());
+		// Only show messages between the two users
+		loadedMessages = loadedMessages.filter(
+			(msg) =>
+				(msg.from === myId && msg.to === otherId) ||
+				(msg.from === otherId && msg.to === myId)
+		);
+		setMessages(loadedMessages);
+	});
+
+	return () => unsub();
 	}, [selectedChat]);
 
 	// Fetch users from Firestore for searching user to message
@@ -313,7 +321,7 @@ const Chat = () => {
 
 		try {
 		// Fetch all profiles (for small user bases)
-		const snapAll = await getDocs(collection(db, "profiles"));
+		const snapAll = await getDocs(fsCollection(db, "profiles"));
 		const results = [];
 		for (const d of snapAll.docs) {
 			if (d.id === auth.currentUser?.uid) continue;
@@ -346,7 +354,7 @@ const Chat = () => {
 		if (searchQuery.trim() === "") {
 		setLoadingUsers(true);
 		try {
-			const snap = await getDocs(query(collection(db, "profiles"), orderBy("email"), limit(100)));
+			const snap = await getDocs(fsQuery(fsCollection(db, "profiles"), fsOrderBy("email"), limit(100)));
 			const results = snap.docs
 			.filter(d => d.id !== auth.currentUser?.uid)
 			.map(d => {
@@ -387,35 +395,22 @@ const Chat = () => {
 		const myId = auth.currentUser.uid;
 		const otherId = selectedChat.id;
 		const chatKey = getChatKey(myId, otherId);
+		const messageData = {
+			text: newMessage,
+			from: myId,
+			to: otherId,
+			timestamp: Date.now(),
+		};
 
-		await fetch(`${BACKEND_URL}/${chatKey}`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ text: newMessage, from: myId, to: otherId }),
-		});
-		setNewMessage("");
+		const msgRef = fsCollection(db, "messages", chatKey, "items");
+		await addDoc(msgRef, messageData);
 
 		addAndPersistUser(selectedChat);
-
-		// Refetch messages after sending
-		fetch(`${BACKEND_URL}/${chatKey}`)
-			.then(async (res) => {
-				if (!res.ok) {
-					const text = await res.text();
-					throw new Error(`Server error: ${res.status} - ${text}`);
-				}
-				return res.json();
-			})
-			.then((data) => {
-				const loadedMessages = data ? Object.values(data) : [];
-				setMessages(loadedMessages);
-			})
-			.catch((err) => {
-				console.error("Failed to fetch messages:", err.message);
-			});
+		setNewMessage("");
 	}, [newMessage, selectedChat]);
 
 	const allChats = [
+		...groupChats, 
 		...chatList,
 		...messagedUsers.filter(
 			(u) => !chatList.some((c) => c.id === u.id || c.name === u.name)
@@ -543,11 +538,10 @@ const Chat = () => {
       <button
         className="join-forum-btn"
         onClick={() => {
-          // Add the forum to the user's chat list
           addAndPersistUser({
             id: selectedForum.id,
             name: selectedForum.name,
-            email: "", // or a group email if you want
+            email: "",
           });
           setSelectedForum(null);
           setShowForumModal(false);
