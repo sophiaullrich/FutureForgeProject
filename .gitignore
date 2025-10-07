@@ -1,4 +1,29 @@
-backend/.env
-backend/gobear-c15ba-firebase-adminsdk-fbsvc-0ebf01fe78.json
-/backend/node_modules
-backend/src/chat/messagedUsers.json
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.package-lock.json
+.package.json
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+npm-debug.log*
+/backend/package-lock.json
+/backend/package.json
+yarn-debug.log*
+yarn-error.log*
+/backend/gobear-c15ba-firebase-adminsdk-fbsvc-0ebf01fe78.json

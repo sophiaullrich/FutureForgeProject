@@ -1,4 +1,4 @@
-const { db, admin } = require('./firebase');
+const { db, admin } = require('../firebase');
 
 exports.getUserRewards = async (req, res) => {
   const uid = req.params.uid;

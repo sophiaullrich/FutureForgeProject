@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
-import TasksPage from "./TasksPage.jsx";
+import TasksPage from "./tasks/TasksPage.jsx";
 import Login from "./Login.jsx";
-import ChatsPage from './chat.jsx';
+import ChatsPage from "./chat.jsx";
 import Signup from "./Signup.jsx";
 import Resetpass from "./Resetpass.jsx";
 import TeamsPage from "./teams-page/TeamsPage.jsx";
@@ -27,7 +27,7 @@ import {
 } from "react-icons/io5";
 
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "./Firebase"; // Firestore
+import { auth, db } from "./Firebase";
 import { ensureProfile } from "./teams-page/ProfileService.js";
 import {
   collection,
@@ -44,54 +44,61 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const profilePrevPath = useRef(null);
 
-  // Routes where global UI (nav, icons) should be hidden
   const hideUIRoutes = ["/", "/login", "/signup", "/resetpass"];
-  const shouldHideUI = hideUIRoutes.includes(
-    location.pathname.toLowerCase()
-  );
+  const shouldHideUI = hideUIRoutes.includes(location.pathname.toLowerCase());
 
   useEffect(() => {
-    let unsubscribeNotif = null;
-
     const offAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-
+      setAuthChecked(true);
       if (user) {
         try {
           await ensureProfile();
-
-          const notifQuery = query(
-            collection(db, "notifications"),
-            where("userId", "==", user.uid),
-            orderBy("timestamp", "desc")
-          );
-
-          unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
-            const newNotifs = snapshot.docs.map((d) => ({
-              id: d.id,
-              ...d.data(),
-            }));
-            setNotifications(newNotifs);
-          });
         } catch (err) {
-          console.error("Error ensuring profile or fetching notifications:", err);
+          console.error("Error ensuring profile:", err);
         }
-      } else {
-        setNotifications([]);
-        if (unsubscribeNotif) unsubscribeNotif();
       }
     });
-
-    return () => {
-      offAuth();
-      if (unsubscribeNotif) unsubscribeNotif();
-    };
+    return () => offAuth();
   }, []);
+
+  useEffect(() => {
+    if (!authChecked || !currentUser) return;
+
+    const notifQuery = query(
+      collection(db, "notifications"),
+      where("userId", "==", currentUser.uid),
+      orderBy("timestamp", "desc")
+    );
+
+    const unsubscribeNotif = onSnapshot(
+      notifQuery,
+      (snapshot) => {
+        const newNotifs = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+        setNotifications(newNotifs);
+      },
+      (err) => console.error("Error in notifications listener:", err)
+    );
+
+    return () => unsubscribeNotif();
+  }, [authChecked, currentUser]);
+
+  if (!authChecked) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "#22336A" }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   const markRead = async (id) => {
     if (!currentUser) return;
@@ -108,7 +115,9 @@ function App() {
     try {
       const unread = notifications.filter((n) => !n.read);
       await Promise.all(
-        unread.map((n) => updateDoc(doc(db, "notifications", n.id), { read: true }))
+        unread.map((n) =>
+          updateDoc(doc(db, "notifications", n.id), { read: true })
+        )
       );
     } catch (err) {
       console.error(err);
@@ -118,8 +127,22 @@ function App() {
   const toggleNotif = () => setNotifOpen((s) => !s);
   const closeNotif = () => setNotifOpen(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const handleNotificationClick = (notification) => {
+    markRead(notification.id);
 
-  // Wrapper to avoid whole-app crash if TeamsPage throws
+    if (notification.type === "friendRequest") {
+      navigate("/friends");
+    } else if (notification.type === "teamInvite" || notification.type === "teamJoined") {
+      navigate("/teams");
+    } else if (notification.type === "task" && notification.taskId) {
+      navigate(`/tasks?notifId=${notification.notifId}&taskId=${notification.taskId}`);
+    } else {
+      navigate("/dashboard");
+    }
+
+    closeNotif();
+  };
+
   const SafeTeamsWrapper = () => {
     try {
       return <TeamsPage />;
@@ -134,7 +157,6 @@ function App() {
     }
   };
 
-  // --------- HIDDEN-UI ROUTES (Landing + Auth) ----------
   if (shouldHideUI) {
     return (
       <div>
@@ -149,7 +171,6 @@ function App() {
     );
   }
 
-  // --------- MAIN APP (with Navigation + Icons) ----------
   return (
     <div className="app-container">
       <NavigationBar />
@@ -157,10 +178,9 @@ function App() {
       <div className="main-content-area">
         <div className="page-content-wrapper">
           <Routes>
-            {/* If users try "/", keep them on Dashboard inside the main app */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/rewards" element={<RewardsPage />} />
-            <Route path="/chat" element={<ChatsPage />} />     
+            <Route path="/chat" element={<ChatsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/teams" element={<SafeTeamsWrapper />} />
             <Route path="/profilepage" element={<ProfilePage />} />
@@ -195,6 +215,7 @@ function App() {
         notifications={notifications}
         onMarkRead={markRead}
         onMarkAllRead={markAllRead}
+        onNotificationClick={handleNotificationClick}
       />
 
       {/* Profile Icon */}

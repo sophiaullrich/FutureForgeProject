@@ -5,6 +5,7 @@ import {
   doc,
   setDoc,
   serverTimestamp,
+  collection,
 } from "firebase/firestore";
 
 export default function InviteMembersModal({ onClose, teams = [] }) {
@@ -63,10 +64,14 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
     });
 
     if (mode === "internal" && selectedUser?.id) {
-      await setDoc(doc(db, "notifications", selectedUser.id), {
+      const notifRef = doc(collection(db, "notifications"));
+      await setDoc(notifRef, {
+        userId: selectedUser.id,
         type: "invite",
+        title: "New Team Invite",
+        message: `You’ve been invited to join the team "${teams.find(t => t.id === selectedTeamId)?.name || "a team"}".`,
         teamId: selectedTeamId,
-        message: `You've been invited to join a team!`,
+        read: false,
         timestamp: serverTimestamp(),
       });
     } else {
@@ -93,7 +98,6 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
         <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
         <h2 className="invite-title">Invite Members</h2>
 
-        {/* Team Selector */}
         <label className="select-team-label">Select a Team:</label>
         <select
           className="select-team-dropdown"
@@ -107,7 +111,6 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
           ))}
         </select>
 
-        {/* Mode Toggle */}
         <div className="invite-mode-toggle">
           <button className={mode === "internal" ? "active" : ""} onClick={() => {
             setMode("internal");
@@ -124,7 +127,6 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
           </button>
         </div>
 
-        {/* Invite Form */}
         <div className="invite-form">
           {mode === "external" && (
             <>
@@ -175,7 +177,6 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
           </p>
         </div>
 
-        {/* List for internal users */}
         {mode === "internal" && (
           <>
             <h3 className="pending-title">Select a User to Invite</h3>
@@ -205,7 +206,6 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
           </>
         )}
 
-        {/* Invite sent overlay */}
         {showSentOverlay && (
           <div className="overlay-backdrop">
             <div className="overlay-card success">
