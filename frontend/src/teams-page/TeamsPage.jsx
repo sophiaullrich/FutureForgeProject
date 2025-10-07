@@ -19,6 +19,8 @@ import {
 } from "../TeamsService";
 import { auth } from "../Firebase";
 
+const CHAT_BACKEND_URL = "http://localhost:5001/api/chat";
+
 export default function TeamsPage() {
   // ui state
   const [modal, setModal] = useState(null); // create | invite | join | details | null
@@ -84,7 +86,11 @@ export default function TeamsPage() {
 
   // delete team
   const handleDeleteTeam = async (teamId) => {
-    await deleteTeam({ teamId });
+    await deleteTeam({ teamId }); // existing team deletion
+    // Delete group chat in backend
+    await fetch(`${CHAT_BACKEND_URL}/deleteTeamAndGroupChat/${teamId}`, {
+      method: "DELETE",
+    });
     setModal(null);
   };
 

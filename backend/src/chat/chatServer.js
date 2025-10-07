@@ -6,6 +6,7 @@ const serviceAccount = require("../../gobear-c15ba-firebase-adminsdk-fbsvc-0ebf0
 require("dotenv").config();
 const { getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { createTeamChatBox, deleteTeamAndGroupChat } = require("./teamChat");
 
 const router = express.Router();
 
@@ -98,6 +99,27 @@ router.post("/messagedUsers/:uid", async (req, res) => {
     res.json(arr);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// creates a team chat box
+router.post("/createTeamChatBox", async (req, res) => {
+  try {
+    const { teamId, teamName, memberUids } = req.body;
+    await createTeamChatBox(teamId, teamName, memberUids);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// deletes a team and its group chat
+router.delete("/deleteTeamAndGroupChat/:teamId", async (req, res) => {
+  try {
+    await deleteTeamAndGroupChat(req.params.teamId);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
   }
 });
 

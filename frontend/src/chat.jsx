@@ -53,26 +53,40 @@ const MessageModal = React.memo(({
   useEffect(() => {
     if (!open || !chat?.id || !auth.currentUser) return;
     const myId = auth.currentUser.uid;
-    const otherId = chat.id;
-    const chatKey = getChatKey(myId, otherId);
 
-    const q = fsQuery(
-      fsCollection(db, "messages", chatKey, "items"),
-      fsOrderBy("timestamp")
-    );
-    const unsub = onSnapshot(q, (snap) => {
-      let loadedMessages = snap.docs.map(doc => doc.data());
-      loadedMessages = loadedMessages.filter(
-        (msg) =>
-          (msg.from === myId && msg.to === otherId) ||
-          (msg.from === otherId && msg.to === myId)
+    let unsub;
+    if (chat.isGroup) {
+      // Listen to group chat messages
+      const q = fsQuery(
+        fsCollection(db, "groupMessages", chat.id, "items"),
+        fsOrderBy("timestamp")
       );
-      setLocalMessages(loadedMessages);
-      setMessages?.(loadedMessages);
-    });
+      unsub = onSnapshot(q, (snap) => {
+        const loadedMessages = snap.docs.map(doc => doc.data());
+        setLocalMessages(loadedMessages);
+        setMessages?.(loadedMessages);
+      });
+    } else {
+      const otherId = chat.id;
+      const chatKey = getChatKey(myId, otherId);
+      const q = fsQuery(
+        fsCollection(db, "messages", chatKey, "items"),
+        fsOrderBy("timestamp")
+      );
+      unsub = onSnapshot(q, (snap) => {
+        let loadedMessages = snap.docs.map(doc => doc.data());
+        loadedMessages = loadedMessages.filter(
+          (msg) =>
+            (msg.from === myId && msg.to === otherId) ||
+            (msg.from === otherId && msg.to === myId)
+        );
+        setLocalMessages(loadedMessages);
+        setMessages?.(loadedMessages);
+      });
+    }
 
-    return () => unsub();
-  }, [open, chat?.id, setMessages]);
+    return () => unsub && unsub();
+  }, [open, chat?.id, chat?.isGroup, setMessages]);
 
   if (!open) return null;
 
@@ -158,6 +172,26 @@ const Chat = () => {
 	const [showForumModal, setShowForumModal] = useState(false);
 	const [selectedForum, setSelectedForum] = useState(null);
 	const [groupChats, setGroupChats] = useState([]);
+
+	// Fetch group chats where current user is a member
+	useEffect(() => {
+		if (!auth.currentUser) return;
+		const uid = auth.currentUser.uid;
+		const q = fsQuery(
+			fsCollection(db, "teams"),
+			where("members", "array-contains", uid)
+		);
+		const unsub = onSnapshot(q, (snap) => {
+			const chats = snap.docs.map(doc => ({
+				id: doc.id,
+				name: doc.data().name,
+				members: doc.data().members,
+				isGroup: true
+			}));
+			setGroupChats(chats);
+		});
+		return () => unsub();
+	}, []);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, (user) => {
@@ -294,23 +328,34 @@ const Chat = () => {
 	const otherId = selectedChat.id;
 	const chatKey = getChatKey(myId, otherId);
 
-	const q = fsQuery(
-		fsCollection(db, "messages", chatKey, "items"),
-		fsOrderBy("timestamp")
-	);
-	const unsub = onSnapshot(q, (snap) => {
-		let loadedMessages = snap.docs.map(doc => doc.data());
-		// Only show messages between the two users
-		loadedMessages = loadedMessages.filter(
-			(msg) =>
-				(msg.from === myId && msg.to === otherId) ||
-				(msg.from === otherId && msg.to === myId)
+	if (selectedChat.isGroup) {
+		// Only listen to groupMessages for group chats
+		const q = fsQuery(
+			fsCollection(db, "groupMessages", selectedChat.id, "items"),
+			fsOrderBy("timestamp")
 		);
-		setMessages(loadedMessages);
-	});
+		const unsub = onSnapshot(q, (snap) => {
+			setMessages(snap.docs.map(doc => doc.data()));
+		});
+		return () => unsub();
+	} else {
+		const q = fsQuery(
+			fsCollection(db, "messages", chatKey, "items"),
+			fsOrderBy("timestamp")
+		);
+		const unsub = onSnapshot(q, (snap) => {
+			let loadedMessages = snap.docs.map(doc => doc.data());
+			loadedMessages = loadedMessages.filter(
+				(msg) =>
+					(msg.from === myId && msg.to === otherId) ||
+					(msg.from === otherId && msg.to === myId)
+			);
+			setMessages(loadedMessages);
+		});
 
-	return () => unsub();
-	}, [selectedChat]);
+		return () => unsub();
+	}
+}, [selectedChat]);
 
 	// Fetch users from Firestore for searching user to message
 	useEffect(() => {
@@ -393,19 +438,30 @@ const Chat = () => {
 		e.preventDefault();
 		if (newMessage.trim() === "" || !selectedChat || !auth.currentUser) return;
 		const myId = auth.currentUser.uid;
-		const otherId = selectedChat.id;
-		const chatKey = getChatKey(myId, otherId);
-		const messageData = {
-			text: newMessage,
-			from: myId,
-			to: otherId,
-			timestamp: Date.now(),
-		};
-
-		const msgRef = fsCollection(db, "messages", chatKey, "items");
-		await addDoc(msgRef, messageData);
-
-		addAndPersistUser(selectedChat);
+		if (selectedChat.isGroup) {
+			// Only allow sending if user is a member
+			if (!selectedChat.members.includes(myId)) {
+				alert("You are not a member of this team.");
+				return;
+			}
+			const msgRef = fsCollection(db, "groupMessages", selectedChat.id, "items");
+			await addDoc(msgRef, {
+				text: newMessage,
+				from: myId,
+				timestamp: Date.now(),
+			});
+		} else {
+			const otherId = selectedChat.id;
+			const chatKey = getChatKey(myId, otherId);
+			const msgRef = fsCollection(db, "messages", chatKey, "items");
+			await addDoc(msgRef, {
+				text: newMessage,
+				from: myId,
+				to: otherId,
+				timestamp: Date.now(),
+			});
+			addAndPersistUser(selectedChat);
+		}
 		setNewMessage("");
 	}, [newMessage, selectedChat]);
 

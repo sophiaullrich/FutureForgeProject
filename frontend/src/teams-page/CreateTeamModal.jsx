@@ -1,7 +1,11 @@
 // modal for creating a new team
 import React, { useEffect, useMemo, useState } from "react";
 import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
-import { collection, doc, setDoc } from "firebase/firestore";
+import { db } from "../Firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth } from "../Firebase"; // Import auth to get current user
+
+const BACKEND_URL = "http://localhost:5001/api/chat/createTeamChatBox"; // Adjust if needed
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   // form fields
@@ -65,6 +69,11 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
       return;
     }
 
+    // Ensure creator is always in the team
+    const creatorUid = auth.currentUser?.uid;
+    const uids = Array.from(selectedUids);
+    if (creatorUid && !uids.includes(creatorUid)) uids.push(creatorUid);
+
     try {
       const teamId = await onCreate?.({
         name,
@@ -72,9 +81,21 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         isPublic: visibility === "public",
       });
 
-      const uids = Array.from(selectedUids);
       if (teamId && uids.length && onAddMembers) {
         await onAddMembers({ teamId, memberUids: uids });
+      }
+
+      // Call backend to create group chat box for the team
+      if (teamId && uids.length) {
+        await fetch(BACKEND_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            teamId,
+            teamName: name,
+            memberUids: uids,
+          }),
+        });
       }
 
       onClose?.();
