@@ -151,3 +151,7 @@
 .demo button:hover {
   background: #3a4a9e;
 }
+.friends-page h1,
+.friends-page h2 {
+  text-transform: capitalize;
+}

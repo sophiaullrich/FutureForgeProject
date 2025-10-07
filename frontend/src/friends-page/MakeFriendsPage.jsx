@@ -63,7 +63,7 @@ export default function MakeFriendsPage() {
   // ---- search ----
   async function handleSearch(q) {
     if (!isSignedIn) {
-      setToast("please sign in first.");
+      setToast("Please sign in first.");
       return;
     }
     setLoading(true);
@@ -72,7 +72,7 @@ export default function MakeFriendsPage() {
       setResults(data);
     } catch (err) {
       console.error(err);
-      setToast("couldn't load results");
+      setToast("Couldn't load results");
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function MakeFriendsPage() {
       setToast("request sent");
     } catch (e) {
       setResults(prev);
-      setToast(e?.message || "failed to send request");
+      setToast(e?.message || "Failed to send request");
     }
   }
 
@@ -100,10 +100,10 @@ export default function MakeFriendsPage() {
     try {
       await FriendsService.accept(req.id);
       await Promise.all([refreshFriends(), refreshIncoming()]);
-      setToast("friend added");
+      setToast("Friend added");
     } catch (e) {
       setIncoming(prev);
-      setToast("failed to accept");
+      setToast("Failed to accept");
     }
   }
 
@@ -117,7 +117,7 @@ export default function MakeFriendsPage() {
       setToast("request declined");
     } catch (e) {
       setIncoming(prev);
-      setToast("failed to decline");
+      setToast("Failed to decline");
     }
   }
 
@@ -166,7 +166,7 @@ export default function MakeFriendsPage() {
     return (
       <div className="friends-page">
         <h1>make friends</h1>
-        <div className="empty">loading your account…</div>
+        <div className="empty">Loading your account…</div>
       </div>
     );
   }
@@ -176,7 +176,7 @@ export default function MakeFriendsPage() {
     return (
       <div className="friends-page">
         <h1>make friends</h1>
-        <div className="empty">please sign in to search and manage friends.</div>
+        <div className="empty">Please sign in to search and manage friends.</div>
       </div>
     );
   }
