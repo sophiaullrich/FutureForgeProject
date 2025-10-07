@@ -1,8 +1,12 @@
 // src/teams-page/TeamDetailsModal.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import AddTaskModal from "../AddTaskModal";
 
 export default function TeamDetailsModal({ team, onClose, onDelete }) {
+  useEffect(() => {
+    setTasks((team?.tasks || []).map(t => ({ ...t, done: !!t.done })));
+  }, [team?.tasks]);
+  
   const [showAddModal, setShowAddModal] = useState(false);
   const [tasks, setTasks] = useState(
     (team?.tasks || []).map((t) => ({ ...t, done: !!t.done }))

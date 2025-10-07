@@ -7,15 +7,12 @@ exports.getMe = async (req, res) => {
     if (!profile) {
       const base = {
         uid: req.user.uid,
-        email: req.user.email || "",
-        emailLower: (req.user.email || "").toLowerCase(),
+        email: (req.user.email || "").toLowerCase(),
         displayName: req.user.email || "",
         description: "",
         interests: [],
         careerGoals: [],
         socials: { google: "", github: "", linkedin: "" },
-        darkMode: false,
-        textSize: "normal",
         createdAt: new Date()
       };
       if (req.user.picture) base.photoURL = req.user.picture; // only if present
@@ -35,8 +32,6 @@ exports.getMe = async (req, res) => {
       careerGoals: profile.careerGoals ?? [],
       socials: profile.socials ?? { google: "", github: "", linkedin: "" },
       photoURL: profile.photoURL ?? "",  // only for the response
-      darkMode: profile.darkMode ?? false,
-      textSize: profile.textSize ?? "normal"
     };
 
     res.json(response);
@@ -50,7 +45,7 @@ exports.patchMe = async (req, res) => {
   try {
     const {
       firstName, lastName, description, interests,
-      careerGoals, socials, photoURL, darkMode, textSize,
+      careerGoals, socials, photoURL,
     } = req.body;
 
     const updates = {};
@@ -70,8 +65,6 @@ exports.patchMe = async (req, res) => {
     if (Array.isArray(careerGoals)) updates.careerGoals  = careerGoals;
     if (socials !== undefined)      updates.socials      = socials;
     if (photoURL !== undefined)     updates.photoURL     = photoURL;
-    if (darkMode !== undefined)     updates.darkMode     = darkMode;
-    if (textSize !== undefined)     updates.textSize     = textSize;
 
     console.log("patchMe received updates:", updates);
     const doc = await service.updateProfileUID(req.user.uid, updates);

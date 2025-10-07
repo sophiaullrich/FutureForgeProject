@@ -40,7 +40,7 @@ export default function JoinTeamPage() {
         setTeamName(teamData.name || "Unnamed Team");
 
         // If already a member, redirect
-        if (teamData.members.includes(uid)) {
+        if (Array.isArray(teamData.members) && teamData.members.includes(uid)) {
           setJoined(true);
           setTimeout(() => navigate("/teams"), 2000);
           return;

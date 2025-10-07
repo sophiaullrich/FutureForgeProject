@@ -8,7 +8,7 @@ import {
   collection,
 } from "firebase/firestore";
 
-export default function InviteMembersModal({ onClose, teams = [] }) {
+export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", linkedin: "" });
   const [mode, setMode] = useState("internal");
   const [profiles, setProfiles] = useState([]);
@@ -18,6 +18,11 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
   const [inviteLink, setInviteLink] = useState("");
 
   const currentUid = auth.currentUser?.uid;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     (async () => {
@@ -35,17 +40,14 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
     }
   }, [teams]);
 
-  const handleChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
   const handleInvite = async () => {
     if (!selectedTeamId) return alert("Please select a team.");
-
+  
     const link = `${window.location.origin}/join/${selectedTeamId}`;
     setInviteLink(link);
-
+  
     let emailToInvite = "";
-
+  
     if (mode === "internal" && selectedUser) {
       emailToInvite = selectedUser.email;
     } else if (mode === "external" && form.email.trim()) {
@@ -53,7 +55,7 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
     } else {
       return alert("Please select a user or enter a valid email.");
     }
-
+  
     const inviteRef = doc(db, `teams/${selectedTeamId}/invites/${emailToInvite}`);
     await setDoc(inviteRef, {
       name: selectedUser?.displayName || form.name || "",
@@ -62,7 +64,7 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
       linkedin: form.linkedin || "",
       createdAt: new Date(),
     });
-
+  
     if (mode === "internal" && selectedUser?.id) {
       const notifRef = doc(collection(db, "notifications"));
       await setDoc(notifRef, {
@@ -81,7 +83,9 @@ export default function InviteMembersModal({ onClose, teams = [] }) {
         console.log("Clipboard failed. Here's your link:", link);
       }
     }
-
+  
+    await onInvite?.({ teamId: selectedTeamId, email: emailToInvite });
+  
     setShowSentOverlay(true);
   };
 

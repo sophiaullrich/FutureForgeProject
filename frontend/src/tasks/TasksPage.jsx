@@ -1,38 +1,27 @@
 import React, { useState, useEffect } from "react";
 import "./TasksPage.css";
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
-import { getAuth } from "firebase/auth";
+import { useOutletContext } from "react-router-dom";
 import { observeMyTeams } from "../TeamsService";
 import { listProfiles } from "../teams-page/ProfileService";
 import TaskModal from "./TaskModal";
 import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
 const API_URL = "http://localhost:5001/tasks";
 
 export default function TasksPage() {
+  const { currentUser } = useOutletContext();
+
   const [activeTab, setActiveTab] = useState("myTasks");
   const [tasks, setTasks] = useState([]);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [detailTask, setDetailTask] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState("");
   const [profiles, setProfiles] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
-
-  const auth = getAuth();
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => setCurrentUser(user));
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -86,13 +75,11 @@ export default function TasksPage() {
     const q = query(collection(db, "tasks"), orderBy("timestamp", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const allTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-
       const visible = allTasks.filter(
         (t) =>
           t.assignedEmails?.includes(userEmail) ||
           (t.type === "team" && teams.some((team) => team.name === t.team))
       );
-
       setTasks(visible);
     });
 
@@ -100,14 +87,12 @@ export default function TasksPage() {
   }, [currentUser, teams]);
 
   const handleTaskToggle = async (taskId, currentDone) => {
+    if (!currentUser) return;
     try {
       const token = await currentUser.getIdToken();
       await fetch(`${API_URL}/${taskId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ done: !currentDone }),
       });
     } catch (err) {
@@ -161,10 +146,7 @@ export default function TasksPage() {
       const token = await currentUser.getIdToken();
       await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
       setShowTaskModal(false);
@@ -175,6 +157,7 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (taskId) => {
+    if (!currentUser) return;
     try {
       const token = await currentUser.getIdToken();
       const res = await fetch(`${API_URL}/${taskId}`, {

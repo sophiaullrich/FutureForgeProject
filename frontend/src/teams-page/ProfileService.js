@@ -28,8 +28,7 @@ export async function ensureProfile() {
 
   const base = {
     uid,
-    email: email || "",                           // keep original casing for display
-    emailLower: (email || "").toLowerCase(),      // for ordering/search
+    email: (email || "").toLowerCase(),                           // keep original casing for display     // for ordering/search
     displayName: displayName || email || uid,     // never blank
     photoURL: photoURL || "",
     updatedAt: serverTimestamp(),
@@ -55,11 +54,11 @@ export async function ensureProfile() {
 /**
  * List all user profiles for member picking.
  * Requires Firestore rules to allow read on /profiles/** for authed users.
- * Orders by emailLower so everyone sorts predictably even if displayName is missing.
+ * Orders by email so everyone sorts predictably even if displayName is missing.
  * @returns {Promise<Array<{id: string, uid: string, displayName?: string, email?: string, photoURL?: string}>>}
  */
 export async function listProfiles() {
-  const q = query(collection(db, "profiles"), orderBy("emailLower"));
+  const q = query(collection(db, "profiles"), orderBy("email"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => {
     const x = d.data() || {};
@@ -148,7 +147,6 @@ export async function bulkUpsertProfiles(users = []) {
       {
         uid,
         email,
-        emailLower: email.toLowerCase(),
         displayName: u.displayName || email || uid,
         photoURL: u.photoURL || "",
         updatedAt: serverTimestamp(),
