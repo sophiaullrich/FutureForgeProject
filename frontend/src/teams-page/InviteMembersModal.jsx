@@ -1,5 +1,5 @@
-// modal for inviting members to a team
-import React, { useState, useEffect } from "react";
+// InviteMembersModal.jsx
+import React, { useState, useEffect, useMemo } from "react";
 import { listProfiles } from "./ProfileService";
 import { auth, db } from "../Firebase";
 import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore";
@@ -10,7 +10,13 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
   const [mode, setMode] = useState("internal"); // internal or external
   const [profiles, setProfiles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // NEW: search query for filtering profiles
+  const [userQuery, setUserQuery] = useState("");
+
+  // IMPORTANT: this holds the **Firestore doc id** (team.docId || team.id)
   const [selectedTeamId, setSelectedTeamId] = useState("");
+
   const [showSentOverlay, setShowSentOverlay] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
 
@@ -32,15 +38,27 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
     })();
   }, [currentUid]);
 
-  // default select first team
+  // default select first team using its Firestore doc id (docId || id)
   useEffect(() => {
     if (teams.length > 0) {
-      setSelectedTeamId(teams[0].id);
+      setSelectedTeamId(teams[0].docId || teams[0].id);
     }
   }, [teams]);
 
+  // NEW: memoised filtering for search
+  const filteredProfiles = useMemo(() => {
+    const q = userQuery.trim().toLowerCase();
+    if (!q) return profiles;
+    return profiles.filter((u) => {
+      const name = (u.displayName || "").toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
+  }, [profiles, userQuery]);
+
   // send invite
   const handleInvite = async () => {
+    if (!auth.currentUser?.uid) return alert("please sign in.");
     if (!selectedTeamId) return alert("please select a team.");
 
     const link = `${window.location.origin}/join/${selectedTeamId}`;
@@ -49,35 +67,51 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
     let emailToInvite = "";
 
     if (mode === "internal" && selectedUser) {
-      emailToInvite = selectedUser.email;
+      emailToInvite = (selectedUser.email || "").trim().toLowerCase();
     } else if (mode === "external" && form.email.trim()) {
       emailToInvite = form.email.trim().toLowerCase();
     } else {
       return alert("please select a user or enter a valid email.");
     }
 
-    // save invite in team subcollection
-    const inviteRef = doc(db, `teams/${selectedTeamId}/invites/${emailToInvite}`);
-    await setDoc(inviteRef, {
-      name: selectedUser?.displayName || form.name || "",
-      email: emailToInvite,
-      phone: form.phone || "",
-      linkedin: form.linkedin || "",
-      createdAt: new Date(),
-    });
+    // find the selected team object (for logging / message text)
+    const teamObj =
+      teams.find((t) => (t.docId || t.id) === selectedTeamId) || null;
+
+    // Only owners can invite per Firestore rules
+    if (!teamObj || teamObj.ownerId !== auth.currentUser.uid) {
+      alert("only the team owner can send invites.");
+      return;
+    }
+
+    try {
+      await onInvite?.({ teamId: selectedTeamId, email: emailToInvite });
+    } catch (err) {
+      console.error("Invite write failed via service:", err);
+      alert(
+        /permission/i.test(String(err?.message))
+          ? "insufficient permissions: only the team owner can invite, or check your Firestore rules."
+          : err?.message || "failed to create invite."
+      );
+      return;
+    }
 
     // internal user notification
     if (mode === "internal" && selectedUser?.id) {
       const notifRef = doc(collection(db, "notifications"));
-      await setDoc(notifRef, {
-        userId: selectedUser.id,
-        type: "invite",
-        title: "new team invite",
-        message: `you’ve been invited to join the team "${teams.find(t => t.id === selectedTeamId)?.name || "a team"}".`,
-        teamId: selectedTeamId,
-        read: false,
-        timestamp: serverTimestamp(),
-      });
+      try {
+        await setDoc(notifRef, {
+          userId: selectedUser.id,
+          type: "invite",
+          title: "new team invite",
+          message: `you’ve been invited to join the team "${teamObj?.name || "a team"}".`,
+          teamId: selectedTeamId,
+          read: false,
+          timestamp: serverTimestamp(),
+        });
+      } catch (err) {
+        console.warn("Notification write failed:", err);
+      }
     } else {
       // copy link for external users
       try {
@@ -87,7 +121,6 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
       }
     }
 
-    await onInvite?.({ teamId: selectedTeamId, email: emailToInvite });
     setShowSentOverlay(true);
   };
 
@@ -113,7 +146,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
           onChange={(e) => setSelectedTeamId(e.target.value)}
         >
           {teams.map((team) => (
-            <option key={team.id} value={team.id}>
+            <option key={team.docId || team.id} value={team.docId || team.id}>
               {team.name}
             </option>
           ))}
@@ -194,11 +227,24 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
         {mode === "internal" && (
           <>
             <h3 className="pending-title">select a user to invite</h3>
-            <div className="invites-list">
-              {profiles.length === 0 ? (
-                <p className="tasks-empty">no users available to invite.</p>
+
+            {/* NEW: search box */}
+            <div className="search-row">
+              <span className="search-icon">🔎</span>
+              <input
+                className="search-input"
+                placeholder="search by name or email…"
+                value={userQuery}
+                onChange={(e) => setUserQuery(e.target.value)}
+              />
+            </div>
+
+            {/* NEW: scrollable container */}
+            <div className="invites-list scrollable-list">
+              {filteredProfiles.length === 0 ? (
+                <p className="tasks-empty">no users match your search.</p>
               ) : (
-                profiles.map((user) => {
+                filteredProfiles.map((user) => {
                   const isSelected = selectedUser?.id === user.id;
                   return (
                     <button
@@ -209,7 +255,9 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                     >
                       <div className="invite-left">
                         <span className="avatar-dot" />
-                        <span className="invite-name">{user.displayName}</span>
+                        <span className="invite-name">
+                          {user.displayName || user.email}
+                        </span>
                       </div>
                       <span className="invite-status pending">{user.email}</span>
                     </button>
@@ -234,7 +282,8 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                 <div className="overlay-email-preview">
                   <p><strong>email preview:</strong></p>
                   <p><em>subject:</em> you've been invited to join a team on gobearai</p>
-                  <p><em>body:</em> click the link to join the team: <br />
+                  <p>
+                    <em>body:</em> click the link to join the team: <br />
                     <code>{inviteLink}</code>
                   </p>
                   <button onClick={handleCopyLink}>copy link again</button>
