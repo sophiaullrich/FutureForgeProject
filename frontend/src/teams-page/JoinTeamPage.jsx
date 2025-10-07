@@ -1,16 +1,15 @@
-// src/teams-page/JoinTeamPage.jsx
+// page for joining a team from an invite link
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../Firebase";
 
-/**
- * This page is used for accepting invites via shared links.
- * It assumes the user is signed in.
- */
 export default function JoinTeamPage() {
+  // get team id from url
   const { teamId } = useParams();
   const navigate = useNavigate();
+
+  // state
   const [teamName, setTeamName] = useState("");
   const [loading, setLoading] = useState(true);
   const [joined, setJoined] = useState(false);
@@ -18,10 +17,11 @@ export default function JoinTeamPage() {
 
   const uid = auth.currentUser?.uid;
 
+  // fetch and join team
   useEffect(() => {
     const fetchTeam = async () => {
       if (!uid) {
-        setError("You must be signed in to accept an invite.");
+        setError("you must be signed in to accept an invite.");
         setLoading(false);
         return;
       }
@@ -31,22 +31,22 @@ export default function JoinTeamPage() {
         const teamSnap = await getDoc(teamRef);
 
         if (!teamSnap.exists()) {
-          setError("This team does not exist.");
+          setError("this team does not exist.");
           setLoading(false);
           return;
         }
 
         const teamData = teamSnap.data();
-        setTeamName(teamData.name || "Unnamed Team");
+        setTeamName(teamData.name || "unnamed team");
 
-        // If already a member, redirect
+        // if already a member
         if (Array.isArray(teamData.members) && teamData.members.includes(uid)) {
           setJoined(true);
           setTimeout(() => navigate("/teams"), 2000);
           return;
         }
 
-        // Join team
+        // join team
         await updateDoc(teamRef, {
           members: arrayUnion(uid),
         });
@@ -54,8 +54,8 @@ export default function JoinTeamPage() {
         setJoined(true);
         setTimeout(() => navigate("/teams"), 2000);
       } catch (err) {
-        console.error("Error joining team:", err);
-        setError("Something went wrong while joining the team.");
+        console.error("error joining team:", err);
+        setError("something went wrong while joining the team.");
       } finally {
         setLoading(false);
       }
@@ -64,19 +64,21 @@ export default function JoinTeamPage() {
     fetchTeam();
   }, [teamId, uid, navigate]);
 
-  if (loading) return <p>Loading invite...</p>;
+  // show loading or error
+  if (loading) return <p>loading invite...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  // show join result
   return (
     <div className="join-team-page">
       {joined ? (
         <div>
-          <h2>Welcome to {teamName}!</h2>
-          <p>You've successfully joined the team. Redirecting...</p>
+          <h2>welcome to {teamName}!</h2>
+          <p>you've successfully joined the team. redirecting...</p>
         </div>
       ) : (
         <div>
-          <h2>Joining {teamName}...</h2>
+          <h2>joining {teamName}...</h2>
         </div>
       )}
     </div>

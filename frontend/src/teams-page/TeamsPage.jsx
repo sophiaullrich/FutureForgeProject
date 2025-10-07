@@ -1,3 +1,4 @@
+// main teams page
 import React, { useEffect, useState } from "react";
 import TeamCard from "./TeamCard";
 import CreateTeamModal from "./CreateTeamModal";
@@ -6,6 +7,7 @@ import JoinTeamModal from "./JoinTeamModal";
 import TeamDetailsModal from "./TeamDetailsModal";
 import "./TeamsPage.css";
 
+// data layer helpers
 import {
   observeMyTeams,
   observeMyInvites,
@@ -18,12 +20,18 @@ import {
 import { auth } from "../Firebase";
 
 export default function TeamsPage() {
-  const [modal, setModal] = useState(null);
+  // ui state
+  const [modal, setModal] = useState(null); // create | invite | join | details | null
   const [selectedTeam, setSelectedTeam] = useState(null);
+
+  // data state
   const [teams, setTeams] = useState([]);
   const [invites, setInvites] = useState([]);
+
+  // auth state
   const [authed, setAuthed] = useState(!!auth.currentUser);
 
+  // watch auth changes
   useEffect(() => {
     if (auth.currentUser) {
       setAuthed(true);
@@ -33,6 +41,7 @@ export default function TeamsPage() {
     return () => off && off();
   }, []);
 
+  // subscribe to teams + invites when authed
   useEffect(() => {
     if (!authed) return;
     const offTeams = observeMyTeams(setTeams);
@@ -43,36 +52,43 @@ export default function TeamsPage() {
     };
   }, [authed]);
 
+  // open details modal
   const handleCardClick = (team) => {
     setSelectedTeam(team);
     setModal("details");
   };
 
+  // create team
   const handleAddTeam = async ({ name, description }) => {
     const teamId = await createTeam({ name, description });
     return teamId;
   };
 
+  // add members to team
   const handleAddMembers = async ({ teamId, memberUids }) => {
     await addMembers({ teamId, memberUids });
     setModal(null);
   };
 
+  // send invite
   const handleInvite = async ({ teamId, email }) => {
     await inviteMember({ teamId, inviteeEmail: email });
     setModal(null);
   };
 
+  // accept invite
   const handleJoinTeam = async ({ teamId }) => {
     await acceptInvite({ teamId });
     setModal(null);
   };
 
+  // delete team
   const handleDeleteTeam = async (teamId) => {
     await deleteTeam({ teamId });
     setModal(null);
   };
 
+  // render page
   return (
     <div className="teams-page">
       <section className="your-teams-panel">

@@ -1,71 +1,37 @@
-// frontend/src/friends-page/FriendsService.firebase.js
+// Firebase-powered FriendsService (Firestore).
+// Requires: db, auth from your Firebase config.
 import { auth, db } from "../Firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import {
-  addDoc, collection, doc, getDoc, getDocs, orderBy, query,
-  serverTimestamp, updateDoc, where, writeBatch, limit
+  addDoc, collection, deleteDoc, doc, getDoc, getDocs,
+  onSnapshot, orderBy, query, serverTimestamp, updateDoc, where,
+  writeBatch, limit
 } from "firebase/firestore";
 
-/** Wait until Firebase Auth delivers a user (or timeout). */
-async function waitForUser(timeoutMs = 8000) {
-  // fast path
-  if (auth.currentUser) return auth.currentUser;
-
-  return new Promise((resolve) => {
-    const timer = setTimeout(() => {
-      off();
-      resolve(null); // resolve null on timeout; caller will throw a friendly error
-    }, timeoutMs);
-
-    const off = onAuthStateChanged(auth, (u) => {
-      if (u) {
-        clearTimeout(timer);
-        off();
-        resolve(u);
-      }
-      // if u is null, keep waiting — auth may not be hydrated yet
-    });
-  });
+function meId() {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Not signed in");
+  return uid;
 }
 
-async function meId() {
-  const u = await waitForUser();
-  if (!u?.uid) throw new Error("Not signed in");
-  return u.uid;
-}
-
+// ---- helpers ----
 async function getProfile(uid) {
   const snap = await getDoc(doc(db, "profiles", uid));
   if (!snap.exists()) return { id: uid, displayName: "Unknown", email: "" };
   return { id: uid, ...snap.data() };
 }
-
 function toUserCard(p) {
   return { id: p.id, name: p.displayName || p.name || "Unknown", email: p.email || "" };
 }
-
 function prefixRange(val) {
   const q = (val || "").trim().toLowerCase();
   if (!q) return null;
   return { gte: q, lt: q + "\uf8ff" };
 }
 
-async function createNotification(userId, title, message, extra = {}) {
-  if (!userId) return;
-  const notifRef = await addDoc(collection(db, "notifications"), {
-    userId,
-    title,
-    message,
-    read: false,
-    timestamp: serverTimestamp(),
-    ...extra,
-  });
-  await updateDoc(notifRef, { notifId: notifRef.id });
-}
-
 const FriendsService = {
+  // --- SEARCH real users by name/email (prefix) ---
   async search(queryStr) {
-    const my = await meId();
+    const my = meId();
     const rng = prefixRange(queryStr);
     let nameMatches = [], emailMatches = [];
 
@@ -86,23 +52,30 @@ const FriendsService = {
       nameMatches = s1.docs.map(d => ({ id: d.id, ...d.data() }));
       emailMatches = s2.docs.map(d => ({ id: d.id, ...d.data() }));
     } else {
+      // empty query -> show a few suggestions (excluding self)
       const qAny = query(collection(db, "profiles"), orderBy("displayName"), limit(10));
       const s = await getDocs(qAny);
       nameMatches = s.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
+    // merge & unique, drop self
     const map = new Map();
-    [...nameMatches, ...emailMatches].forEach(p => { if (p.id !== my) map.set(p.id, p); });
+    [...nameMatches, ...emailMatches].forEach(p => {
+      if (p.id !== my) map.set(p.id, p);
+    });
     const candidates = [...map.values()];
 
+    // annotate friend / pending states
     const outQ = query(collection(db, "friendRequests"),
       where("fromId", "==", my), where("status", "==", "pending"));
     const inQ = query(collection(db, "friendRequests"),
       where("toId", "==", my), where("status", "==", "pending"));
     const [outS, inS] = await Promise.all([getDocs(outQ), getDocs(inQ)]);
+
     const outSet = new Set(outS.docs.map(d => d.data().toId));
     const inSet  = new Set(inS.docs.map(d => d.data().fromId));
 
+    // friends subcollection
     const friendsSnap = await getDocs(collection(db, "users", my, "friends"));
     const friendSet = new Set(friendsSnap.docs.map(d => d.id));
 
@@ -114,14 +87,17 @@ const FriendsService = {
     }));
   },
 
+  // --- LISTS ---
   async listFriends() {
-    const my = await meId();
+    const my = meId();
     const s = await getDocs(collection(db, "users", my, "friends"));
     const ids = s.docs.map(d => d.id);
     if (ids.length === 0) return [];
+    // Firestore 'in' supports up to 10 IDs; chunk if needed
+    const chunks = [];
+    for (let i = 0; i < ids.length; i += 10) chunks.push(ids.slice(i, i + 10));
     const results = [];
-    for (let i = 0; i < ids.length; i += 10) {
-      const chunk = ids.slice(i, i + 10);
+    for (const chunk of chunks) {
       const qx = query(collection(db, "profiles"), where("__name__", "in", chunk));
       const sx = await getDocs(qx);
       sx.forEach(d => results.push(toUserCard({ id: d.id, ...d.data() })));
@@ -130,7 +106,7 @@ const FriendsService = {
   },
 
   async listIncoming() {
-    const my = await meId();
+    const my = meId();
     const qx = query(
       collection(db, "friendRequests"),
       where("toId", "==", my),
@@ -138,16 +114,17 @@ const FriendsService = {
       orderBy("createdAt", "desc")
     );
     const s = await getDocs(qx);
-    return Promise.all(
+    const rows = await Promise.all(
       s.docs.map(async d => {
         const from = await getProfile(d.data().fromId);
         return { id: d.id, from: toUserCard(from) };
       })
     );
+    return rows;
   },
 
   async listOutgoing() {
-    const my = await meId();
+    const my = meId();
     const qx = query(
       collection(db, "friendRequests"),
       where("fromId", "==", my),
@@ -155,26 +132,30 @@ const FriendsService = {
       orderBy("createdAt", "desc")
     );
     const s = await getDocs(qx);
-    return Promise.all(
+    const rows = await Promise.all(
       s.docs.map(async d => {
         const to = await getProfile(d.data().toId);
         return { id: d.id, to: toUserCard(to) };
       })
     );
+    return rows;
   },
 
+  // --- COMMANDS ---
   async sendRequest(toUserId) {
-    const my = await meId();
+    const my = meId();
     if (my === toUserId) throw new Error("Can't friend yourself");
 
+    // already friends?
     const friendDoc = await getDoc(doc(db, "users", my, "friends", toUserId));
     if (friendDoc.exists()) throw new Error("Already friends");
 
+    // pending duplicate?
     const [outS, inS] = await Promise.all([
       getDocs(query(collection(db, "friendRequests"),
         where("fromId", "==", my), where("toId", "==", toUserId), where("status", "==", "pending"))),
       getDocs(query(collection(db, "friendRequests"),
-        where("fromId", "==", toUserId), where("toId", "==", my), where("status", "==", "pending")))
+        where("fromId", "==", toUserId), where("toId", "==", my), where("status", "==", "pending"))),
     ]);
     if (!outS.empty) throw new Error("Request already pending");
     if (!inS.empty) throw new Error("They already requested you");
@@ -185,20 +166,11 @@ const FriendsService = {
       status: "pending",
       createdAt: serverTimestamp(),
     });
-
-    const fromProfile = await getProfile(my);
-    await createNotification(
-      toUserId,
-      "New Friend Request",
-      `${fromProfile.displayName || "Someone"} sent you a friend request.`,
-      { type: "friendRequest", fromId: my }
-    );
-
     return { ok: true };
   },
 
   async accept(requestId) {
-    const my = await meId();
+    const my = meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
@@ -210,40 +182,22 @@ const FriendsService = {
     batch.set(doc(db, "users", my, "friends", fromId), { since: serverTimestamp() });
     batch.set(doc(db, "users", fromId, "friends", my), { since: serverTimestamp() });
     await batch.commit();
-
-    const myProfile = await getProfile(my);
-    await createNotification(
-      fromId,
-      "Friend Request Accepted",
-      `${myProfile.displayName || "User"} accepted your friend request.`,
-      { type: "friendRequest", toId: my }
-    );
-
     return { ok: true };
   },
 
   async decline(requestId) {
-    const my = await meId();
+    const my = meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
-    const { fromId, toId, status } = snap.data();
+    const { toId, status } = snap.data();
     if (toId !== my || status !== "pending") throw new Error("Invalid request");
     await updateDoc(ref, { status: "declined" });
-
-    const myProfile = await getProfile(my);
-    await createNotification(
-      fromId,
-      "Friend Request Declined",
-      `${myProfile.displayName || "User"} declined your friend request.`,
-      { type: "friendRequest", toId: my }
-    );
-
     return { ok: true };
   },
 
   async cancel(requestId) {
-    const my = await meId();
+    const my = meId();
     const ref = doc(db, "friendRequests", requestId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error("Request not found");
@@ -253,20 +207,27 @@ const FriendsService = {
     return { ok: true };
   },
 
+  // --- UPDATED: split deletes with path logging to expose rule/path issues ---
   async unfriend(otherId) {
-    const my = await meId();
-    const batch = writeBatch(db);
-    batch.delete(doc(db, "users", my, "friends", otherId));
-    batch.delete(doc(db, "users", otherId, "friends", my));
-    await batch.commit();
+    const my = meId();
+    const a = doc(db, "users", my, "friends", otherId);
+    const b = doc(db, "users", otherId, "friends", my);
 
-    const myProfile = await getProfile(my);
-    await createNotification(
-      otherId,
-      "Friend Removed",
-      `${myProfile.displayName || "User"} removed you from their friends.`,
-      { type: "friendRequest", fromId: my }
-    );
+    try {
+      await deleteDoc(a);
+      console.log("Deleted A:", a.path);
+    } catch (e) {
+      console.error("Delete A failed:", a.path, e);
+      throw e;
+    }
+
+    try {
+      await deleteDoc(b);
+      console.log("Deleted B:", b.path);
+    } catch (e) {
+      console.error("Delete B failed:", b.path, e);
+      throw e;
+    }
 
     return { ok: true };
   },

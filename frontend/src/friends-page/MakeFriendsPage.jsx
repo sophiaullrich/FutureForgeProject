@@ -1,30 +1,30 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import FriendsService from "./FriendsService.firebase"; // Firebase service
+import FriendsService from "./FriendsService.firebase";
 import SearchBar from "./SearchBar";
 import UserCard from "./UserCard";
 import Tabs from "./Tabs";
 import Toast from "./Toast";
 import "./friends.css";
 
-// Wait for auth before first load
+// wait for auth before loading
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../Firebase";
 
 export default function MakeFriendsPage() {
-  // UI state
+  // ui state
   const [tab, setTab] = useState("friends"); // friends | requests | pending
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
   const [authReady, setAuthReady] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  // Data state
+  // data state
   const [results, setResults] = useState([]);   // search results
   const [friends, setFriends] = useState([]);   // confirmed friends
   const [incoming, setIncoming] = useState([]); // requests to me
   const [outgoing, setOutgoing] = useState([]); // requests from me
 
-  // Refresh helpers
+  // refresh helpers
   const refreshFriends  = useCallback(async () => setFriends(await FriendsService.listFriends()), []);
   const refreshIncoming = useCallback(async () => setIncoming(await FriendsService.listIncoming()), []);
   const refreshOutgoing = useCallback(async () => setOutgoing(await FriendsService.listOutgoing()), []);
@@ -32,7 +32,7 @@ export default function MakeFriendsPage() {
     await Promise.all([refreshFriends(), refreshIncoming(), refreshOutgoing()]);
   }, [refreshFriends, refreshIncoming, refreshOutgoing]);
 
-  // Tab badge counts
+  // tab badge counts
   const counts = useMemo(
     () => ({
       friends: friends.length,
@@ -42,16 +42,13 @@ export default function MakeFriendsPage() {
     [friends.length, incoming.length, outgoing.length]
   );
 
-  // Initial load — wait for Firebase Auth to hydrate, then load lists
+  // first load: wait for auth, then fetch lists
   useEffect(() => {
     const off = onAuthStateChanged(auth, (u) => {
-      // 🔎 debug: confirm same project + UID
-      console.log("MakeFriendsPage auth:", u?.uid, auth.app.options.projectId);
-
+      console.log("makefriendspage auth:", u?.uid, auth.app.options.projectId);
       setAuthReady(true);
       setIsSignedIn(!!u);
       if (u) {
-        // user is signed in; now safe to hit Firestore
         refreshAll();
       } else {
         setFriends([]);
@@ -63,10 +60,10 @@ export default function MakeFriendsPage() {
     return () => off();
   }, [refreshAll]);
 
-  // ---- SEARCH ----
+  // ---- search ----
   async function handleSearch(q) {
     if (!isSignedIn) {
-      setToast("Please sign in first.");
+      setToast("please sign in first.");
       return;
     }
     setLoading(true);
@@ -75,23 +72,23 @@ export default function MakeFriendsPage() {
       setResults(data);
     } catch (err) {
       console.error(err);
-      setToast("Couldn't load results");
+      setToast("couldn't load results");
     } finally {
       setLoading(false);
     }
   }
 
-  // ---- ACTIONS ----
+  // ---- actions ----
   async function handleAdd(userId) {
     const prev = results;
     setResults(prev.map((u) => (u.id === userId ? { ...u, pendingOutgoing: true } : u)));
     try {
       await FriendsService.sendRequest(userId);
       await refreshOutgoing();
-      setToast("Request sent");
+      setToast("request sent");
     } catch (e) {
       setResults(prev);
-      setToast(e?.message || "Failed to send request");
+      setToast(e?.message || "failed to send request");
     }
   }
 
@@ -102,11 +99,11 @@ export default function MakeFriendsPage() {
     setIncoming(prev.filter((r) => r.id !== req.id));
     try {
       await FriendsService.accept(req.id);
-      await refreshFriends();
-      setToast("Friend added");
+      await Promise.all([refreshFriends(), refreshIncoming()]);
+      setToast("friend added");
     } catch (e) {
       setIncoming(prev);
-      setToast("Failed to accept");
+      setToast("failed to accept");
     }
   }
 
@@ -117,10 +114,10 @@ export default function MakeFriendsPage() {
     setIncoming(prev.filter((r) => r.id !== req.id));
     try {
       await FriendsService.decline(req.id);
-      setToast("Request declined");
+      setToast("request declined");
     } catch (e) {
       setIncoming(prev);
-      setToast("Failed to decline");
+      setToast("failed to decline");
     }
   }
 
@@ -131,27 +128,29 @@ export default function MakeFriendsPage() {
     setOutgoing(prev.filter((r) => r.id !== req.id));
     try {
       await FriendsService.cancel(req.id);
-      setToast("Request canceled");
+      setToast("request canceled");
     } catch (e) {
       setOutgoing(prev);
-      setToast("Failed to cancel");
+      setToast("failed to cancel");
     }
   }
 
+  // remove a friend and refresh
   async function handleUnfriend(userId) {
     const prev = friends;
     setFriends(prev.filter((f) => f.id !== userId)); // optimistic
     try {
       await FriendsService.unfriend(userId);
-      await refreshFriends();
-      setToast("Removed from friends");
+      await Promise.all([refreshFriends(), refreshIncoming(), refreshOutgoing()]);
+      setToast("removed from friends");
     } catch (e) {
+      console.error("unfriend failed:", e);
       setFriends(prev);
-      setToast(e?.message || "Failed to unfriend");
+      setToast(e?.message || "failed to unfriend");
     }
   }
 
-  // Derived list for current tab
+  // pick list based on tab
   const tabList = useMemo(() => {
     if (tab === "friends")
       return friends.map((f) => ({ id: f.id, name: f.name, email: f.email, isFriend: true }));
@@ -162,36 +161,36 @@ export default function MakeFriendsPage() {
     return [];
   }, [tab, friends, incoming, outgoing]);
 
-  // If auth hasn't hydrated yet, show a light placeholder
+  // handle auth loading state
   if (!authReady) {
     return (
       <div className="friends-page">
-        <h1>Make Friends</h1>
-        <div className="empty">Loading your account…</div>
+        <h1>make friends</h1>
+        <div className="empty">loading your account…</div>
       </div>
     );
   }
 
-  // If user is not signed in, show a friendly message
+  // handle not signed in
   if (authReady && !isSignedIn) {
     return (
       <div className="friends-page">
-        <h1>Make Friends</h1>
-        <div className="empty">Please sign in to search and manage friends.</div>
+        <h1>make friends</h1>
+        <div className="empty">please sign in to search and manage friends.</div>
       </div>
     );
   }
 
+  // main page ui
   return (
     <div className="friends-page">
-      <h1>Make Friends</h1>
+      <h1>make friends</h1>
 
       <SearchBar onSearch={handleSearch} loading={loading} />
 
-      {/* Search results */}
       {results.length > 0 && (
         <>
-          <h2 className="subhead">Search Results</h2>
+          <h2 className="subhead">search results</h2>
           <div role="list" className="list">
             {results.map((u) => (
               <UserCard
@@ -208,11 +207,11 @@ export default function MakeFriendsPage() {
         </>
       )}
 
-      {/* Tabs + current list */}
       <Tabs tab={tab} counts={counts} onTab={setTab} />
+
       <div role="list" className="list">
         {tabList.length === 0 ? (
-          <div className="empty">No items yet</div>
+          <div className="empty">no items yet</div>
         ) : (
           tabList.map((u) => (
             <UserCard

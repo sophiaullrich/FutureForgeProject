@@ -1,7 +1,7 @@
 /* FriendsPage.css */
 
 .friends-page {
-  background: #efe4cf; /* same warm beige as Teams */
+  background: #efe4cf; 
   min-height: 100vh;
   padding: 28px 24px 40px;
   font-family: 'Helvetica Neue', sans-serif;
@@ -21,7 +21,7 @@
   color: #2b2d63;
 }
 
-/* Search bar */
+
 .friends-search {
   display: flex;
   gap: 8px;

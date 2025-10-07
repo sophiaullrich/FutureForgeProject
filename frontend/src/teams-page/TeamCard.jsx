@@ -1,7 +1,8 @@
-// src/teams-page/TeamCard.jsx
+// card for showing a team
 import React from "react";
 
 export default function TeamCard({ team, onClick }) {
+  // render simple team card
   return (
     <div onClick={onClick} style={cardStyle}>
       <h3>{team.name}</h3>
@@ -9,6 +10,7 @@ export default function TeamCard({ team, onClick }) {
   );
 }
 
+// basic card styling
 const cardStyle = {
   backgroundColor: "#fff",
   padding: "1rem",

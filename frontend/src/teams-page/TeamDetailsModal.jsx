@@ -1,34 +1,40 @@
-// src/teams-page/TeamDetailsModal.jsx
+// modal for viewing a team's details
 import React, { useMemo, useState, useEffect } from "react";
 import AddTaskModal from "../AddTaskModal";
 
 export default function TeamDetailsModal({ team, onClose, onDelete }) {
-  useEffect(() => {
-    setTasks((team?.tasks || []).map(t => ({ ...t, done: !!t.done })));
-  }, [team?.tasks]);
-  
+  // set up task state
   const [showAddModal, setShowAddModal] = useState(false);
   const [tasks, setTasks] = useState(
     (team?.tasks || []).map((t) => ({ ...t, done: !!t.done }))
   );
 
+  // update tasks if team changes
+  useEffect(() => {
+    setTasks((team?.tasks || []).map((t) => ({ ...t, done: !!t.done })));
+  }, [team?.tasks]);
+
+  // add new task
   const addTask = (task) => {
     setTasks((prev) => [...prev, { ...task, done: false }]);
     setShowAddModal(false);
   };
 
+  // toggle done/undone
   const toggleDone = (index) => {
     setTasks((prev) =>
       prev.map((t, i) => (i === index ? { ...t, done: !t.done } : t))
     );
   };
 
+  // calculate progress
   const progressPct = useMemo(() => {
     if (!tasks.length) return 0;
     const done = tasks.filter((t) => t.done).length;
     return Math.round((done / tasks.length) * 100);
   }, [tasks]);
 
+  // format due date
   const formatDue = (d) => {
     if (!d) return { mon: "—", day: "" };
     const date = new Date(d);
@@ -37,20 +43,23 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
       mon: date.toLocaleString("en-US", { month: "short" }).toUpperCase(),
       day: String(date.getDate()),
     };
-    };
+  };
 
+  // render modal
   return (
     <div className="details-modal">
-      <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
+      <button className="modal-x" onClick={onClose} aria-label="close">
+        ✕
+      </button>
 
-      {/* Header */}
-      <h2 className="details-title">{team?.name || "Team"}</h2>
+      {/* title and description */}
+      <h2 className="details-title">{team?.name || "team"}</h2>
       {team?.description && <p className="details-sub">{team.description}</p>}
 
-      {/* Top row: Members | Progress */}
+      {/* members and progress */}
       <div className="details-top">
         <div className="members-card">
-          <div className="card-title">Members</div>
+          <div className="card-title">members</div>
           <div className="members-list-chip">
             {(team?.members || []).map((m) => (
               <input key={m} className="member-chip" value={m} readOnly />
@@ -59,7 +68,7 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
         </div>
 
         <div className="progress-card">
-          <div className="card-title center">Team Progress</div>
+          <div className="card-title center">team progress</div>
           <div className="progress-bar-wrap">
             <div className="progress-bar-track">
               <div
@@ -71,28 +80,35 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
                 role="progressbar"
               />
             </div>
-            <div style={{ textAlign: "center", marginTop: 6, color: "#2b2d63", fontWeight: 600 }}>
+            <div
+              style={{
+                textAlign: "center",
+                marginTop: 6,
+                color: "#2b2d63",
+                fontWeight: 600,
+              }}
+            >
               {progressPct}%
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tasks */}
+      {/* team tasks */}
       <div className="tasks-section">
-        <div className="card-title">Team Tasks</div>
+        <div className="card-title">team tasks</div>
 
         <div className="tasks-card">
           <div className="tasks-head">
-            <span>Done?</span>
-            <span>Task Name</span>
-            <span>Due Date</span>
-            <span>Assigned To</span>
+            <span>done?</span>
+            <span>task name</span>
+            <span>due date</span>
+            <span>assigned to</span>
           </div>
 
           <div className="tasks-body">
             {tasks.length === 0 ? (
-              <div className="tasks-empty">No tasks yet.</div>
+              <div className="tasks-empty">no tasks yet.</div>
             ) : (
               tasks.map((t, i) => {
                 const d = formatDue(t.dueDate);
@@ -119,17 +135,22 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
         </div>
       </div>
 
+      {/* buttons */}
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
-          Add New Task
+        <button
+          className="primary-outline-btn"
+          onClick={() => setShowAddModal(true)}
+        >
+          add new task
         </button>
         {onDelete && (
           <button className="revoke-btn" onClick={onDelete}>
-            Delete Team (owner)
+            delete team (owner)
           </button>
         )}
       </div>
 
+      {/* add task modal */}
       {showAddModal && (
         <AddTaskModal
           members={team?.members || []}

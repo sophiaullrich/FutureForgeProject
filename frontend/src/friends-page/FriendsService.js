@@ -1,5 +1,5 @@
-// Firebase-powered FriendsService (Firestore).
-// Requires: db, auth from your Firebase config.
+// firebase friends service (firestore)
+// needs: auth and db from your firebase setup
 import { auth, db } from "../Firebase";
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs,
@@ -7,6 +7,7 @@ import {
   writeBatch, limit
 } from "firebase/firestore";
 
+// get current user id or fail if not signed in
 function meId() {
   const uid = auth.currentUser?.uid;
   if (!uid) throw new Error("Not signed in");
@@ -14,14 +15,20 @@ function meId() {
 }
 
 // ---- helpers ----
+
+// get profile doc or fallback
 async function getProfile(uid) {
   const snap = await getDoc(doc(db, "profiles", uid));
   if (!snap.exists()) return { id: uid, displayName: "Unknown", email: "" };
   return { id: uid, ...snap.data() };
 }
+
+// shape data for user card ui
 function toUserCard(p) {
   return { id: p.id, name: p.displayName || p.name || "Unknown", email: p.email || "" };
 }
+
+// build prefix range for case-insensitive search
 function prefixRange(val) {
   const q = (val || "").trim().toLowerCase();
   if (!q) return null;
@@ -29,19 +36,21 @@ function prefixRange(val) {
 }
 
 const FriendsService = {
-  // --- SEARCH real users by name/email (prefix) ---
+  // --- search users by name/email (prefix) ---
   async search(queryStr) {
     const my = meId();
     const rng = prefixRange(queryStr);
     let nameMatches = [], emailMatches = [];
 
     if (rng) {
+      // search by name
       const qName = query(
         collection(db, "profiles"),
         where("nameLower", ">=", rng.gte),
         where("nameLower", "<", rng.lt),
         limit(20)
       );
+      // search by email
       const qEmail = query(
         collection(db, "profiles"),
         where("emailLower", ">=", rng.gte),
@@ -52,21 +61,20 @@ const FriendsService = {
       nameMatches = s1.docs.map(d => ({ id: d.id, ...d.data() }));
       emailMatches = s2.docs.map(d => ({ id: d.id, ...d.data() }));
     } else {
-      // empty query -> show a few suggestions (excluding self)
+      // empty query -> sample some profiles (not me)
       const qAny = query(collection(db, "profiles"), orderBy("displayName"), limit(10));
       const s = await getDocs(qAny);
       nameMatches = s.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
-    // merge & unique, drop self
+    // merge unique results and drop self
     const map = new Map();
     [...nameMatches, ...emailMatches].forEach(p => {
       if (p.id !== my) map.set(p.id, p);
     });
     const candidates = [...map.values()];
 
-    // annotate friend / pending states
-    // outgoing pending
+    // get pending states
     const outQ = query(collection(db, "friendRequests"),
       where("fromId", "==", my), where("status", "==", "pending"));
     const inQ = query(collection(db, "friendRequests"),
@@ -76,10 +84,11 @@ const FriendsService = {
     const outSet = new Set(outS.docs.map(d => d.data().toId));
     const inSet  = new Set(inS.docs.map(d => d.data().fromId));
 
-    // friends subcollection
+    // get current friends
     const friendsSnap = await getDocs(collection(db, "users", my, "friends"));
     const friendSet = new Set(friendsSnap.docs.map(d => d.id));
 
+    // add ui flags
     return candidates.map(p => ({
       ...toUserCard(p),
       isFriend: friendSet.has(p.id),
@@ -88,13 +97,15 @@ const FriendsService = {
     }));
   },
 
-  // --- LISTS ---
+  // --- lists ---
+
+  // list my friends as user cards
   async listFriends() {
     const my = meId();
     const s = await getDocs(collection(db, "users", my, "friends"));
     const ids = s.docs.map(d => d.id);
     if (ids.length === 0) return [];
-    // Firestore 'in' supports up to 10 IDs; chunk if needed
+    // chunk for firestore "in" limit (10)
     const chunks = [];
     for (let i = 0; i < ids.length; i += 10) chunks.push(ids.slice(i, i + 10));
     const results = [];
@@ -103,10 +114,11 @@ const FriendsService = {
       const sx = await getDocs(qx);
       sx.forEach(d => results.push(toUserCard({ id: d.id, ...d.data() })));
     }
-    // keep original order not guaranteed — fine for now
+    // order may differ from source; ok
     return results;
   },
 
+  // list incoming pending requests
   async listIncoming() {
     const my = meId();
     const qx = query(
@@ -125,6 +137,7 @@ const FriendsService = {
     return rows;
   },
 
+  // list outgoing pending requests
   async listOutgoing() {
     const my = meId();
     const qx = query(
@@ -143,7 +156,9 @@ const FriendsService = {
     return rows;
   },
 
-  // --- COMMANDS ---
+  // --- commands ---
+
+  // send a friend request
   async sendRequest(toUserId) {
     const my = meId();
     if (my === toUserId) throw new Error("Can't friend yourself");
@@ -152,7 +167,7 @@ const FriendsService = {
     const friendDoc = await getDoc(doc(db, "users", my, "friends", toUserId));
     if (friendDoc.exists()) throw new Error("Already friends");
 
-    // pending duplicate?
+    // check for duplicate pending (both directions)
     const [outS, inS] = await Promise.all([
       getDocs(query(collection(db, "friendRequests"),
         where("fromId", "==", my), where("toId", "==", toUserId), where("status", "==", "pending"))),
@@ -171,6 +186,7 @@ const FriendsService = {
     return { ok: true };
   },
 
+  // accept a request and add both sides as friends
   async accept(requestId) {
     const my = meId();
     const ref = doc(db, "friendRequests", requestId);
@@ -187,6 +203,7 @@ const FriendsService = {
     return { ok: true };
   },
 
+  // decline a request
   async decline(requestId) {
     const my = meId();
     const ref = doc(db, "friendRequests", requestId);
@@ -198,6 +215,7 @@ const FriendsService = {
     return { ok: true };
   },
 
+  // cancel my outgoing request
   async cancel(requestId) {
     const my = meId();
     const ref = doc(db, "friendRequests", requestId);
@@ -209,6 +227,7 @@ const FriendsService = {
     return { ok: true };
   },
 
+  // remove friendship both ways
   async unfriend(otherId) {
     const my = meId();
     const batch = writeBatch(db);

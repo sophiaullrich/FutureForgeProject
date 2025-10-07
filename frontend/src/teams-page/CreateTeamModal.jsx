@@ -1,20 +1,24 @@
-// frontend/src/teams-page/CreateTeamModal.jsx
+// modal for creating a new team
 import React, { useEffect, useMemo, useState } from "react";
-import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
+import { listProfiles } from "./ProfileService"; // make sure filename matches
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
+  // form fields
   const [teamName, setTeamName] = useState("");
   const [description, setDescription] = useState("");
-  const [visibility, setVisibility] = useState("private"); // NEW: public/private toggle
+  const [visibility, setVisibility] = useState("private"); // public or private
 
+  // user profiles
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
+  // search and selection
   const [query, setQuery] = useState("");
   const [selectedUids, setSelectedUids] = useState(new Set());
   const [submitError, setSubmitError] = useState("");
 
+  // load user profiles
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -23,16 +27,15 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         const ppl = await listProfiles();
         setProfiles(ppl);
       } catch (e) {
-        console.error("Failed to load profiles:", e);
-        setLoadError(
-          "Could not load users. Make sure you are signed in and Firestore rules allow read on /profiles."
-        );
+        console.error("failed to load profiles:", e);
+        setLoadError("could not load users. check signin and firestore rules.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  // filter users by query
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return profiles;
@@ -43,6 +46,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     });
   }, [profiles, query]);
 
+  // select or unselect a user
   const toggle = (uid) => {
     setSelectedUids((prev) => {
       const next = new Set(prev);
@@ -51,11 +55,12 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     });
   };
 
+  // create team and add members
   const handleCreate = async () => {
     setSubmitError("");
     const name = teamName.trim();
     if (!name) {
-      setSubmitError("Please enter a team name.");
+      setSubmitError("please enter a team name.");
       return;
     }
 
@@ -63,7 +68,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
       const teamId = await onCreate?.({
         name,
         description: description.trim(),
-        isPublic: visibility === "public" // <- NEW
+        isPublic: visibility === "public",
       });
 
       const uids = Array.from(selectedUids);
@@ -74,38 +79,39 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
       onClose?.();
     } catch (e) {
       console.error(e);
-      setSubmitError(e?.message || "Failed to create team.");
+      setSubmitError(e?.message || "failed to create team.");
     }
   };
 
+  // render modal ui
   return (
     <div className="modal-backdrop">
       <div className="create-modal">
-        <button className="modal-close" onClick={onClose} aria-label="Close">
+        <button className="modal-close" onClick={onClose} aria-label="close">
           ✕
         </button>
 
-        <h2 className="create-title">Create Team</h2>
+        <h2 className="create-title">create team</h2>
 
         {submitError && <div className="form-error">{submitError}</div>}
 
-        <label className="form-label">Team Name</label>
+        <label className="form-label">team name</label>
         <input
           className="form-input"
-          placeholder="Enter Team Name"
+          placeholder="enter team name"
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
         />
 
-        <label className="form-label">Description</label>
+        <label className="form-label">description</label>
         <textarea
           className="form-textarea"
-          placeholder="Enter Description"
+          placeholder="enter description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <label className="form-label">Team Visibility</label>
+        <label className="form-label">team visibility</label>
         <div className="radio-row" style={{ marginBottom: "1rem" }}>
           <label style={{ marginRight: "1rem" }}>
             <input
@@ -115,7 +121,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
               checked={visibility === "public"}
               onChange={() => setVisibility("public")}
             />
-            Public
+            public
           </label>
           <label>
             <input
@@ -125,16 +131,16 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
               checked={visibility === "private"}
               onChange={() => setVisibility("private")}
             />
-            Private
+            private
           </label>
         </div>
 
-        <label className="form-label">Add Members (from registered users)</label>
+        <label className="form-label">add members (from registered users)</label>
         <div className="search-row">
           <span className="search-icon">🔎</span>
           <input
             className="search-input"
-            placeholder="Search by name or email..."
+            placeholder="search by name or email..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -142,11 +148,11 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
 
         <div className="member-list" style={{ maxHeight: 240, overflowY: "auto" }}>
           {loading ? (
-            <div className="tasks-empty">Loading users…</div>
+            <div className="tasks-empty">loading users…</div>
           ) : loadError ? (
             <div className="form-error" style={{ marginTop: 8 }}>{loadError}</div>
           ) : filtered.length === 0 ? (
-            <div className="tasks-empty">No users found.</div>
+            <div className="tasks-empty">no users found.</div>
           ) : (
             filtered.map((p) => {
               const uid = p.uid || p.id;
@@ -169,7 +175,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         </div>
 
         <button className="primary-cta" onClick={handleCreate}>
-          Create Team
+          create team
         </button>
       </div>
     </div>

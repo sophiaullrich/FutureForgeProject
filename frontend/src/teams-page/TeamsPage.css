@@ -83,7 +83,7 @@ body {
   z-index: 1000;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
   .teams-page-container {
     padding: 1rem;
@@ -97,7 +97,7 @@ body {
     font-size: 1.5rem;
   }
 }
-/* ==== JoinTeamModal ==== */
+
 .modal-backdrop{
   position: fixed; inset: 0; display: grid; place-items: center;
   background: rgba(0,0,0,0.6); z-index: 1000;
@@ -178,7 +178,7 @@ body {
   margin-top: 14px; background:#2b2d63; color:#fff; border:none;
   padding: 10px 14px; border-radius: 8px; font-weight: 600; cursor:pointer;
 }
-/* ==== InviteMembersModal ==== */
+
 .invite-modal{
   background:#f8f6ef;
   width:min(860px, 92vw);
@@ -273,7 +273,7 @@ body {
 }
 .resend-btn{ background:#4c8c6b; color:#fff; }
 .revoke-btn{ background:#b35353; color:#fff; }
-/* ==== CreateTeamModal ==== */
+
 .create-modal{
   background:#f8f6ef;
   width:min(860px, 92vw);
@@ -324,9 +324,9 @@ body {
   background:#24306b; color:#fff; border:2px solid #2b2d63;
   border-radius:10px; padding:12px 16px; font-weight:700; cursor:pointer;
 }
-/* ==== TeamsPage layout ==== */
+
 .teams-page{
-  background:#efe4cf; /* warm beige from mock */
+  background:#efe4cf; 
   min-height:100vh;
   padding:28px 24px 40px;
 }
@@ -353,7 +353,7 @@ body {
   .teams-grid{ grid-template-columns: 1fr; }
 }
 
-/* big outlined action rows */
+
 .teams-actions{
   display:flex;
   flex-direction:column;
@@ -379,14 +379,14 @@ body {
 }
 .chevron{ font-size:22px; line-height:1; }
 
-/* shared modal backdrop (used by details & others) */
+
 .modal-backdrop{
   position:fixed; inset:0; display:grid; place-items:center;
   background:rgba(0,0,0,.5); z-index:1000;
 }
-/* ==== TeamDetails (mock-style) ==== */
+
 .details-modal{
-  background:#efe9d9; /* soft beige */
+  background:#efe9d9; 
   border:2px solid #2b2d63;
   border-radius:12px;
   width:min(880px, 92vw);
@@ -420,14 +420,14 @@ body {
   padding:8px 10px; font-size:14px; color:#1f2242;
 }
 
-/* progress dummy */
+
 .progress-bar-wrap{ padding:8px; }
 .progress-bar-track{
   width:100%; height:18px; border:2px solid #2b2d63; border-radius:10px; background:#fff;
 }
 .progress-bar-fill{ height:100%; background:#2b2d63; border-radius:8px 0 0 8px; }
 
-/* tasks */
+
 .tasks-section{ margin-top:10px; }
 .tasks-card{
   background:#faf9f6;
@@ -458,7 +458,7 @@ body {
   padding:12px 14px; cursor:pointer;
 }
 .primary-outline-btn:hover{ filter:brightness(.98); }
-/* highlight selected row like dark pill */
+
 .invite-row { display:flex; align-items:center; justify-content:space-between; width:100%; border:1px solid var(--card-border); border-radius:0.75rem; padding:0.9rem 1rem; background:var(--panel); cursor:pointer; }
 .invite-row + .invite-row { margin-top:0.75rem; }
 .invite-row.selected { background:#1d2330; color:#e9ecf2; } 
@@ -466,15 +466,15 @@ body {
 .invite-status.declined { color:#b05555; font-weight:500; }
 .avatar-dot { width:28px; height:28px; border-radius:999px; display:inline-block; margin-right:10px; background:radial-gradient(circle at 30% 30%, #7bb, #a56); }
 
-/* overlay */
+
 .overlay-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.25); }
 .overlay-card { background:#fffaf2; border:2px solid #5da066; border-radius:12px; padding:16px 22px; min-width:320px; text-align:center; }
 .overlay-card.success .overlay-title { margin:0 0 6px; font-size:20px; color:#2d6a3f; }
 .overlay-sub { margin:0 0 12px; }
 .overlay-ok { border:none; border-radius:10px; padding:8px 18px; background:#5da066; color:#fff; cursor:pointer; }
 .invite-row.selected {
-  background: #1d2330; /* your dark highlight color */
-  color: #ffffff; /* makes the name text white */
+  background: #1d2330; 
+  color: #ffffff; 
 }
 
 .invite-row.selected {
@@ -488,7 +488,7 @@ body {
   color: #1f2242;
 }
 
-/* ==== Invite Mode Toggle Tabs ==== */
+
 .invite-mode-toggle {
   display: flex;
   justify-content: center;

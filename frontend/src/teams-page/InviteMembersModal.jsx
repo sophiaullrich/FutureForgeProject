@@ -1,61 +1,62 @@
+// modal for inviting members to a team
 import React, { useState, useEffect } from "react";
 import { listProfiles } from "./ProfileService";
 import { auth, db } from "../Firebase";
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  collection,
-} from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore";
 
 export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
+  // form fields
   const [form, setForm] = useState({ name: "", email: "", phone: "", linkedin: "" });
-  const [mode, setMode] = useState("internal");
+  const [mode, setMode] = useState("internal"); // internal or external
   const [profiles, setProfiles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const [showSentOverlay, setShowSentOverlay] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
 
+  // current user id
   const currentUid = auth.currentUser?.uid;
 
+  // handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // load user profiles
   useEffect(() => {
     (async () => {
       const all = await listProfiles();
-      const filtered = all.filter(
-        (p) => p.id !== currentUid && !p.disabled
-      );
+      const filtered = all.filter((p) => p.id !== currentUid && !p.disabled);
       setProfiles(filtered);
     })();
   }, [currentUid]);
 
+  // default select first team
   useEffect(() => {
     if (teams.length > 0) {
       setSelectedTeamId(teams[0].id);
     }
   }, [teams]);
 
+  // send invite
   const handleInvite = async () => {
-    if (!selectedTeamId) return alert("Please select a team.");
-  
+    if (!selectedTeamId) return alert("please select a team.");
+
     const link = `${window.location.origin}/join/${selectedTeamId}`;
     setInviteLink(link);
-  
+
     let emailToInvite = "";
-  
+
     if (mode === "internal" && selectedUser) {
       emailToInvite = selectedUser.email;
     } else if (mode === "external" && form.email.trim()) {
       emailToInvite = form.email.trim().toLowerCase();
     } else {
-      return alert("Please select a user or enter a valid email.");
+      return alert("please select a user or enter a valid email.");
     }
-  
+
+    // save invite in team subcollection
     const inviteRef = doc(db, `teams/${selectedTeamId}/invites/${emailToInvite}`);
     await setDoc(inviteRef, {
       name: selectedUser?.displayName || form.name || "",
@@ -64,45 +65,48 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
       linkedin: form.linkedin || "",
       createdAt: new Date(),
     });
-  
+
+    // internal user notification
     if (mode === "internal" && selectedUser?.id) {
       const notifRef = doc(collection(db, "notifications"));
       await setDoc(notifRef, {
         userId: selectedUser.id,
         type: "invite",
-        title: "New Team Invite",
-        message: `You’ve been invited to join the team "${teams.find(t => t.id === selectedTeamId)?.name || "a team"}".`,
+        title: "new team invite",
+        message: `you’ve been invited to join the team "${teams.find(t => t.id === selectedTeamId)?.name || "a team"}".`,
         teamId: selectedTeamId,
         read: false,
         timestamp: serverTimestamp(),
       });
     } else {
+      // copy link for external users
       try {
         await navigator.clipboard.writeText(link);
       } catch {
-        console.log("Clipboard failed. Here's your link:", link);
+        console.log("clipboard failed. here’s your link:", link);
       }
     }
-  
+
     await onInvite?.({ teamId: selectedTeamId, email: emailToInvite });
-  
     setShowSentOverlay(true);
   };
 
+  // copy invite link again
   const handleCopyLink = () => {
     if (inviteLink) {
       navigator.clipboard.writeText(inviteLink);
-      alert("Link copied to clipboard.");
+      alert("link copied to clipboard.");
     }
   };
 
+  // render modal ui
   return (
     <div className="modal-backdrop">
       <div className="invite-modal" role="dialog" aria-modal="true">
-        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
-        <h2 className="invite-title">Invite Members</h2>
+        <button className="modal-close" onClick={onClose} aria-label="close">✕</button>
+        <h2 className="invite-title">invite members</h2>
 
-        <label className="select-team-label">Select a Team:</label>
+        <label className="select-team-label">select a team:</label>
         <select
           className="select-team-dropdown"
           value={selectedTeamId}
@@ -116,18 +120,24 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
         </select>
 
         <div className="invite-mode-toggle">
-          <button className={mode === "internal" ? "active" : ""} onClick={() => {
-            setMode("internal");
-            setSelectedUser(null);
-            setForm((f) => ({ ...f, email: "" }));
-          }}>
-            Invite Existing User
+          <button
+            className={mode === "internal" ? "active" : ""}
+            onClick={() => {
+              setMode("internal");
+              setSelectedUser(null);
+              setForm((f) => ({ ...f, email: "" }));
+            }}
+          >
+            invite existing user
           </button>
-          <button className={mode === "external" ? "active" : ""} onClick={() => {
-            setMode("external");
-            setSelectedUser(null);
-          }}>
-            Invite by link
+          <button
+            className={mode === "external" ? "active" : ""}
+            onClick={() => {
+              setMode("external");
+              setSelectedUser(null);
+            }}
+          >
+            invite by link
           </button>
         </div>
 
@@ -137,14 +147,14 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               <input
                 className="invite-input"
                 name="email"
-                placeholder="Email Address"
+                placeholder="email address"
                 value={form.email}
                 onChange={handleChange}
               />
               <input
                 className="invite-input"
                 name="name"
-                placeholder="Name (optional)"
+                placeholder="name (optional)"
                 value={form.name}
                 onChange={handleChange}
               />
@@ -153,14 +163,14 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
           <input
             className="invite-input"
             name="phone"
-            placeholder="Phone Number (optional)"
+            placeholder="phone number (optional)"
             value={form.phone}
             onChange={handleChange}
           />
           <input
             className="invite-input"
             name="linkedin"
-            placeholder="LinkedIn Profile (optional)"
+            placeholder="linkedin profile (optional)"
             value={form.linkedin}
             onChange={handleChange}
           />
@@ -170,23 +180,23 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
             onClick={handleInvite}
             disabled={mode === "internal" ? !selectedUser : !form.email.trim()}
           >
-            <span>Send Invite</span>
+            <span>send invite</span>
             <span className="arrow">›</span>
           </button>
 
           <p className="invite-help">
             {mode === "internal"
-              ? "Select an existing user below to invite them to your team."
-              : "Enter an email address to generate an invite link."}
+              ? "select an existing user below to invite them to your team."
+              : "enter an email address to generate an invite link."}
           </p>
         </div>
 
         {mode === "internal" && (
           <>
-            <h3 className="pending-title">Select a User to Invite</h3>
+            <h3 className="pending-title">select a user to invite</h3>
             <div className="invites-list">
               {profiles.length === 0 ? (
-                <p className="tasks-empty">No users available to invite.</p>
+                <p className="tasks-empty">no users available to invite.</p>
               ) : (
                 profiles.map((user) => {
                   const isSelected = selectedUser?.id === user.id;
@@ -213,26 +223,26 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
         {showSentOverlay && (
           <div className="overlay-backdrop">
             <div className="overlay-card success">
-              <h4 className="overlay-title">Invite Sent!</h4>
+              <h4 className="overlay-title">invite sent!</h4>
               <p className="overlay-sub">
                 {mode === "external"
-                  ? "The invite link was copied to your clipboard."
-                  : "A notification was sent to the user."}
+                  ? "the invite link was copied to your clipboard."
+                  : "a notification was sent to the user."}
               </p>
 
               {inviteLink && (
                 <div className="overlay-email-preview">
-                  <p><strong>Email Preview:</strong></p>
-                  <p><em>Subject:</em> You've been invited to join a team on GoBearAI</p>
-                  <p><em>Body:</em> Click the link to join the team: <br />
+                  <p><strong>email preview:</strong></p>
+                  <p><em>subject:</em> you've been invited to join a team on gobearai</p>
+                  <p><em>body:</em> click the link to join the team: <br />
                     <code>{inviteLink}</code>
                   </p>
-                  <button onClick={handleCopyLink}>Copy Link Again</button>
+                  <button onClick={handleCopyLink}>copy link again</button>
                 </div>
               )}
 
               <button className="overlay-ok" onClick={() => setShowSentOverlay(false)}>
-                OK
+                ok
               </button>
             </div>
           </div>
