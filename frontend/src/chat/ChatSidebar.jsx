@@ -4,6 +4,8 @@ import { IoIosArrowForward } from "react-icons/io";
 import { avatarColors } from "./chatUtils";
 import "./chat.css";
 
+const hasUnread = (setLike, id) =>
+  setLike instanceof Set && typeof setLike.has === "function" && setLike.has(id);
 const ChatSidebar = ({
   searchQuery,
   setSearchQuery,
@@ -12,6 +14,8 @@ const ChatSidebar = ({
   selectedChat,
   setSelectedChat,
   setShowForumModal,
+  unreadChats,
+  onOpenChat,
 }) => (
   <div className="chat-sidebar">
     <div className="sidebar-title-bar">
@@ -38,11 +42,7 @@ const ChatSidebar = ({
         <div
           key={chat.id || index}
           className="chat-item"
-          onClick={() => {
-            if (!selectedChat || selectedChat.name !== chat.name) {
-              setSelectedChat(chat);
-            }
-          }}
+          onClick={() => onOpenChat(chat)}
           style={{ cursor: "pointer" }}
         >
           <div
@@ -52,7 +52,10 @@ const ChatSidebar = ({
             }}
           />
           <div className="chat-info">
-            <h3 className="chat-name">{chat.name}</h3>
+            <h3 className="chat-name">
+              {chat.name}
+              {chat.id && hasUnread(unreadChats, chat.id) ? ( <span className="chat-dot" /> ) : null}
+            </h3> 
             <p className="chat-preview">{chat.preview}</p>
           </div>
         </div>
