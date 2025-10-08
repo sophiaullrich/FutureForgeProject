@@ -1,24 +1,19 @@
-// modal for creating a new team
+// CreateTeamModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { listProfiles } from "./ProfileService"; // <- make sure filename matches exactly
-import { db } from "../Firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { auth } from "../Firebase"; // Import auth to get current user
-
-const BACKEND_URL = "http://localhost:5001/api/chat/createTeamChatBox"; // Adjust if needed
+import { listProfiles } from "./ProfileService";
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   // form fields
   const [teamName, setTeamName] = useState("");
   const [description, setDescription] = useState("");
-  const [visibility, setVisibility] = useState("private"); // public or private
+  const [visibility, setVisibility] = useState("private"); // "public" or "private"
 
   // user profiles
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  // search and selection
+  // search & selection
   const [query, setQuery] = useState("");
   const [selectedUids, setSelectedUids] = useState(new Set());
   const [submitError, setSubmitError] = useState("");
@@ -32,15 +27,13 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         const ppl = await listProfiles();
         setProfiles(ppl);
       } catch (e) {
-        console.error("failed to load profiles:", e);
-        setLoadError("could not load users. check signin and firestore rules.");
+        setLoadError("Could not load users. check signin and firestore rules.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  // filter users by query
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return profiles;
@@ -51,7 +44,6 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     });
   }, [profiles, query]);
 
-  // select or unselect a user
   const toggle = (uid) => {
     setSelectedUids((prev) => {
       const next = new Set(prev);
@@ -60,48 +52,30 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     });
   };
 
-  // create team and add members
   const handleCreate = async () => {
     setSubmitError("");
     const name = teamName.trim();
     if (!name) {
-      setSubmitError("please enter a team name.");
+      setSubmitError("Please enter a team name.");
       return;
     }
 
-    // Ensure owner of the group is always in the team
-    const creatorUid = auth.currentUser?.uid;
-    const uids = Array.from(selectedUids);
-    if (creatorUid && !uids.includes(creatorUid)) uids.push(creatorUid);
-
     try {
-      const teamId = await onCreate?.({
+      // Prepare payload with visibility and isPublic
+      const payload = {
         name,
         description: description.trim(),
+        visibility,
         isPublic: visibility === "public",
-      });
-
+      };
+      const teamId = await onCreate?.(payload);
+      const uids = Array.from(selectedUids);
       if (teamId && uids.length && onAddMembers) {
         await onAddMembers({ teamId, memberUids: uids });
       }
-
-      // Call backend to create group chat box for the team
-      if (teamId && uids.length) {
-        await fetch(BACKEND_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            teamId,
-            teamName: name,
-            memberUids: uids,
-          }),
-        });
-      }
-
       onClose?.();
     } catch (e) {
-      console.error(e);
-      setSubmitError(e?.message || "failed to create team.");
+      setSubmitError(e?.message || "Failed to create team.");
     }
   };
 
@@ -111,28 +85,27 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         <button className="modal-close" onClick={onClose} aria-label="close">
           ✕
         </button>
-
-        <h2 className="create-title">create team</h2>
+        <h2 className="create-title">Create Team</h2>
 
         {submitError && <div className="form-error">{submitError}</div>}
 
-        <label className="form-label">team name</label>
+        <label className="form-label">Team Name</label>
         <input
           className="form-input"
-          placeholder="enter team name"
+          placeholder="Enter Team Name"
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
         />
 
-        <label className="form-label">description</label>
+        <label className="form-label">Description</label>
         <textarea
           className="form-textarea"
-          placeholder="enter description"
+          placeholder="Enter Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <label className="form-label">team visibility</label>
+        <label className="form-label">Team Visibility</label>
         <div className="radio-row" style={{ marginBottom: "1rem" }}>
           <label style={{ marginRight: "1rem" }}>
             <input
@@ -141,8 +114,8 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
               value="public"
               checked={visibility === "public"}
               onChange={() => setVisibility("public")}
-            />
-            public
+            />{" "}
+            Public (anyone can join)
           </label>
           <label>
             <input
@@ -151,17 +124,17 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
               value="private"
               checked={visibility === "private"}
               onChange={() => setVisibility("private")}
-            />
-            private
+            />{" "}
+            Private (invite only)
           </label>
         </div>
 
-        <label className="form-label">add members (from registered users)</label>
+        <label className="form-label">Add Members (From Registered Users)</label>
         <div className="search-row">
           <span className="search-icon">🔎</span>
           <input
             className="search-input"
-            placeholder="search by name or email..."
+            placeholder="Search By Name Or Email..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -171,7 +144,9 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
           {loading ? (
             <div className="tasks-empty">loading users…</div>
           ) : loadError ? (
-            <div className="form-error" style={{ marginTop: 8 }}>{loadError}</div>
+            <div className="form-error" style={{ marginTop: 8 }}>
+              {loadError}
+            </div>
           ) : filtered.length === 0 ? (
             <div className="tasks-empty">no users found.</div>
           ) : (
@@ -187,7 +162,9 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
                   title={p.email}
                 >
                   <span className="avatar-dot" />
-                  <span className="member-name">{p.displayName || p.email || uid}</span>
+                  <span className="member-name">
+                    {p.displayName || p.email || uid}
+                  </span>
                   <span className="member-sub">{p.email}</span>
                 </button>
               );

@@ -692,3 +692,69 @@ body {
   background: #fff;
   font-size: 14px;
 }
+.invite-modal { z-index: 1002; pointer-events: auto; }
+
+.invite-modal .invites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invite-modal .invite-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 2px solid #cfc8b6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: box-shadow .15s ease, transform .05s ease, border-color .15s ease;
+}
+.invite-modal .invite-row:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.08); }
+.invite-modal .invite-row.selected { background: #e2d9c4; border-color: #2b2d63; color: #1f2242; }
+
+.invite-modal .invite-left { display: flex; align-items: center; gap: 10px; }
+.invite-modal .avatar-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 25% 25%, #86c391, #5170a6);
+  border: 1px solid #c9c3b5;
+}
+.invite-modal .invite-name { color: #1f2242; font-weight: 600; }
+.invite-modal .invite-status { font-weight: 600; }
+.invite-modal .invite-status.pending { color: #6b8cc9; }
+.invite-modal .invite-status.declined { color: #b35353; }
+.invite-modal .invite-row.selected {
+  background: #e2d9c4;
+  border-color: #2b2d63;
+  color: #1f2242;
+  box-shadow: 0 0 0 3px rgba(43, 45, 99, 0.25);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.invite-modal .invite-row:hover:not(.selected) {
+  background: #f1ede1;
+}
+/* Capitalize headings + labels in Teams/Create/Invite modals */
+.teams-header,
+.create-modal .create-title,
+.create-modal .form-label,
+.create-modal .select-team-label,
+.create-modal label,
+.invite-modal .invite-title,
+.invite-modal .pending-title,
+.join-modal .join-title,
+.details-modal .details-title,
+.panel-title,
+.card-title,
+.action-tile { 
+  text-transform: capitalize;
+}
+
+/* Capitalize placeholders in the Create Team form */
+.create-modal input::placeholder,
+.create-modal textarea::placeholder {
+  text-transform: capitalize;
+}

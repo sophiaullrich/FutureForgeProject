@@ -1,3 +1,4 @@
+// ProfileService.js
 // service for managing user profiles
 import { auth, db } from "../Firebase";
 import {
@@ -13,7 +14,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 
-// make sure current user has a profile in /profiles/{uid}
+// make sure current user has a profile 
 export async function ensureProfile() {
   const user = auth.currentUser;
   if (!user) throw new Error("not signed in");
@@ -42,7 +43,6 @@ export async function ensureProfile() {
   } else {
     await setDoc(ref, base, { merge: true });
   }
-
   return ref;
 }
 
@@ -71,32 +71,26 @@ export async function getMyProfile() {
   return { id: snap.id, ...x, displayName: x.displayName || x.email || snap.id };
 }
 
-// update signed-in user’s profile (only allowed fields)
+// update signed-in user’s profile
 export async function updateMyProfile(patch = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error("not signed in");
   const ref = doc(db, "profiles", user.uid);
-
   const allowed = ["displayName", "photoURL", "bio"];
   const safePatch = Object.fromEntries(
     Object.entries(patch).filter(([k, v]) => allowed.includes(k) && v != null)
   );
-
   if (Object.keys(safePatch).length === 0) return;
-
-  await updateDoc(ref, {
-    ...safePatch,
-    updatedAt: serverTimestamp(),
-  });
+  await updateDoc(ref, { ...safePatch, updatedAt: serverTimestamp() });
 }
 
-// admin function: add many profiles at once
+
 export async function bulkUpsertProfiles(users = []) {
   const me = auth.currentUser;
   if (!me) throw new Error("not signed in");
 
   // only allowed for admins
-  const adminEmails = ["sophia@uhl.co.nz"]; // edit if needed
+  const adminEmails = ["sophia@uhl.co.nz"]; 
   if (!adminEmails.includes((me.email || "").toLowerCase())) {
     throw new Error("forbidden: admin only");
   }
@@ -104,12 +98,10 @@ export async function bulkUpsertProfiles(users = []) {
   if (!Array.isArray(users) || users.length === 0) return;
 
   const batch = writeBatch(db);
-
   users.forEach((u) => {
     const uid = u?.uid;
     const email = (u?.email || "").trim();
     if (!uid || !email) return;
-
     const ref = doc(db, "profiles", uid);
     batch.set(
       ref,
@@ -126,7 +118,7 @@ export async function bulkUpsertProfiles(users = []) {
     );
   });
 
-  // make callable from browser console
+  // make callable from browser console if needed
   if (typeof window !== "undefined") {
     window.bulkUpsertProfiles = bulkUpsertProfiles;
   }

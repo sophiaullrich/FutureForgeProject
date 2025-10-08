@@ -1,4 +1,4 @@
-// main teams page
+// src/teams-page/TeamsPage.jsx
 import React, { useEffect, useState } from "react";
 import TeamCard from "./TeamCard";
 import CreateTeamModal from "./CreateTeamModal";
@@ -7,23 +7,24 @@ import JoinTeamModal from "./JoinTeamModal";
 import TeamDetailsModal from "./TeamDetailsModal";
 import "./TeamsPage.css";
 
-// data layer helpers
+
 import {
   observeMyTeams,
   observeMyInvites,
   createTeam,
   inviteMember,
-  acceptInvite,
+  joinPublicTeam, 
   deleteTeam,
   addMembers,
-} from "../TeamsService";
+} from "./TeamsService"; 
+
 import { auth } from "../Firebase";
 
 const CHAT_BACKEND_URL = "http://localhost:5001/api/chat";
 
 export default function TeamsPage() {
   // ui state
-  const [modal, setModal] = useState(null); // create | invite | join | details | null
+  const [modal, setModal] = useState(null); // "create" | "invite" | "join" | "details" | null
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   // data state
@@ -60,9 +61,9 @@ export default function TeamsPage() {
     setModal("details");
   };
 
-  // create team
-  const handleAddTeam = async ({ name, description }) => {
-    const teamId = await createTeam({ name, description });
+  // create team 
+  const handleAddTeam = async ({ name, description, visibility }) => {
+    const teamId = await createTeam({ name, description, visibility });
     return teamId;
   };
 
@@ -78,9 +79,9 @@ export default function TeamsPage() {
     setModal(null);
   };
 
-  // accept invite
+  // join public team 
   const handleJoinTeam = async ({ teamId }) => {
-    await acceptInvite({ teamId });
+    await joinPublicTeam({ teamId });
     setModal(null);
   };
 
@@ -94,15 +95,24 @@ export default function TeamsPage() {
     setModal(null);
   };
 
-  // render page
   return (
     <div className="teams-page">
       <section className="your-teams-panel">
         <div className="panel-title">Your Teams</div>
         <div className="teams-grid">
-          {teams.map((team) => (
-            <TeamCard key={team.id} team={team} onClick={() => handleCardClick(team)} />
-          ))}
+          {teams.length === 0 ? (
+            <div className="team-card" style={{ justifyContent: "center" }}>
+              You haven’t joined any teams yet.
+            </div>
+          ) : (
+            teams.map((team) => (
+              <TeamCard
+                key={team.id}
+                team={team}
+                onClick={() => handleCardClick(team)}
+              />
+            ))
+          )}
         </div>
       </section>
 
@@ -111,10 +121,12 @@ export default function TeamsPage() {
           <span>Create Team</span>
           <span className="chevron">›</span>
         </button>
+
         <button onClick={() => setModal("invite")} className="action-tile">
           <span>Invite Members</span>
           <span className="chevron">›</span>
         </button>
+
         <button onClick={() => setModal("join")} className="action-tile">
           <span>Join a Team</span>
           <span className="chevron">›</span>

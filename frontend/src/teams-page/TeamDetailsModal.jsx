@@ -1,4 +1,5 @@
-// modal for viewing a team's details
+// TeamDetailsModal.jsx
+
 import React, { useMemo, useState, useEffect } from "react";
 import AddTaskModal from "../AddTaskModal";
 import { listProfiles } from "./ProfileService"; 
@@ -10,59 +11,52 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
     (team?.tasks || []).map((t) => ({ ...t, done: !!t.done }))
   );
 
-  
+  // members
   const [memberNames, setMemberNames] = useState([]); // [{ uid, name }]
-  const [uidToName, setUidToName] = useState({});     // { uid: name }
+  const [uidToName, setUidToName] = useState({}); // { uid: name }
 
   // update tasks if team changes
   useEffect(() => {
     setTasks((team?.tasks || []).map((t) => ({ ...t, done: !!t.done })));
   }, [team?.tasks]);
 
-  
+  // fetch all profiles and build uid name map, then map team members to names
   useEffect(() => {
     let isMounted = true;
-
     const fetchNames = async () => {
       try {
-        const profiles = await listProfiles(); // expects [{ uid, name, ... }]
+        const profiles = await listProfiles();
         const map = {};
         for (const p of profiles || []) {
-          // be flexible with field names
           const name =
             p.name ||
             p.displayName ||
             [p.firstName, p.lastName].filter(Boolean).join(" ") ||
             "Unknown User";
           if (p.uid) map[p.uid] = name;
+          if (!p.uid && p.id) map[p.id] = name;
         }
-
-        // build member name list in the same order as team.members
         const members = (team?.members || []).map((m) => {
-          // support either raw UID or stored object { uid, name }
-          if (typeof m === "string") {
+          if (typeof m === "string")
             return { uid: m, name: map[m] || m };
-          } else if (m?.uid) {
-            return { uid: m.uid, name: m.name || map[m.uid] || m.uid };
-          }
+          if (m?.uid) return { uid: m.uid, name: m.name || map[m.uid] || m.uid };
           return { uid: String(m), name: String(m) };
         });
-
         if (isMounted) {
           setUidToName(map);
           setMemberNames(members);
         }
-      } catch (e) {
-        // fallback: show raw values if profiles can’t be fetched
+      } catch {
         const members = (team?.members || []).map((m) =>
-          typeof m === "string" ? { uid: m, name: m } : { uid: m?.uid || "", name: m?.name || "" }
+          typeof m === "string"
+            ? { uid: m, name: m }
+            : { uid: m?.uid || "", name: m?.name || "" }
         );
         if (isMounted) {
           setMemberNames(members);
         }
       }
     };
-
     fetchNames();
     return () => {
       isMounted = false;
@@ -100,16 +94,14 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
     };
   };
 
-  // ✅ helper: show name for an assignee UID
+  // show name for an assignee value
   const displayAssignee = (val) => {
     if (!val) return "";
-    // if tasks store objects { uid, name }
     if (typeof val === "object" && val !== null) {
       return val.name || uidToName[val.uid] || val.uid || "";
     }
-    // string: if it matches a known UID, show name; else show as-is (maybe already a name)
     return uidToName[val] || String(val);
-  };
+    };
 
   return (
     <div className="details-modal">
@@ -125,7 +117,6 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
       <div className="details-top">
         <div className="members-card">
           <div className="card-title">members</div>
-
           <div className="members-list-chip">
             {memberNames.length === 0 ? (
               <div style={{ opacity: 0.6, padding: 8 }}>no members</div>
@@ -151,12 +142,7 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
               />
             </div>
             <div
-              style={{
-                textAlign: "center",
-                marginTop: 6,
-                color: "#2b2d63",
-                fontWeight: 600,
-              }}
+              style={{ textAlign: "center", marginTop: 6, color: "#2b2d63", fontWeight: 600 }}
             >
               {progressPct}%
             </div>
@@ -167,7 +153,6 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
       {/* team tasks */}
       <div className="tasks-section">
         <div className="card-title">team tasks</div>
-
         <div className="tasks-card">
           <div className="tasks-head">
             <span>done?</span>
@@ -175,7 +160,6 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
             <span>due date</span>
             <span>assigned to</span>
           </div>
-
           <div className="tasks-body">
             {tasks.length === 0 ? (
               <div className="tasks-empty">no tasks yet.</div>
@@ -207,10 +191,7 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
 
       {/* buttons */}
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button
-          className="primary-outline-btn"
-          onClick={() => setShowAddModal(true)}
-        >
+        <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
           add new task
         </button>
         {onDelete && (
@@ -223,9 +204,7 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
       {/* add task modal */}
       {showAddModal && (
         <AddTaskModal
-          members={(team?.members || []).map((m) =>
-            typeof m === "string" ? { uid: m, name: uidToName[m] || m } : m
-          )}
+          members={memberNames.map((m) => m.name)}
           onClose={() => setShowAddModal(false)}
           onAdd={addTask}
         />

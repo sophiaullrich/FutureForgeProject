@@ -5,31 +5,22 @@ import { auth, db } from "../Firebase";
 import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore";
 
 export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
-  // form fields
   const [form, setForm] = useState({ name: "", email: "", phone: "", linkedin: "" });
-  const [mode, setMode] = useState("internal"); // internal or external
+  const [mode, setMode] = useState("internal"); // internal and external
   const [profiles, setProfiles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-
-  // NEW: search query for filtering profiles
   const [userQuery, setUserQuery] = useState("");
-
-  // IMPORTANT: this holds the **Firestore doc id** (team.docId || team.id)
   const [selectedTeamId, setSelectedTeamId] = useState("");
-
   const [showSentOverlay, setShowSentOverlay] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
 
-  // current user id
   const currentUid = auth.currentUser?.uid;
 
-  // handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // load user profiles
   useEffect(() => {
     (async () => {
       const all = await listProfiles();
@@ -38,14 +29,12 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
     })();
   }, [currentUid]);
 
-  // default select first team using its Firestore doc id (docId || id)
   useEffect(() => {
     if (teams.length > 0) {
       setSelectedTeamId(teams[0].docId || teams[0].id);
     }
   }, [teams]);
 
-  // NEW: memoised filtering for search
   const filteredProfiles = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
     if (!q) return profiles;
@@ -56,31 +45,26 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
     });
   }, [profiles, userQuery]);
 
-  // send invite
   const handleInvite = async () => {
-    if (!auth.currentUser?.uid) return alert("please sign in.");
-    if (!selectedTeamId) return alert("please select a team.");
+    if (!auth.currentUser?.uid) return alert("Please sign in.");
+    if (!selectedTeamId) return alert("Please select a team.");
 
     const link = `${window.location.origin}/join/${selectedTeamId}`;
     setInviteLink(link);
 
     let emailToInvite = "";
-
     if (mode === "internal" && selectedUser) {
       emailToInvite = (selectedUser.email || "").trim().toLowerCase();
     } else if (mode === "external" && form.email.trim()) {
       emailToInvite = form.email.trim().toLowerCase();
     } else {
-      return alert("please select a user or enter a valid email.");
+      return alert("Please select a user or enter a valid email.");
     }
 
-    // find the selected team object (for logging / message text)
     const teamObj =
       teams.find((t) => (t.docId || t.id) === selectedTeamId) || null;
-
-    // Only owners can invite per Firestore rules
     if (!teamObj || teamObj.ownerId !== auth.currentUser.uid) {
-      alert("only the team owner can send invites.");
+      alert("Only the team owner can send invites.");
       return;
     }
 
@@ -90,13 +74,12 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
       console.error("Invite write failed via service:", err);
       alert(
         /permission/i.test(String(err?.message))
-          ? "insufficient permissions: only the team owner can invite, or check your Firestore rules."
+          ? "Insufficient permissions: only the team owner can invite, or check your Firestore rules."
           : err?.message || "failed to create invite."
       );
       return;
     }
 
-    // internal user notification
     if (mode === "internal" && selectedUser?.id) {
       const notifRef = doc(collection(db, "notifications"));
       try {
@@ -104,7 +87,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
           userId: selectedUser.id,
           type: "invite",
           title: "new team invite",
-          message: `you’ve been invited to join the team "${teamObj?.name || "a team"}".`,
+          message: `You’ve been invited to join the team "${teamObj?.name || "a team"}".`,
           teamId: selectedTeamId,
           read: false,
           timestamp: serverTimestamp(),
@@ -113,26 +96,23 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
         console.warn("Notification write failed:", err);
       }
     } else {
-      // copy link for external users
       try {
         await navigator.clipboard.writeText(link);
       } catch {
-        console.log("clipboard failed. here’s your link:", link);
+        console.log("Clipboard failed. here’s your link:", link);
       }
     }
 
     setShowSentOverlay(true);
   };
 
-  // copy invite link again
   const handleCopyLink = () => {
     if (inviteLink) {
       navigator.clipboard.writeText(inviteLink);
-      alert("link copied to clipboard.");
+      alert("Link copied to clipboard.");
     }
   };
 
-  // render modal ui
   return (
     <div className="modal-backdrop">
       <div className="invite-modal" role="dialog" aria-modal="true">
@@ -180,30 +160,31 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               <input
                 className="invite-input"
                 name="email"
-                placeholder="email address"
+                placeholder="Email address"
                 value={form.email}
                 onChange={handleChange}
               />
               <input
                 className="invite-input"
                 name="name"
-                placeholder="name (optional)"
+                placeholder="Name (optional)"
                 value={form.name}
                 onChange={handleChange}
               />
             </>
           )}
+
           <input
             className="invite-input"
             name="phone"
-            placeholder="phone number (optional)"
+            placeholder="Phone number (optional)"
             value={form.phone}
             onChange={handleChange}
           />
           <input
             className="invite-input"
             name="linkedin"
-            placeholder="linkedin profile (optional)"
+            placeholder="Linkedin profile (optional)"
             value={form.linkedin}
             onChange={handleChange}
           />
@@ -219,8 +200,8 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
 
           <p className="invite-help">
             {mode === "internal"
-              ? "select an existing user below to invite them to your team."
-              : "enter an email address to generate an invite link."}
+              ? "Select an existing user below to invite them to your team."
+              : "Enter an email address to generate an invite link."}
           </p>
         </div>
 
@@ -228,7 +209,6 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
           <>
             <h3 className="pending-title">select a user to invite</h3>
 
-            {/* NEW: search box */}
             <div className="search-row">
               <span className="search-icon">🔎</span>
               <input
@@ -239,7 +219,6 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               />
             </div>
 
-            {/* NEW: scrollable container */}
             <div className="invites-list scrollable-list">
               {filteredProfiles.length === 0 ? (
                 <p className="tasks-empty">no users match your search.</p>
@@ -247,11 +226,15 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                 filteredProfiles.map((user) => {
                   const isSelected = selectedUser?.id === user.id;
                   return (
-                    <button
+                    <div
                       key={user.id}
-                      type="button"
                       className={`invite-row ${isSelected ? "selected" : ""}`}
-                      onClick={() => setSelectedUser(user)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedUser(user);
+                      }}
+                      style={{ cursor: "pointer", pointerEvents: "auto" }}
                     >
                       <div className="invite-left">
                         <span className="avatar-dot" />
@@ -260,7 +243,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                         </span>
                       </div>
                       <span className="invite-status pending">{user.email}</span>
-                    </button>
+                    </div>
                   );
                 })
               )}
@@ -274,8 +257,8 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               <h4 className="overlay-title">invite sent!</h4>
               <p className="overlay-sub">
                 {mode === "external"
-                  ? "the invite link was copied to your clipboard."
-                  : "a notification was sent to the user."}
+                  ? "The invite link was copied to your clipboard."
+                  : "A notification was sent to the user."}
               </p>
 
               {inviteLink && (

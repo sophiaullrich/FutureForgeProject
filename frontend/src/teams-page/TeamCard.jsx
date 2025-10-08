@@ -1,4 +1,4 @@
-// card for showing a team
+// TeamCard.jsx
 import React from "react";
 
 export default function TeamCard({ team, onClick }) {
