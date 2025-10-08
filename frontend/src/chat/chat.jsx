@@ -180,10 +180,6 @@ const Chat = () => {
 
   const chatList = [
     { name: "Sophia", preview: "Hey what..." },
-    { name: "Developer Forum", preview: "Yes" },
-    { name: "Team Marketing", preview: "No it's..." },
-    { name: "William", preview: "Whats up?" },
-    { name: "Willie", preview: "hii" },
   ];
 
   // Live messages listener for selected chat
@@ -194,7 +190,7 @@ const Chat = () => {
     if (selectedChat.isGroup) {
       const q = fsQuery(
         fsCollection(db, "groupMessages", selectedChat.id, "items"),
-        fsOrderBy("timestamp")
+        fsOrderBy("timestamp", "desc")
       );
       const unsub = onSnapshot(q, (snap) => {
         setMessages(snap.docs.map((doc) => doc.data()));
@@ -205,7 +201,7 @@ const Chat = () => {
       const chatKey = getChatKey(myId, otherId);
       const q = fsQuery(
         fsCollection(db, "messages", chatKey, "items"),
-        fsOrderBy("timestamp")
+        fsOrderBy("timestamp", "desc")
       );
       const unsub = onSnapshot(q, (snap) => {
         let loaded = snap.docs.map((doc) => doc.data());
