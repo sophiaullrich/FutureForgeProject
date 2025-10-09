@@ -24,6 +24,7 @@ import {
   addAndPersistUser
 } from "./chatUtils";
 import "./chat.css";
+import { useLocation } from "react-router-dom";
 
 const BACKEND_URL = "http://localhost:5001/api/chat/messages";
 
@@ -32,6 +33,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
+  const location = useLocation();
   const [userResults, setUserResults] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [messagedUsers, setMessagedUsers] = useState([]);
@@ -633,6 +635,22 @@ const sendMessage = useCallback(
         from: myId,
         timestamp: Date.now(),
       });
+
+      for (const memberId of selectedChat.members) {
+      if (memberId === myId) continue;
+        await addDoc(fsCollection(db, "notifications"), {
+          userId: memberId,
+          title: `New message in ${selectedChat.name}`,
+          message: `${myName}: ${newMessage}`,
+          type: "chat",             
+          isGroup: true,             
+          chatUserId: selectedChat.id, 
+          read: false,
+          timestamp: new Date(),
+        });
+      }
+
+
     } else {
       const otherId = selectedChat.id;
       const chatKey = getChatKey(myId, otherId);
@@ -662,6 +680,16 @@ const sendMessage = useCallback(
       } catch (err) {
         console.warn("Failed to update receiver’s messagedUsers:", err);
       }
+
+      await addDoc(fsCollection(db, "notifications"), {
+        userId: otherId,
+        title: `New message from ${myName}`,
+        message: newMessage,
+        type: "chat",   
+        chatUserId: myId,
+        read: false,
+        timestamp: new Date(),
+      });
     }
 
     setNewMessage("");
@@ -802,6 +830,48 @@ const handleCloseChat = () => {
       window.removeEventListener('beforeunload', handleFlushSeen);
     };
   }, [selectedChat, messages, lastActivity]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userId = params.get("userId");
+    const groupId = params.get("groupId");
+
+    if (!auth.currentUser || (!userId && !groupId)) return;
+
+    const openChatFromNotification = async () => {
+      try {
+        if (userId) {
+          const userSnap = await getDoc(doc(db, "profiles", userId));
+          const u = userSnap.exists() ? userSnap.data() : {};
+          console.log("[Chat.jsx] Auto-opening DM from notification:", userId, u);
+          setSelectedChat({
+            id: userId,
+            name:
+              u.displayName ||
+              u.firstName ||
+              u.email ||
+              "User",
+            email: u.email || "",
+            isGroup: false,
+          });
+        } else if (groupId) {
+          const groupSnap = await getDoc(doc(db, "teams", groupId));
+          const g = groupSnap.exists() ? groupSnap.data() : {};
+          console.log("[Chat.jsx] Auto-opening Group Chat from notification:", groupId, g);
+          setSelectedChat({
+            id: groupId,
+            name: g.name || "Group Chat",
+            members: g.members || [],
+            isGroup: true,
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to open chat from notification:", err);
+      }
+    };
+
+    openChatFromNotification();
+  }, [location.search, location.state, auth.currentUser]);
 
   return (
     <div className="chat-app">
