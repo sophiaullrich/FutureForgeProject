@@ -610,39 +610,65 @@ useEffect(() => {
   }, [searchQuery]);
 
   // Send message
-  const sendMessage = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (newMessage.trim() === "" || !selectedChat || !auth.currentUser) return;
-      const myId = auth.currentUser.uid;
+const sendMessage = useCallback(
+  async (e) => {
+    e.preventDefault();
+    if (newMessage.trim() === "" || !selectedChat || !auth.currentUser) return;
 
-      if (selectedChat.isGroup) {
-        if (!selectedChat.members.includes(myId)) {
-          alert("You are not a member of this team.");
-          return;
-        }
-        const msgRef = fsCollection(db, "groupMessages", selectedChat.id, "items");
-        await addDoc(msgRef, {
-          text: newMessage,
-          from: myId,
-          timestamp: Date.now(),
-        });
-      } else {
-        const otherId = selectedChat.id;
-        const chatKey = getChatKey(myId, otherId);
-        const msgRef = fsCollection(db, "messages", chatKey, "items");
-        await addDoc(msgRef, {
-          text: newMessage,
-          from: myId,
-          to: otherId,
-          timestamp: Date.now(),
-        });
-        addAndPersistUser(selectedChat, setMessagedUsers, auth, BACKEND_URL);
+    const myId = auth.currentUser.uid;
+    const myName =
+      auth.currentUser.displayName ||
+      auth.currentUser.email?.split("@")[0] ||
+      myId;
+    const myEmail = auth.currentUser.email || "";
+
+    if (selectedChat.isGroup) {
+      if (!selectedChat.members.includes(myId)) {
+        alert("You are not a member of this team.");
+        return;
       }
-      setNewMessage("");
-    },
-    [newMessage, selectedChat]
-  );
+      const msgRef = fsCollection(db, "groupMessages", selectedChat.id, "items");
+      await addDoc(msgRef, {
+        text: newMessage,
+        from: myId,
+        timestamp: Date.now(),
+      });
+    } else {
+      const otherId = selectedChat.id;
+      const chatKey = getChatKey(myId, otherId);
+      const msgRef = fsCollection(db, "messages", chatKey, "items");
+
+      await addDoc(msgRef, {
+        text: newMessage,
+        from: myId,
+        to: otherId,
+        timestamp: Date.now(),
+      });
+
+      addAndPersistUser(selectedChat, setMessagedUsers, auth, BACKEND_URL);
+
+      try {
+        await fetch(`${BACKEND_URL.replace("/messages", "")}/messagedUsers/${otherId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: {
+              id: myId,
+              name: myName,
+              email: myEmail,
+            },
+          }),
+        });
+      } catch (err) {
+        console.warn("Failed to update receiver’s messagedUsers:", err);
+      }
+    }
+
+    setNewMessage("");
+  },
+  [newMessage, selectedChat]
+);
+
 
   const allChats = [
     ...groupChats,
