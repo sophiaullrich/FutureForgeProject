@@ -54,17 +54,41 @@ export default function ProtectedLayout() {
     }
   }, [notifications]);
 
-  const handleNotificationClick = (notification) => {
-    markRead(notification.id);
-    switch (notification.type) {
-      case "friendRequest": navigate("/friends"); break;
-      case "teamInvite":
-      case "teamJoined": navigate("/teams"); break;
-      case "task": navigate(`/tasks?notifId=${notification.notifId}&taskId=${notification.taskId}`); break;
-      default: navigate("/dashboard");
-    }
+const handleNotificationClick = (notification) => {
+  markRead(notification.id);
+
+  if (notification.type === "chat") {
+    const isGroup = notification.isGroup === true;
+    const target = isGroup
+      ? `/chat?groupId=${notification.chatUserId}`
+      : `/chat?userId=${notification.chatUserId}`;
+
+    console.log("[Redirecting to chat notification]", { isGroup, target });
+    navigate(target, {
+    replace: false,
+    state: { forceOpen: Date.now() }, 
+    });
     setNotifOpen(false);
-  };
+    return;
+  }
+
+  switch (notification.type) {
+    case "friendRequest":
+      navigate("/friends");
+      break;
+    case "teamInvite":
+    case "teamJoined":
+      navigate("/teams");
+      break;
+    case "task":
+      navigate(`/tasks?notifId=${notification.notifId}&taskId=${notification.taskId}`);
+      break;
+    default:
+      navigate("/dashboard");
+  }
+
+  setNotifOpen(false);
+};
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

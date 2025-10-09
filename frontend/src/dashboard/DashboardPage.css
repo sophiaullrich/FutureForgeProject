@@ -97,7 +97,7 @@
 
 .task-name {
   font-size: 14px;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .task-date {
