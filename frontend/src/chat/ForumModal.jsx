@@ -1,22 +1,95 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./chat.css";
+import { db } from "../Firebase";
+import {
+  collection as fsCollection,
+  query as fsQuery,
+  where as fsWhere,
+  onSnapshot,
+  getDocs,
+} from "firebase/firestore";
 
-const forums = [
-  { id: "general", name: "General Discussion" },
-  { id: "development", name: "Development" },
-  { id: "jobs", name: "Developer Jobs" },
-  { id: "cv", name: "CV Help" },
-  { id: "conferences", name: "Conferences Auckland" },
-  { id: "Job Opportunities", name: "Job Opportunities Overseas" },
-  { id: "UI Design", name: "UI Design Help" },
-  { id: "Web Dev", name: "Web Designer Jobs" },
-];
+const makeChatKey = ({ type, id }) => `${type}::${id}`; 
 
 export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [publicTeams, setPublicTeams] = useState([]);
+  const [loadingTeams, setLoadingTeams] = useState(true);
+  const [error, setError] = useState("");
+
+
+  useEffect(() => {
+    if (!showForumModal) return;
+
+    const teamsRef = fsCollection(db, "teams");
+
+    // Subscribe to visibility == 'public'
+    const q1 = fsQuery(teamsRef, fsWhere("visibility", "==", "public"));
+    const unsub1 = onSnapshot(
+      q1,
+      (snap) => {
+        const updated = snap.docs.map((d) => {
+          const data = d.data() || {};
+          return {
+            id: d.id,
+            name: data.name || "(unnamed team)",
+            description: data.description || "",
+            kind: "team",
+          };
+        });
+        setPublicTeams(updated);
+        setLoadingTeams(false);
+      },
+      (e) => {
+        console.error(e);
+        setError("Couldn't load public teams.");
+        setLoadingTeams(false);
+      }
+    );
+
+    // Fallback: also include isPublic == true (for older docs)
+    const q2 = fsQuery(teamsRef, fsWhere("isPublic", "==", true));
+    getDocs(q2)
+      .then((snap) => {
+        const extra = snap.docs.map((d) => {
+          const data = d.data() || {};
+          return {
+            id: d.id,
+            name: data.name || "(unnamed team)",
+            description: data.description || "",
+            kind: "team",
+          };
+        });
+        setPublicTeams((prev) => {
+          const map = new Map(prev.map((t) => [t.id, t]));
+          extra.forEach((t) => map.set(t.id, t));
+          return Array.from(map.values());
+        });
+      })
+      .catch((e) => console.error(e));
+
+    return () => unsub1();
+  }, [showForumModal]);
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return publicTeams;
+    return publicTeams.filter((f) => f.name.toLowerCase().includes(q));
+  }, [publicTeams, searchQuery]);
+
   if (!showForumModal) return null;
+
   return (
     <div className="modal-overlay">
-      <div className="modal-content forum-modal" style={{ position: "relative" }}>
+      <div
+        className="modal-content forum-modal"
+        style={{
+          position: "relative",
+          maxHeight: "80vh",
+          overflowY: "auto",
+          paddingBottom: "20px",
+        }}
+      >
         <button
           className="modal-close"
           style={{ position: "absolute", top: 18, right: 24 }}
@@ -25,13 +98,29 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
         >
           ×
         </button>
+
         <h2 className="forum-modal-title">Find Forums</h2>
+
         <input
           className="forum-search"
-          placeholder="Search forums and topics...."
+          placeholder="Search public teams..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <div className="forum-list">
-          {forums.map((forum) => (
+
+        {loadingTeams && <div className="forum-loading">Loading public teams…</div>}
+        {error && <div className="forum-error">{error}</div>}
+
+        <div
+          className="forum-list"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+            marginTop: "16px",
+          }}
+        >
+          {filtered.map((forum) => (
             <button
               key={forum.id}
               className="forum-list-item"
@@ -40,6 +129,10 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
               {forum.name}
             </button>
           ))}
+
+          {!loadingTeams && filtered.length === 0 && (
+            <div className="forum-empty">No results.</div>
+          )}
         </div>
       </div>
     </div>
@@ -48,30 +141,35 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
 
 export function JoinForumModal({ selectedForum, setSelectedForum, addAndPersistUser, setShowForumModal }) {
   if (!selectedForum) return null;
+
+  const displayName = selectedForum.name;
+
   return (
     <div className="modal-overlay">
       <div className="modal-content join-forum-modal">
         <button className="modal-close" onClick={() => setSelectedForum(null)}>
           ×
         </button>
-        <h2>{selectedForum.name}</h2>
+        <h2>{displayName}</h2>
         <p>
-          A forum for discussing {selectedForum.name.toLowerCase()}.<br />
-          Would you like to join?
+          Would you like to join this forum?
         </p>
         <button
           className="join-forum-btn"
           onClick={() => {
-            addAndPersistUser({
+            const channel = {
               id: selectedForum.id,
-              name: selectedForum.name,
+              name: displayName,
+              type: "team",
+              chatKey: makeChatKey({ type: "team", id: selectedForum.id }),
               email: "",
-            });
+            }
+            addAndPersistUser(channel);
             setSelectedForum(null);
             setShowForumModal(false);
           }}
         >
-          Join Forum
+          Join
         </button>
       </div>
     </div>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { db, auth } from "../Firebase";
 import {
   collection as fsCollection,
+  collectionGroup as fsCollectionGroup,
   query as fsQuery,
   orderBy as fsOrderBy,
   onSnapshot,
@@ -37,6 +38,75 @@ const Chat = () => {
   const [showForumModal, setShowForumModal] = useState(false);
   const [selectedForum, setSelectedForum] = useState(null);
   const [groupChats, setGroupChats] = useState([]);
+  const [unreadChats, setUnreadChats] = useState(new Set());
+  const [lastSeen, setLastSeen] = useState({});
+  const lastSeenRef = useRef({});
+  const [lastSeenReady, setLastSeenReady] = useState(false);
+  const [lastActivity, setLastActivity] = useState({});
+
+  const tsNum = (t) => typeof t === "number" ? t : (t?.toMillis?.() || 0);
+
+  // flush lastSeen when tab is hidden or page is unloaded
+  useEffect(() => {
+  const handleFlushSeen = () => {
+    const id = selectedChat?.id;
+    if (!id) return;
+
+    // compute a safe "latest we’ve seen" value
+    const newestLocalTs =
+      messages && messages.length
+        ? tsNum(messages[0]?.timestamp)
+        : 0;
+
+    const prevSeen = Number(lastSeenRef.current?.[id] || 0);
+    const ts = Math.max(prevSeen, newestLocalTs, Date.now());
+
+    setLastSeen((prev) => {
+      const next = { ...(prev || {}), [id]: ts };
+      lastSeenRef.current = next;
+      const uid = auth.currentUser?.uid;
+      if (uid) { try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {} }
+      return next;
+    });
+  };
+
+  document.addEventListener('visibilitychange', handleFlushSeen);
+  window.addEventListener('beforeunload', handleFlushSeen);
+  return () => {
+    document.removeEventListener('visibilitychange', handleFlushSeen);
+    window.removeEventListener('beforeunload', handleFlushSeen);
+  };
+}, [selectedChat, messages]);
+
+  // load from local storage when user logs in and out
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const raw = localStorage.getItem(`lastSeen_${user.uid}`);
+        let next = {};
+        try { next = raw ? JSON.parse(raw) : {};} catch {next = {}; } 
+        lastSeenRef.current = next;
+        setLastSeen(next);
+        setLastSeenReady(true);
+        console.log('[lastSeen load]', { uid: user.uid, lastSeen: next });
+      } else {
+        lastSeenRef.current = {};
+        setLastSeen({});
+        setLastSeenReady(true); // to avoid blocking initial load
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    lastSeenRef.current = lastSeen || {};
+  }, [lastSeen]);
+
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(lastSeen)); } catch {}
+  }, [lastSeen]);
 
   // Fetch group chats when auth is ready
   useEffect(() => {
@@ -152,13 +222,8 @@ const Chat = () => {
     }
   }, [selectedChat]);
 
-  const chatList = [
-    { name: "Sophia", preview: "Hey what..." },
-    { name: "Developer Forum", preview: "Yes" },
-    { name: "Team Marketing", preview: "No it's..." },
-    { name: "William", preview: "Whats up?" },
-    { name: "Willie", preview: "hii" },
-  ];
+  // list for testing purposes
+  const chatList = [];
 
   // Live messages listener for selected chat
   useEffect(() => {
@@ -168,10 +233,32 @@ const Chat = () => {
     if (selectedChat.isGroup) {
       const q = fsQuery(
         fsCollection(db, "groupMessages", selectedChat.id, "items"),
-        fsOrderBy("timestamp")
+        fsOrderBy("timestamp", "desc")
       );
       const unsub = onSnapshot(q, (snap) => {
+        if (snap.empty) return; 
+        const msg = snap.docs[0].data() || {};
         setMessages(snap.docs.map((doc) => doc.data()));
+        // while group chat is OPEN, mark lastSeen to newest group message ts
+        const ts = typeof msg.timestamp === "number"
+          ? msg.timestamp
+          : (msg.timestamp?.toMillis?.() || 0);
+        if (ts) {
+          setLastSeen((prev) => {
+            const prevVal = prev?.[selectedChat.id] || 0;
+            if (prevVal >= ts) return prev;
+            const next = { ...(prev || {}), [selectedChat.id]: ts };
+            lastSeenRef.current = next;
+            const uid = auth.currentUser?.uid;
+            if (uid) { try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {} }
+            return next;
+          });
+          setUnreadChats((prev) => {
+            const s = new Set(prev instanceof Set ? prev : []);
+            s.delete(selectedChat.id);
+            return s;
+          });
+        }
       });
       return () => unsub();
     } else {
@@ -179,7 +266,7 @@ const Chat = () => {
       const chatKey = getChatKey(myId, otherId);
       const q = fsQuery(
         fsCollection(db, "messages", chatKey, "items"),
-        fsOrderBy("timestamp")
+        fsOrderBy("timestamp", "desc")
       );
       const unsub = onSnapshot(q, (snap) => {
         let loaded = snap.docs.map((doc) => doc.data());
@@ -189,10 +276,263 @@ const Chat = () => {
             (msg.from === otherId && msg.to === myId)
         );
         setMessages(loaded);
+      // while chat is OPEN, mark lastSeen to the newest message ts we actually have
+      if (!snap.empty) {
+        const latest = snap.docs[0].data() || {};
+        const ts = typeof latest.timestamp === "number"
+          ? latest.timestamp
+          : (latest.timestamp?.toMillis?.() || 0);
+        if (ts) {
+          setLastSeen((prev) => {
+            const prevVal = prev?.[otherId] || 0;
+            if (prevVal >= ts) return prev; // already newer
+            const next = { ...(prev || {}), [otherId]: ts };
+            lastSeenRef.current = next;
+            const uid = auth.currentUser?.uid;
+            if (uid) { try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {} }
+            return next;
+          });
+          // also ensure the dot is cleared for the open chat
+          setUnreadChats((prev) => {
+            const s = new Set(prev instanceof Set ? prev : []);
+            s.delete(otherId);
+            return s;
+          });
+        }
+      }
       });
       return () => unsub();
     }
   }, [selectedChat]);
+
+  // latest message listener
+  useEffect(() => {
+  const me = auth.currentUser;
+  if (!me || !lastSeenReady) return;
+  const myId = me.uid;
+
+  const unsubs = [];
+
+  const pushUnsub = (fn) => {
+    if (typeof fn === "function") unsubs.push(fn);
+  };
+
+  // dm latest message
+  (Array.isArray(messagedUsers) ? messagedUsers : []).forEach((u) => {
+    const otherId = u && u.id;
+    if (!otherId) return;
+
+    const chatKey = getChatKey(myId, otherId);
+    const q = fsQuery(
+      fsCollection(db, "messages", chatKey, "items"),
+      fsOrderBy("timestamp", "desc"),
+      limit(1) 
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      if (snap.empty) return;
+      const msg = snap.docs[0].data() || {};
+      const isOpen = Boolean(
+        selectedChat &&
+        !selectedChat.isGroup &&
+        selectedChat.id &&
+        selectedChat.id === otherId
+      );
+
+      const ts = typeof msg.timestamp === "number" ? msg.timestamp : (msg.timestamp?.toMillis?.() || 0);
+      // update last activity for sorting (regardless of who sent it)
+      setLastActivity((prev) => ({ ...(prev || {}), [otherId]: Math.max(prev?.[otherId] || 0, ts) }));
+      const iReceivedIt = msg.to === myId && msg.from !== myId;
+      const last = Number(lastSeenRef.current?.[otherId] || 0);
+      const isNewSinceLastSeen = ts > last;
+      console.log('[DM latest]', {
+        chatId: otherId, ts, lastSeen: last, isOpen, iReceivedIt, isNewSinceLastSeen
+      });
+
+      setUnreadChats((prev) => {
+        const next = new Set(prev instanceof Set ? prev : []);
+        if (iReceivedIt && !isOpen && isNewSinceLastSeen) next.add(otherId);
+        else next.delete(otherId);        // if open, ensure it’s cleared
+        if (iReceivedIt && !isOpen && isNewSinceLastSeen) {
+          console.log('[DM -> ADD dot]', { chatId: otherId });
+          next.add(otherId);
+        } else {
+          console.log('[DM -> CLEAR dot]', { chatId: otherId });
+          next.delete(otherId);
+        }
+        return next;
+      });
+    });
+
+    pushUnsub(unsub);
+  });
+
+  // group latest message
+  (Array.isArray(groupChats) ? groupChats : []).forEach((g) => {
+    const groupId = g && g.id;
+    if (!groupId) return;
+
+    const q = fsQuery(
+      fsCollection(db, "groupMessages", groupId, "items"),
+      fsOrderBy("timestamp", "desc"),
+      limit(1)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      if (snap.empty) return;
+      const msg = snap.docs[0].data() || {};
+      const isOpen = Boolean(
+      selectedChat &&
+      selectedChat.isGroup &&
+      selectedChat.id &&
+      selectedChat.id === groupId
+    );
+
+    const ts = typeof msg.timestamp === "number" ? msg.timestamp : (msg.timestamp?.toMillis?.() || 0);
+    // update last activity for sorting
+    setLastActivity((prev) => ({ ...(prev || {}), [groupId]: Math.max(prev?.[groupId] || 0, ts) }));
+    const iSentIt = msg.from === myId;
+    const last = Number(lastSeenRef.current?.[groupId] || 0);
+    const isNewSinceLastSeen = ts > last;
+    console.log('[GROUP latest]', {
+      chatId: groupId, ts, lastSeen: last, isOpen, iSentIt, isNewSinceLastSeen
+    });
+    
+    setUnreadChats((prev) => {
+      const next = new Set(prev instanceof Set ? prev : []);
+      if (!iSentIt && !isOpen && isNewSinceLastSeen) next.add(groupId);
+      else next.delete(groupId);        // if open, ensure it’s cleared
+      if (!iSentIt && !isOpen && isNewSinceLastSeen) {
+       console.log('[GROUP -> ADD dot]', { chatId: groupId });
+       next.add(groupId);
+     } else {
+       console.log('[GROUP -> CLEAR dot]', { chatId: groupId });
+       next.delete(groupId);
+     }
+      return next;
+    });
+    });
+
+    pushUnsub(unsub);
+  });
+
+  return () => {
+    // Only call if it’s actually a function
+    unsubs.forEach((u) => { try { typeof u === "function" && u(); } catch {} });
+  };
+}, [auth.currentUser?.uid, lastSeenReady, messagedUsers, groupChats, selectedChat]);
+
+// for clearing unread when chat is opened
+  // when a chat is opened, mark as seen using the newest known ts (or now if empty)
+  // and persist immediately
+useEffect(() => {
+  if (!selectedChat?.id) return;
+  const id = selectedChat.id;
+
+  const newestLocalTs =
+    messages && messages.length
+      ? (typeof messages[0]?.timestamp === "number"
+          ? messages[0].timestamp
+          : (messages[0]?.timestamp?.toMillis?.() || 0))
+      : 0;
+
+  const ts = newestLocalTs || Date.now();
+
+  // persist lastSeen immediately (state + ref + localStorage)
+  setLastSeen((prev) => {
+    const next = { ...(prev || {}), [id]: ts };
+    lastSeenRef.current = next;
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {}
+    }
+    return next;
+  });
+
+  // clear the blue dot for the open chat
+  setUnreadChats((prev) => {
+    const s = new Set(prev instanceof Set ? prev : []);
+    s.delete(id);
+    return s;
+  });
+}, [selectedChat, messages]);
+
+
+  useEffect(() => {
+  if (!lastSeenReady) return;
+  setUnreadChats((prev) => {
+    const next = new Set(prev instanceof Set ? prev : []);
+    console.log('[reconcile before]', Array.from(next));
+    for (const id of Array.from(next)) {
+      const last = Number(lastSeenRef.current?.[id] || 0);
+      const act  = Number(lastActivity[id] || 0);
+      console.log('[reconcile check]', { id, act, last, willClear: act <= last });
+      if (act <= last) next.delete(id); // already seen
+    }
+    console.log('[reconcile after]', Array.from(next));
+    return next;
+  });
+}, [lastSeenReady, lastActivity]);
+
+  // Auto-add inbound DM senders to my chat list
+  const inboundRef = useRef(null);
+  useEffect(() => {
+  const me = auth.currentUser;
+    if (!me) return;
+    if (inboundRef.current) return; // already listening
+    const myId = me.uid;
+ 
+    const q = fsQuery(
+      fsCollectionGroup(db, "items"), // groups dms, but the 'to' filter means DMs only
+      where("to", "==", myId),
+      fsOrderBy("timestamp", "desc"),
+      limit(50)
+    );
+  
+    const unsub = onSnapshot(q, async (snap) => {
+      const current = new Set((messagedUsers || []).map(u => u.id));
+      const candidates = new Map(); // fromId -> latest ts
+  
+      snap.docs.forEach((d) => {
+        // ensure it's under root 'messages' (not groupMessages)
+        const isDMItem = d.ref.parent?.parent?.parent?.id === "messages";
+        if (!isDMItem) return;
+        const m = d.data() || {};
+        const fromId = m.from;
+        if (!fromId || fromId === myId || current.has(fromId)) return;
+        const ts = typeof m.timestamp === "number" ? m.timestamp : (m.timestamp?.toMillis?.() || 0);
+        const prev = candidates.get(fromId) || 0;
+        if (ts > prev) candidates.set(fromId, ts);
+      });
+  
+      if (candidates.size === 0) return;
+  
+      // Optimistically stamp lastActivity so they sort to the top immediately
+      setLastActivity((prev) => {
+        const next = { ...(prev || {}) };
+        for (const [fromId, ts] of candidates) {
+          next[fromId] = Math.max(next[fromId] || 0, ts);
+        }
+       return next;
+     });
+ 
+     // Fetch minimal profile and add
+     for (const [fromId] of candidates) {
+       try {
+         const pSnap = await getDoc(doc(db, "profiles", fromId));
+         const p = pSnap.exists() ? pSnap.data() : {};
+         const name = p.firstName
+           ? `${capitalize(p.firstName)}${p.lastName ? " " + capitalize(p.lastName) : ""}` : (p.email || fromId);
+           addAndPersistUser({ id: fromId, name, email: p.email || "" }, setMessagedUsers, auth, BACKEND_URL);
+        } catch {
+          addAndPersistUser({ id: fromId, name: fromId, email: "" }, setMessagedUsers, auth, BACKEND_URL);
+        }
+      }
+    });
+  
+    inboundRef.current = unsub;
+    return () => { try { inboundRef.current?.(); } catch {} inboundRef.current = null; };
+  }, [auth.currentUser?.uid]); // note: not dependent on messagedUsers to avoid resubscribing
 
   // Search users
   useEffect(() => {
@@ -306,20 +646,136 @@ const Chat = () => {
 
   const allChats = [
     ...groupChats,
-    ...chatList,
     ...messagedUsers.filter(
       (u) => !chatList.some((c) => c.id === u.id || c.name === u.name)
     ),
+    ...chatList, // keep test items at the end by default
   ];
+  
+  // sort by latest activity (missing ids fall back to 0)
+  const sortedChats = [...allChats].sort((a, b) => {
+    const ta = a?.id ? (lastActivity[a.id] || 0) : 0;
+    const tb = b?.id ? (lastActivity[b.id] || 0) : 0;
+    return tb - ta;
+});
 
   const displayChats =
     searchQuery.trim() === ""
-      ? allChats
+      ? sortedChats
       : userResults.map((user) => ({
           name: user.name,
           preview: user.email || user.name || "",
           id: user.id,
         }));
+
+const onOpenChat = (chat) => {
+  setSelectedChat(chat);
+  const idToClear = chat?.id;
+  if (!idToClear) return;
+
+  // mark as seen now
+  const now = Date.now();
+    setLastSeen((prev) => {
+     const next = { ...(prev || {}), [idToClear]: now };
+     lastSeenRef.current = next; // keep ref instantly in sync
+     const uid = auth.currentUser?.uid;
+     if (uid) { try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {} }
+     return next;
+   });
+
+  // clear the blue dot
+  setUnreadChats((prev) => {
+    const next = new Set(prev instanceof Set ? prev : []);
+    next.delete(idToClear);
+    return next;
+  });
+  console.log('[onOpenChat mark seen]', { id: idToClear, now });
+};
+
+const handleCloseChat = () => {
+  const id = selectedChat?.id;
+  if (id) {
+    // figure out the newest timestamp we actually have locally
+    const newestLocalTs =
+      (messages && messages.length
+        ? (typeof messages[0]?.timestamp === "number"
+            ? messages[0].timestamp
+            : (messages[0]?.timestamp?.toMillis?.() || 0))
+        : 0);
+
+    const newestActivityTs = Number(lastActivity[id] || 0);
+    const prevSeen = Number(lastSeenRef.current?.[id] || 0);
+
+    // pick the max to be safe
+   
+    const ts = Math.max(prevSeen, newestLocalTs, newestActivityTs);
+    console.log('[handleCloseChat]', {
+      id,
+      newestLocalTs,
+      newestActivityTs,
+      prevSeen,
+      chosen: ts
+    });
+
+    if (ts) {
+      // persist immediately (state + ref + localStorage)
+      setLastSeen((prev) => {
+        const next = { ...(prev || {}), [id]: ts };
+        lastSeenRef.current = next;
+        const uid = auth.currentUser?.uid;
+        if (uid) {
+          try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {}
+        }
+        return next;
+      });
+
+      // make sure the dot for this chat is gone right now
+      setUnreadChats((prev) => {
+        const next = new Set(prev instanceof Set ? prev : []);
+        next.delete(id);
+        return next;
+      });
+    }
+  }
+
+  setSelectedChat(null);
+  };
+  
+  // ensure lastSeen is stamped if the tab is hidden/closed while a chat is open
+  useEffect(() => {
+    const handleFlushSeen = () => {
+      const id = selectedChat?.id;
+      if (!id) return;
+
+      const newestLocalTs =
+        messages && messages.length
+          ? (typeof messages[0]?.timestamp === "number"
+              ? messages[0].timestamp
+              : (messages[0]?.timestamp?.toMillis?.() || 0))
+          : 0;
+
+      const newestActivityTs = Number(lastActivity[id] || 0);
+      const prevSeen = Number(lastSeenRef.current?.[id] || 0);
+      const ts = Math.max(prevSeen, newestLocalTs, newestActivityTs, Date.now());
+
+      setLastSeen((prev) => {
+        const next = { ...(prev || {}), [id]: ts };
+        lastSeenRef.current = next;
+        const uid = auth.currentUser?.uid;
+        if (uid) {
+          try { localStorage.setItem(`lastSeen_${uid}`, JSON.stringify(next)); } catch {}
+        }
+        return next;
+      });
+    };
+
+    document.addEventListener('visibilitychange', handleFlushSeen);
+    window.addEventListener('beforeunload', handleFlushSeen);
+    return () => {
+      document.removeEventListener('visibilitychange', handleFlushSeen);
+      window.removeEventListener('beforeunload', handleFlushSeen);
+    };
+  }, [selectedChat, messages, lastActivity]);
 
   return (
     <div className="chat-app">
@@ -331,10 +787,12 @@ const Chat = () => {
         selectedChat={selectedChat}
         setSelectedChat={setSelectedChat}
         setShowForumModal={setShowForumModal}
+        unreadChats={unreadChats}
+        onOpenChat={onOpenChat}
       />
       <MessageModal
         open={!!selectedChat}
-        onClose={() => setSelectedChat(null)}
+        onClose={handleCloseChat}
         chat={selectedChat}
         messages={messages}
         newMessage={newMessage}
