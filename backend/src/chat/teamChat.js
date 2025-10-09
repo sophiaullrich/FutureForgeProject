@@ -1,27 +1,28 @@
 const admin = require("firebase-admin");
 
 async function createTeamChatBox(teamId, teamName) {
-  if (!teamId || !teamName) {
-    throw new Error("Missing team info for chat box creation.");
-  }
+  if (!teamId || !teamName) throw new Error("Missing team info for chat box creation.");
 
-  // Only store minimal data since members are in /teams/{teamId}
-  await admin.firestore().collection("groupChats").doc(teamId).set({
+  // chat metadata lives here
+  await admin.firestore().collection("chats").doc(teamId).set({
     name: teamName,
-    createdAt: Date.now(),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
   return { success: true, teamId };
 }
 
-// Delete team and associated group chat
+// Delete team and its group chat + all messages
 async function deleteTeamAndGroupChat(teamId) {
   if (!teamId) throw new Error("Missing teamId");
 
-  await admin.firestore().collection("groupChats").doc(teamId).delete();
+  await admin.firestore().collection("chats").doc(teamId).delete();
 
-  // Delete all group chat messages
-  const messagesRef = admin.firestore().collection("groupMessages").doc(teamId).collection("items");
+  const messagesRef = admin.firestore()
+    .collection("messages")
+    .doc(teamId)
+    .collection("items");
+
   const snapshot = await messagesRef.get();
   const batch = admin.firestore().batch();
   snapshot.forEach(doc => batch.delete(doc.ref));
