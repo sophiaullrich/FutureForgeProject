@@ -54,7 +54,7 @@ const Chat = () => {
     const id = selectedChat?.id;
     if (!id) return;
 
-    // compute a safe "latest we’ve seen" value
+    // compute a safe "latest we've seen" value
     const newestLocalTs =
       messages && messages.length
         ? tsNum(messages[0]?.timestamp)
@@ -354,7 +354,7 @@ const Chat = () => {
       setUnreadChats((prev) => {
         const next = new Set(prev instanceof Set ? prev : []);
         if (iReceivedIt && !isOpen && isNewSinceLastSeen) next.add(otherId);
-        else next.delete(otherId);        // if open, ensure it’s cleared
+        else next.delete(otherId);        // if open, ensure it's cleared
         if (iReceivedIt && !isOpen && isNewSinceLastSeen) {
           console.log('[DM -> ADD dot]', { chatId: otherId });
           next.add(otherId);
@@ -403,7 +403,7 @@ const Chat = () => {
     setUnreadChats((prev) => {
       const next = new Set(prev instanceof Set ? prev : []);
       if (!iSentIt && !isOpen && isNewSinceLastSeen) next.add(groupId);
-      else next.delete(groupId);        // if open, ensure it’s cleared
+      else next.delete(groupId);        // if open, ensure it's cleared
       if (!iSentIt && !isOpen && isNewSinceLastSeen) {
        console.log('[GROUP -> ADD dot]', { chatId: groupId });
        next.add(groupId);
@@ -419,7 +419,7 @@ const Chat = () => {
   });
 
   return () => {
-    // Only call if it’s actually a function
+    // Only call if it's actually a function
     unsubs.forEach((u) => { try { typeof u === "function" && u(); } catch {} });
   };
 }, [auth.currentUser?.uid, lastSeenReady, messagedUsers, groupChats, selectedChat]);
@@ -678,7 +678,7 @@ const sendMessage = useCallback(
           }),
         });
       } catch (err) {
-        console.warn("Failed to update receiver’s messagedUsers:", err);
+        console.warn("Failed to update receiver's messagedUsers:", err);
       }
 
       await addDoc(fsCollection(db, "notifications"), {
