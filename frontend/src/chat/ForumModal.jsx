@@ -1,12 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./chat.css";
-import { db } from "../Firebase";
+import { db, auth } from "../Firebase";
 import {
   collection as fsCollection,
   query as fsQuery,
   where as fsWhere,
   onSnapshot,
   getDocs,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  doc
 } from "firebase/firestore";
 
 const makeChatKey = ({ type, id }) => `${type}::${id}`; 
@@ -139,36 +143,36 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
   );
 }
 
-export function JoinForumModal({ selectedForum, setSelectedForum, addAndPersistUser, setShowForumModal }) {
+export function JoinForumModal({ selectedForum, setSelectedForum, setShowForumModal }) {
   if (!selectedForum) return null;
 
-  const displayName = selectedForum.name;
+  const handleJoin = async () => {
+    try {
+      const uid = auth.currentUser?.uid;
+      if (!uid) throw new Error("You must be signed in.");
+
+      const teamRef = doc(db, "teams", selectedForum.id);
+      await updateDoc(teamRef, { members: arrayUnion(uid) });
+
+      const snap = await getDoc(teamRef);
+      const team = snap.exists() ? snap.data() : {};
+
+      // Close modals
+      setSelectedForum(null);
+      setShowForumModal(false);
+
+    } catch (e) {
+      alert(e.message || "Failed to join forum.");
+    }
+  };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content join-forum-modal">
-        <button className="modal-close" onClick={() => setSelectedForum(null)}>
-          ×
-        </button>
-        <h2>{displayName}</h2>
-        <p>
-          Would you like to join this forum?
-        </p>
-        <button
-          className="join-forum-btn"
-          onClick={() => {
-            const channel = {
-              id: selectedForum.id,
-              name: displayName,
-              type: "team",
-              chatKey: makeChatKey({ type: "team", id: selectedForum.id }),
-              email: "",
-            }
-            addAndPersistUser(channel);
-            setSelectedForum(null);
-            setShowForumModal(false);
-          }}
-        >
+        <button className="modal-close" onClick={() => setSelectedForum(null)}>×</button>
+        <h2>{selectedForum.name}</h2>
+        <p>Would you like to join this forum?</p>
+        <button className="join-forum-btn" onClick={handleJoin}>
           Join
         </button>
       </div>
