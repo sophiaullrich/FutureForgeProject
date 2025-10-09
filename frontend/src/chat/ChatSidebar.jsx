@@ -10,11 +10,11 @@ const ChatSidebar = ({
   searchQuery,
   setSearchQuery,
   loadingUsers,
-  displayChats = [], 
+  displayChats, 
   selectedChat,
   setSelectedChat,
   setShowForumModal,
-  unreadChats = new Set(), 
+  unreadChats, 
   onOpenChat,
 }) => (
   <div className="chat-sidebar">
