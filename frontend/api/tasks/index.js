@@ -1,5 +1,5 @@
-const { db, FieldValue } = require("../_admin.cjs");
-const { authenticate } = require("../_auth.cjs");
+const { db, FieldValue } = require("../_admin.js");
+const { authenticate } = require("../_auth.js");
 
 // Optional: wire up notifications later if you have a module moved into frontend/lib
 // const notificationService = require("../../lib/notifications/notification.service");

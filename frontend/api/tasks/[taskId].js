@@ -1,5 +1,5 @@
-const { db } = require("../_admin.cjs");
-const { authenticate } = require("../_auth.cjs");
+const { db } = require("../_admin.js");
+const { authenticate } = require("../_auth.js");
 
 module.exports = async (req, res) => {
   const user = await authenticate(req);
