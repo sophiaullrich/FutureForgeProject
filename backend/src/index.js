@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
   "http://localhost:3000",
   "https://future-forge-project.vercel.app",
+  "https://future-forge-project-ezra8fqzo-sophias-projects-55766626.vercel.app",
 ];
 
 // middleware

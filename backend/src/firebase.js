@@ -11,7 +11,7 @@ if (fs.existsSync(localPath)) {
   console.log("Using local Firebase service account JSON");
   serviceAccount = require(localPath);
 } else {
-  console.log("🚀 Using Firebase credentials from environment variables");
+  console.log("Using Firebase credentials from environment variables");
   serviceAccount = {
     projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
