@@ -19,10 +19,12 @@ app.use((req, res, next) => {
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://future-forge-project.vercel.app",
+  "https://future-forge-frontend-hazel.vercel.app", 
+  "https://future-forge-backend.vercel.app",       
+  "https://future-forge-project.vercel.app",      
   "https://future-forge-project-ezra8fqzo-sophias-projects-55766626.vercel.app",
   "https://future-forge-project-c65y9o56t-sophias-projects-55766626.vercel.app",
-  "https://australia-southeast1-gobear-c15ba.cloudfunctions.net", 
+  "https://australia-southeast1-gobear-c15ba.cloudfunctions.net",
 ];
 
 app.use(
