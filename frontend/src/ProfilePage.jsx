@@ -4,7 +4,9 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
+// Use same-origin in prod; still works locally with Next/Vercel dev.
+// If you set NEXT_PUBLIC_API_BASE_URL, we'll trim any trailing slash and still default to same-origin.
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "";
 
 function ProfilePage() {
   const defaultImg = "/profileImages/defaultImage.png";
@@ -234,7 +236,11 @@ function ProfilePage() {
         </div>
 
         {/* Right - Socials */}
-        <div className="social-section" onMouseEnter={() => setIsHoveringSocials(true)} onMouseLeave={() => setIsHoveringSocials(false)}>
+        <div
+          className="social-section"
+          onMouseEnter={() => setIsHoveringSocials(true)}
+          onMouseLeave={() => setIsHoveringSocials(false)}
+        >
           <div className="social-header">
             {isHoveringSocials && !editing.socials && <IoPencilSharp className="socials-edit-icon" onClick={startEditSocials} />}
             <h4>Social Accounts</h4>
@@ -244,15 +250,30 @@ function ProfilePage() {
             <>
               <div className="social-link">
                 <FaGoogle className="icon" />
-                <input type="text" value={temp.socials.google} placeholder="Gmail" onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, google: e.target.value } })} />
+                <input
+                  type="text"
+                  value={temp.socials.google}
+                  placeholder="Gmail"
+                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, google: e.target.value } })}
+                />
               </div>
               <div className="social-link">
                 <FaGithub className="icon" />
-                <input type="text" value={temp.socials.github} placeholder="Github" onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, github: e.target.value } })} />
+                <input
+                  type="text"
+                  value={temp.socials.github}
+                  placeholder="Github"
+                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, github: e.target.value } })}
+                />
               </div>
               <div className="social-link">
                 <FaLinkedin className="icon" />
-                <input type="text" value={temp.socials.linkedin} placeholder="Linkedin" onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, linkedin: e.target.value } })} />
+                <input
+                  type="text"
+                  value={temp.socials.linkedin}
+                  placeholder="Linkedin"
+                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, linkedin: e.target.value } })}
+                />
               </div>
               <div className="social-buttons">
                 <button onClick={saveSocials} className="save-btn">Save</button>
@@ -261,9 +282,18 @@ function ProfilePage() {
             </>
           ) : (
             <>
-              <div className="social-link"><FaGoogle className="icon" /><input type="text" readOnly value={profile.socials.google} /></div>
-              <div className="social-link"><FaGithub className="icon" /><input type="text" readOnly value={profile.socials.github} /></div>
-              <div className="social-link"><FaLinkedin className="icon" /><input type="text" readOnly value={profile.socials.linkedin} /></div>
+              <div className="social-link">
+                <FaGoogle className="icon" />
+                <input type="text" readOnly value={profile.socials.google} />
+              </div>
+              <div className="social-link">
+                <FaGithub className="icon" />
+                <input type="text" readOnly value={profile.socials.github} />
+              </div>
+              <div className="social-link">
+                <FaLinkedin className="icon" />
+                <input type="text" readOnly value={profile.socials.linkedin} />
+              </div>
             </>
           )}
         </div>
@@ -296,7 +326,11 @@ function ProfilePage() {
         ) : (
           <>
             <div className="scrollable-row interests-row">
-              {profile.interests.map((interest, idx) => <div key={idx} className="interest-tag">{interest}</div>)}
+              {profile.interests.map((interest, idx) => (
+                <div key={idx} className="interest-tag">
+                  {interest}
+                </div>
+              ))}
             </div>
             <IoPencilSharp className="interests-edit-icon" onClick={() => setEditing({ ...editing, interests: true })} />
           </>
@@ -304,11 +338,19 @@ function ProfilePage() {
       </div>
 
       {/* Career Goals */}
-      <div className="career-goals" onMouseEnter={() => setIsHoveringGoals(true)} onMouseLeave={() => setIsHoveringGoals(false)}>
+      <div
+        className="career-goals"
+        onMouseEnter={() => setIsHoveringGoals(true)}
+        onMouseLeave={() => setIsHoveringGoals(false)}
+      >
         <h3>Career Goals</h3>
         {editing.careerGoals ? (
           <div className="career-goals-edit-container">
-            <textarea className="editable-goals-textarea" value={temp.careerGoalsText} onChange={(e) => setTemp({ ...temp, careerGoalsText: e.target.value })} />
+            <textarea
+              className="editable-goals-textarea"
+              value={temp.careerGoalsText}
+              onChange={(e) => setTemp({ ...temp, careerGoalsText: e.target.value })}
+            />
             <div className="career-goals-buttons">
               <button onClick={saveGoals} className="save-btn">Save</button>
               <button onClick={cancelEditGoals} className="cancel-btn">Cancel</button>
@@ -316,15 +358,25 @@ function ProfilePage() {
           </div>
         ) : (
           <div className="career-goals-textbox">
-            <ul>{profile.careerGoals.map((goal, idx) => <li key={idx}>{goal}</li>)}</ul>
+            <ul>
+              {profile.careerGoals.map((goal, idx) => (
+                <li key={idx}>{goal}</li>
+              ))}
+            </ul>
             {isHoveringGoals && <IoPencilSharp className="edit-icon" onClick={startEditGoals} />}
           </div>
         )}
       </div>
 
       {/* Badges */}
-      <div className="badge-box-name">{profile.displayName ? `${profile.displayName}'s Badges` : "My Badges"}</div>
-      <div className="scrollable-row badges-row">{[...Array(8)].map((_, idx) => <div key={idx} className="badge-box" />)}</div>
+      <div className="badge-box-name">
+        {profile.displayName ? `${profile.displayName}'s Badges` : "My Badges"}
+      </div>
+      <div className="scrollable-row badges-row">
+        {[...Array(8)].map((_, idx) => (
+          <div key={idx} className="badge-box" />
+        ))}
+      </div>
     </div>
   );
 }
