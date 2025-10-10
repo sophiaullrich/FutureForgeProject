@@ -1,5 +1,5 @@
 // frontend/api/_auth.cjs
-const { admin } = require("./_admin.cjs");
+const { admin } = require("./_admin.js");
 
 async function authenticate(req) {
   const header = req.headers?.authorization || "";

@@ -1,6 +1,6 @@
 // frontend/api/tasks/[taskId].cjs
-const { db } = require("../_admin.cjs");
-const { authenticate } = require("../_auth.cjs");
+const { db } = require("../_admin.js");
+const { authenticate } = require("../_auth.js");
 
 // CORS helper
 function setCors(res) {
