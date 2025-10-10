@@ -19,12 +19,14 @@ if (fs.existsSync(localPath)) {
   };
 }
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://gobear-c15ba-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    storageBucket: "gobear-c15ba.appspot.com",
-  });
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: "gobear-c15ba.appspot.com",
+    });
+  }
+} catch (err) {
+  console.error("🔥 Firebase init error:", err);
 }
 
 const db = getFirestore();
