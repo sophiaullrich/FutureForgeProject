@@ -11,17 +11,19 @@ const chatRoutes = require("./chat/chatServer");
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://future-forge-project.vercel.app",
-  "https://future-forge-project-ezra8fqzo-sophias-projects-55766626.vercel.app",
-];
-
 // middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://future-forge-project.vercel.app",
+  "https://future-forge-project-ezra8fqzo-sophias-projects-55766626.vercel.app",
+  "https://future-forge-project-c65y9o56t-sophias-projects-55766626.vercel.app",
+  "https://australia-southeast1-gobear-c15ba.cloudfunctions.net", 
+];
 
 app.use(
   cors({
