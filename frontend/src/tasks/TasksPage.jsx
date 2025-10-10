@@ -1,4 +1,3 @@
-// TasksPage.jsx
 import React, { useState, useEffect } from "react";
 import "./TasksPage.css";
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
@@ -8,7 +7,16 @@ import { listProfiles } from "../teams-page/ProfileService";
 import TaskModal from "./TaskModal";
 import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const API_URL =
   process.env.NODE_ENV === "development" ? "/api/tasks" : "/api/tasks";
@@ -35,10 +43,9 @@ export default function TasksPage() {
       }
     });
     return () => unsub?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
-  // --- Load all profiles (for assignment dropdowns)
+  // --- Load all profiles
   useEffect(() => {
     if (!currentUser) return;
     (async () => {
@@ -47,7 +54,7 @@ export default function TasksPage() {
     })();
   }, [currentUser]);
 
-  // --- Compute teamMembers for selected team + ensure currentUser present
+  // --- Compute teamMembers
   useEffect(() => {
     if (!currentUser) {
       setTeamMembers([]);
@@ -81,7 +88,7 @@ export default function TasksPage() {
     setTeamMembers(members);
   }, [profiles, teams, selectedTeam, currentUser]);
 
-  // --- Live tasks feed; filter client-side for the current user/team
+  // --- Live Firestore listener
   useEffect(() => {
     if (!currentUser) return;
 
@@ -101,25 +108,20 @@ export default function TasksPage() {
     return () => unsub();
   }, [currentUser, selectedTeam]);
 
-  // --- Toggle done (still via API)
+  // --- ✅ Toggle task completion (Firestore direct)
   const handleTaskToggle = async (taskId, currentDone) => {
-    if (!currentUser) return;
+    console.log("Toggling task:", taskId);
     try {
-      const token = await currentUser.getIdToken();
-      await fetch(`${API_URL}/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ done: !currentDone }),
+      await updateDoc(doc(db, "tasks", taskId), {
+        done: !currentDone,
+        updatedAt: serverTimestamp(),
       });
     } catch (err) {
       console.error("Error updating task:", err);
     }
   };
 
-  // --- Create task (minimal change: add assignedEmails + timestamp)
+  // --- Create task (via API)
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
 
@@ -131,14 +133,14 @@ export default function TasksPage() {
 
     const payload = {
       name: taskData.name.trim(),
-      due: dueISO, // store ISO
+      due: dueISO,
       description: taskData.description ?? "",
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
       assignedUsers: [],
-      type: taskData.type, // "private" | "team"
-      // NEW ↓ ensures your filter and ordering work with the API path
-      assignedEmails: [],                 // <-- added
-      timestamp: new Date().toISOString() // <-- added
+      type: taskData.type,
+      assignedEmails: [],
+      done: false,
+      timestamp: new Date().toISOString(),
     };
 
     if (taskData.type === "private") {
@@ -148,9 +150,8 @@ export default function TasksPage() {
         displayName: currentUser.displayName || currentUser.email,
       };
       payload.assignedUsers = [me];
-      payload.assignedEmails = [me.email]; // <-- keep in sync
+      payload.assignedEmails = [me.email];
     } else if (taskData.type === "team") {
-      // single assignee from dropdown; extend to multi if needed
       const emailFromModal = (taskData.assignedUsers?.[0]?.email || "").toLowerCase();
       const selected =
         teamMembers.find((m) => m.email === emailFromModal) || null;
@@ -163,7 +164,7 @@ export default function TasksPage() {
       };
 
       payload.assignedUsers = [userObj];
-      payload.assignedEmails = [userObj.email]; // <-- keep in sync
+      payload.assignedEmails = [userObj.email];
     }
 
     try {
@@ -181,31 +182,23 @@ export default function TasksPage() {
         throw new Error(j.error || `HTTP ${res.status}`);
       }
       setShowTaskModal(false);
-      // onSnapshot will pick it up
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Failed to create task: " + error.message);
     }
   };
 
-  // --- Delete task (via API)
+  // --- ✅ Delete task (Firestore direct)
   const handleDeleteTask = async (taskId) => {
-    if (!currentUser) return;
+    console.log("Deleting task:", taskId);
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch(`${API_URL}/${taskId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete task");
-      // optimistic UI; onSnapshot will also remove it
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      await deleteDoc(doc(db, "tasks", taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
     }
   };
 
-  // --- Display formatter
+  // --- Format date
   const formatDate = (val) => {
     if (!val) return "—";
     const s = String(val);
@@ -213,11 +206,7 @@ export default function TasksPage() {
     const d = new Date(s);
     if (Number.isNaN(d.getTime())) return s;
     return d
-      .toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+      .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
       .toUpperCase();
   };
 
@@ -251,10 +240,7 @@ export default function TasksPage() {
         {activeTab === "teamTasks" && (
           <div style={{ margin: "10px 20px" }}>
             <label>Select Team: </label>
-            <select
-              value={selectedTeam}
-              onChange={(e) => setSelectedTeam(e.target.value)}
-            >
+            <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
               {teams.map((team) => (
                 <option key={team.id} value={team.name}>
                   {team.name}
@@ -264,21 +250,13 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div
-          className={`tasks-table ${
-            activeTab === "teamTasks" ? "team-tasks" : "my-tasks"
-          }`}
-        >
+        <div className={`tasks-table ${activeTab === "teamTasks" ? "team-tasks" : "my-tasks"}`}>
           <div className="table-header">
             <div className="header-cell">Done?</div>
             <div className="header-cell">Task Name</div>
             <div className="header-cell">Due Date</div>
-            {activeTab === "teamTasks" && (
-              <div className="header-cell">Assigned To</div>
-            )}
-            {activeTab === "teamTasks" && (
-              <div className="header-cell">Team</div>
-            )}
+            {activeTab === "teamTasks" && <div className="header-cell">Assigned To</div>}
+            {activeTab === "teamTasks" && <div className="header-cell">Team</div>}
             <div className="header-cell">Actions</div>
           </div>
 
@@ -291,30 +269,19 @@ export default function TasksPage() {
               <div
                 className="table-cell checkbox-cell"
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // ✅ Prevent row click
                   handleTaskToggle(task.id, task.done);
                 }}
-                role="button"
-                aria-label={task.done ? "Mark as not done" : "Mark as done"}
-                title={task.done ? "Mark as not done" : "Mark as done"}
               >
-                {task.done ? (
-                  <IoCheckboxOutline size={33} />
-                ) : (
-                  <IoSquareOutline size={33} />
-                )}
+                {task.done ? <IoCheckboxOutline size={33} /> : <IoSquareOutline size={33} />}
               </div>
 
               <div className="table-cell task-name-cell">{task.name}</div>
-              <div className="table-cell due-date-cell">
-                {formatDate(task.due)}
-              </div>
+              <div className="table-cell due-date-cell">{formatDate(task.due)}</div>
 
               {activeTab === "teamTasks" && (
                 <div className="table-cell team-cell">
-                  {(task.assignedUsers || [])
-                    .map((u) => u.displayName)
-                    .join(", ")}
+                  {(task.assignedUsers || []).map((u) => u.displayName).join(", ")}
                 </div>
               )}
               {activeTab === "teamTasks" && (
@@ -323,11 +290,14 @@ export default function TasksPage() {
 
               <div
                 className="table-cell actions-cell"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()} // ✅ Prevent detail modal
               >
                 <button
                   className="delete-btn"
-                  onClick={() => handleDeleteTask(task.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // ✅ Prevent row click
+                    handleDeleteTask(task.id);
+                  }}
                 >
                   Delete
                 </button>
@@ -357,9 +327,7 @@ export default function TasksPage() {
         />
       )}
 
-      {detailTask && (
-        <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />
-      )}
+      {detailTask && <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />}
     </div>
   );
 }
