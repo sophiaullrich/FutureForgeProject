@@ -1,165 +1,169 @@
 .landingCont {
-    box-sizing: border-box;
-    margin: 0 auto;
-    background: linear-gradient(0deg, #22336A 0%, #F3E7D3 100%);
-    height: 100vh;
+  box-sizing: border-box;
+  margin: 0 auto;
+  background: linear-gradient(0deg, #22336a 0%, #f3e7d3 100%);
+  height: 100vh;
 }
 
+/* nav bar */
 .nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #252B2F;
-    height: 114px;
-    flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #252b2f;
+  height: 114px;
+  flex-shrink: 0;
 }
 
 .navLeft,
 .navCenter,
 .navRight {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .navLeft {
-    list-style: none;
-    background: #F3E7D3;
-    border-radius: 8px;
-    margin-left: 26px;
-    width: 270px;
+  list-style: none;
+  background: #f3e7d3;
+  border-radius: 8px;
+  margin-left: 26px;
+  width: 270px;
 }
 
 .navLogo {
-    width: 138px;
-    height: 50px;
-    margin-left: 50px;
+  width: 138px;
+  height: 50px;
+  margin-left: 66px;
 }
 
 .navCenter {
-    justify-content: center;
+  justify-content: center;
 }
 
 .navCenter a {
-    color: #F5EBE0;
-    font-family: "SF Pro Rounded";
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-decoration: none;
+  color: #f5ebe0;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-decoration: none;
 }
 
 .navCenter a:hover {
-    color: #6096BA;
+  color: #6096ba;
 }
 
 .navRight {
-    justify-content: flex-end;
+  justify-content: flex-end;
 }
 
+/* login button */
 .loginBtn {
-    border-radius: 5px;
-    border: 3px solid #6096BA;
-    background: #F3E7D3;
-    color: #6096BA;
-    font-family: "SF Pro Rounded";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    width: 156px;
-    height: 36px;
-    flex-shrink: 0;
-    margin-right: 18px
+  border-radius: 5px;
+  border: 3px solid #6096ba;
+  background: #f3e7d3;
+  color: #6096ba;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  width: 156px;
+  height: 36px;
+  flex-shrink: 0;
+  margin-right: 18px;
 }
 
 .loginBtn:hover {
-    border-radius: 5px;
-    border: 3px solid #F3E7D3;
-    background: #6096BA;
-    color: #F3E7D3;
+  border-radius: 5px;
+  border: 3px solid #f3e7d3;
+  background: #6096ba;
+  color: #f3e7d3;
 }
 
+/* sign up button */
 .signupBtn {
-    border-radius: 5px;
-    border: 3px solid #6096BA;
-    background: #F3E7D3;
-    color: #6096BA;
-    font-family: "SF Pro Rounded";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    width: 156px;
-    height: 36px;
-    flex-shrink: 0;
-    margin-right: 18px
+  border-radius: 5px;
+  border: 3px solid #6096ba;
+  background: #f3e7d3;
+  color: #6096ba;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  width: 156px;
+  height: 36px;
+  flex-shrink: 0;
+  margin-right: 18px;
 }
 
 .signupBtn:hover {
-    border-radius: 5px;
-    border: 3px solid #F3E7D3;
-    background: #6096BA;
-    color: #F3E7D3;
+  border-radius: 5px;
+  border: 3px solid #f3e7d3;
+  background: #6096ba;
+  color: #f3e7d3;
 }
 
-.landingBody{
-    display: flex;
-    flex-direction: column;
+/* body */
+.landingBody {
+  display: flex;
+  flex-direction: column;
 }
 
-.bodyLogo{
-    width: 197px;
-flex-shrink: 0;
-margin: 0 auto;
+.bodyLogo {
+  width: 197px;
+  flex-shrink: 0;
+  margin: 0 auto;
 }
 
-.bodyTitle{
-    width: 545px;
-height: 188px;
-flex-shrink: 0;
-border-radius: 23px;
-opacity: 0.8;
-background: #FFF;
-margin: 0 auto;
+.bodyTitle {
+  width: 545px;
+  height: 188px;
+  flex-shrink: 0;
+  border-radius: 23px;
+  opacity: 0.8;
+  background: #fff;
+  margin: 0 auto;
 }
 
-.bodyTitle h1{
-    color: #22336A;
-font-family: "SF Pro Rounded";
-font-size: 40px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-text-align: center;
-margin-top: 54px;
+.bodyTitle h1 {
+  color: #22336a;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  margin-top: 54px;
 }
 
-.cta{
-    width: 989.82px;
-flex-shrink: 0;
-border-radius: 10px;
-opacity: 0.8;
-background: #FFF;
-margin: 0 auto;
-margin-top: 33px;
+.cta {
+  width: 989.82px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  opacity: 0.8;
+  background: #fff;
+  margin: 0 auto;
+  margin-top: 33px;
 }
 
-.cta p{
-    color: #22336A;
-text-align: center;
-font-family: "SF Pro Rounded";
-font-size: 24px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
+.cta p {
+  color: #22336a;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 
-.ctaBtns{
-    margin: 0 auto;
-    margin-top: 42.5px;
+.ctaBtns {
+  margin: 0 auto;
+  margin-top: 42.5px;
 }
 
-.ctaBtns .loginBtn{
-    margin-right: 102.2px;
+.ctaBtns .loginBtn {
+  margin-right: 102.2px;
 }
