@@ -9,17 +9,13 @@ import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
-
 const API_URL =
-  process.env.NODE_ENV === "development"
-    ? "/api/tasks"                   // dev with Vercel dev or CRA proxy
-    : "/api/tasks";                  // production on Vercel
-
+  process.env.NODE_ENV === "development" ? "/api/tasks" : "/api/tasks";
 
 export default function TasksPage() {
   const { currentUser } = useOutletContext();
 
-  const [activeTab, setActiveTab] = useState("myTasks");
+  const [activeTab, setActiveTab] = useState("myTasks"); // myTasks | teamTasks
   const [tasks, setTasks] = useState([]);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [detailTask, setDetailTask] = useState(null);
@@ -28,24 +24,29 @@ export default function TasksPage() {
   const [profiles, setProfiles] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
 
+  // --- Load teams for the current user
   useEffect(() => {
     if (!currentUser) return;
-    const unsubscribe = observeMyTeams((teams) => {
-      setTeams(teams);
-      if (teams.length > 0 && !selectedTeam) setSelectedTeam(teams[0].name);
+    const unsub = observeMyTeams((tms) => {
+      setTeams(tms || []);
+      if ((tms || []).length > 0 && !selectedTeam) {
+        setSelectedTeam(tms[0].name);
+      }
     });
-    return () => unsubscribe();
+    return () => unsub?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
+  // --- Load all profiles (for assignment dropdowns)
   useEffect(() => {
     if (!currentUser) return;
-    const fetchProfiles = async () => {
+    (async () => {
       const allProfiles = await listProfiles();
-      setProfiles(allProfiles);
-    };
-    fetchProfiles();
+      setProfiles(allProfiles || []);
+    })();
   }, [currentUser]);
 
+  // --- Compute teamMembers for selected team + ensure currentUser present
   useEffect(() => {
     if (!currentUser) {
       setTeamMembers([]);
@@ -59,45 +60,59 @@ export default function TasksPage() {
         members = (team.members || [])
           .map((uid) => profiles.find((p) => p.uid === uid))
           .filter(Boolean)
-          .map((p) => ({ uid: p.uid, email: p.email, displayName: p.displayName }));
+          .map((p) => ({
+            uid: p.uid,
+            email: (p.email || "").toLowerCase(),
+            displayName: p.displayName || p.email || p.uid,
+          }));
       }
     }
 
     const currentUserObj = {
       uid: currentUser.uid,
-      email: currentUser.email,
+      email: (currentUser.email || "").toLowerCase(),
       displayName: currentUser.displayName || currentUser.email,
     };
+    if (!members.some((m) => m.uid === currentUser.uid)) {
+      members.push(currentUserObj);
+    }
 
-    if (!members.some((m) => m.uid === currentUser.uid)) members.push(currentUserObj);
     setTeamMembers(members);
   }, [profiles, teams, selectedTeam, currentUser]);
 
+  // --- Live tasks feed; filter client-side for the current user/team
   useEffect(() => {
     if (!currentUser) return;
-    const userEmail = currentUser.email.toLowerCase();
 
     const q = query(collection(db, "tasks"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const visible = allTasks.filter(
+    const unsub = onSnapshot(q, (snapshot) => {
+      const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const myEmail = (currentUser.email || "").toLowerCase();
+
+      const visible = all.filter(
         (t) =>
-          t.assignedEmails?.includes(userEmail) ||
-          (t.type === "team" && teams.some((team) => team.name === t.team))
+          (t.assignedEmails || []).includes(myEmail) ||
+          (t.type === "team" &&
+            !!selectedTeam &&
+            t.team === selectedTeam)
       );
       setTasks(visible);
     });
 
-    return () => unsubscribe();
-  }, [currentUser, teams]);
+    return () => unsub();
+  }, [currentUser, selectedTeam]);
 
+  // --- Toggle done
   const handleTaskToggle = async (taskId, currentDone) => {
     if (!currentUser) return;
     try {
       const token = await currentUser.getIdToken();
       await fetch(`${API_URL}/${taskId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ done: !currentDone }),
       });
     } catch (err) {
@@ -105,43 +120,45 @@ export default function TasksPage() {
     }
   };
 
+  // --- Create task
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
-    const dueDateISO = taskData.due ? new Date(taskData.due).toISOString() : null;
-    if (!taskData.name || !dueDateISO)
-      return alert("Task name and due date are required");
 
-    const formattedDate = new Date(dueDateISO)
-      .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-      .toUpperCase();
+    // keep ISO in the DB; format only for display
+    const dueISO = taskData.due ? new Date(taskData.due).toISOString() : null;
+    if (!taskData.name || !dueISO) {
+      alert("Task name and due date are required");
+      return;
+    }
 
     const payload = {
-      name: taskData.name,
-      due: formattedDate,
+      name: taskData.name.trim(),
+      due: dueISO, // store ISO
       description: taskData.description ?? "",
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
       assignedUsers: [],
-      type: taskData.type,
+      type: taskData.type, // "private" | "team"
     };
 
     if (taskData.type === "private") {
       payload.assignedUsers = [
         {
           uid: currentUser.uid,
-          email: currentUser.email.toLowerCase(),
+          email: (currentUser.email || "").toLowerCase(),
           displayName: currentUser.displayName || currentUser.email,
         },
       ];
     } else if (taskData.type === "team") {
-      const selectedUser = teamMembers.find(
+      // single assignee from dropdown; extend to multi if needed
+      const selected = teamMembers.find(
         (m) => m.email === taskData.assignedUsers?.[0]?.email
       );
-      if (selectedUser) {
+      if (selected) {
         payload.assignedUsers = [
           {
-            uid: selectedUser.uid,
-            email: selectedUser.email.toLowerCase(),
-            displayName: selectedUser.displayName || selectedUser.email,
+            uid: selected.uid,
+            email: (selected.email || "").toLowerCase(),
+            displayName: selected.displayName || selected.email,
           },
         ];
       }
@@ -149,18 +166,27 @@ export default function TasksPage() {
 
     try {
       const token = await currentUser.getIdToken();
-      await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || `HTTP ${res.status}`);
+      }
       setShowTaskModal(false);
+      // no manual refresh needed — onSnapshot will pick up the new doc
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Failed to create task: " + error.message);
     }
   };
 
+  // --- Delete task
   const handleDeleteTask = async (taskId) => {
     if (!currentUser) return;
     try {
@@ -170,16 +196,22 @@ export default function TasksPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete task");
+      // optimistic UI; onSnapshot will also remove it
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return "—";
-    const parsedDate = new Date(date);
-    return parsedDate
+  // --- Display formatter: accepts ISO or your older "DD MON YYYY"
+  const formatDate = (val) => {
+    if (!val) return "—";
+    const s = String(val);
+    // if it already looks like "20 OCT 2025", just show it
+    if (/[A-Z]{3}/.test(s) && !s.includes("T")) return s;
+    const d = new Date(s);
+    if (Number.isNaN(d.getTime())) return s;
+    return d
       .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
       .toUpperCase();
   };
@@ -187,7 +219,9 @@ export default function TasksPage() {
   const filteredTasks =
     activeTab === "myTasks"
       ? tasks.filter((task) =>
-          task.assignedEmails?.includes(currentUser?.email?.toLowerCase())
+          (task.assignedEmails || []).includes(
+            (currentUser?.email || "").toLowerCase()
+          )
         )
       : tasks.filter((task) => task.team === selectedTeam);
 
@@ -233,25 +267,40 @@ export default function TasksPage() {
           </div>
 
           {filteredTasks.map((task) => (
-            <div key={task.id} className="table-row" onClick={() => setDetailTask(task)}>
+            <div
+              key={task.id}
+              className="table-row"
+              onClick={() => setDetailTask(task)}
+            >
               <div
                 className="table-cell checkbox-cell"
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // don't open detail modal
                   handleTaskToggle(task.id, task.done);
                 }}
+                role="button"
+                aria-label={task.done ? "Mark as not done" : "Mark as done"}
+                title={task.done ? "Mark as not done" : "Mark as done"}
               >
                 {task.done ? <IoCheckboxOutline size={33} /> : <IoSquareOutline size={33} />}
               </div>
+
               <div className="table-cell task-name-cell">{task.name}</div>
               <div className="table-cell due-date-cell">{formatDate(task.due)}</div>
+
               {activeTab === "teamTasks" && (
                 <div className="table-cell team-cell">
-                  {task.assignedUsers?.map((u) => u.displayName).join(", ")}
+                  {(task.assignedUsers || []).map((u) => u.displayName).join(", ")}
                 </div>
               )}
-              {activeTab === "teamTasks" && <div className="table-cell team-cell">{task.team}</div>}
-              <div className="table-cell actions-cell" onClick={(e) => e.stopPropagation()}>
+              {activeTab === "teamTasks" && (
+                <div className="table-cell team-cell">{task.team}</div>
+              )}
+
+              <div
+                className="table-cell actions-cell"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button className="delete-btn" onClick={() => handleDeleteTask(task.id)}>
                   Delete
                 </button>
@@ -281,7 +330,12 @@ export default function TasksPage() {
         />
       )}
 
-      {detailTask && <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />}
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          onClose={() => setDetailTask(null)}
+        />
+      )}
     </div>
   );
 }

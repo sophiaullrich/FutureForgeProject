@@ -1,3 +1,4 @@
+// frontend/api/_admin.cjs
 const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
@@ -15,8 +16,7 @@ if (!admin.apps.length) {
   console.log("🚀 Firebase Admin initialized on Vercel");
 }
 
-module.exports = {
-  admin,
-  firestore: admin.firestore(),
-  FieldValue: admin.firestore.FieldValue,
-};
+const db = admin.firestore();
+const FieldValue = admin.firestore.FieldValue;
+
+module.exports = { admin, db, FieldValue };

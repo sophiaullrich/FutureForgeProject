@@ -1,14 +1,13 @@
-const { getAuth } = require("firebase-admin/auth");
-const { admin } = require("./_admin.js");
+// frontend/api/_auth.cjs
+const { admin } = require("./_admin.cjs");
 
 async function authenticate(req) {
-  const header = req.headers.authorization || "";
+  const header = req.headers?.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-
   if (!token) return null;
 
   try {
-    const decoded = await getAuth(admin).verifyIdToken(token);
+    const decoded = await admin.auth().verifyIdToken(token);
     return { uid: decoded.uid, email: decoded.email || "" };
   } catch (err) {
     console.error("Auth error:", err);
