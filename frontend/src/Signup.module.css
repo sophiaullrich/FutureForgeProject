@@ -23,7 +23,7 @@
 .formCont h1 {
   color: #f5ebe0;
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 36px;
   font-style: normal;
   font-weight: 400;
@@ -32,7 +32,7 @@
 
 .formLabel {
   color: #f5ebe0;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
@@ -44,7 +44,7 @@
   color: #ac4750;
   content: " *";
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 30px;
   font-style: normal;
   font-weight: 400;
@@ -58,7 +58,7 @@
   border-radius: 5px;
   background: #f3e7d3;
   color: #252b2f;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
@@ -66,6 +66,7 @@
   margin-left: 20px;
   margin-bottom: 18px;
   border: none;
+  padding: 12px;
 }
 
 .signupBtn {
@@ -77,13 +78,13 @@
   background: #22336a;
   color: #f3e7d3;
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
   margin: 0 auto;
-  margin-top: 28px;
+  margin-top: 10px;
 }
 
 .signupBtn:hover {
@@ -99,7 +100,7 @@
   flex-shrink: 0;
   color: #6096ba;
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-style: normal;
   font-weight: 700;
