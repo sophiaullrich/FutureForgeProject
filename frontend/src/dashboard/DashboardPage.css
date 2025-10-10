@@ -6,8 +6,8 @@
   padding: 15px;
   padding-top: 46px;
   font-family: "SF Pro Rounded", Arial, sans-serif;
-  color: #22336A;
-  overflow-y: auto;
+  color: #22336a;
+  overflow: hidden !important;
   box-sizing: border-box;
 }
 
@@ -20,12 +20,12 @@
 .teams-section,
 .tasks-due-section {
   flex: 1;
-  background: #252B2F;
-  color: #F5EBE0;
+  background: #252b2f;
+  color: #f3e7d3;
   border-radius: 8px;
-  padding: 12px;
+  padding: 20px;
   min-width: 260px;
-  height: 300px;
+  height: 450px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -33,11 +33,17 @@
 
 .teams-section h3,
 .tasks-due-section h3 {
+  color: #f3e7d3;
+  font-family: "SF Pro Rounded";
   font-size: 20px;
   font-weight: 500;
   margin-top: 0px;
   margin-bottom: 6px;
   flex-shrink: 0;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .scrollable-content {
@@ -45,30 +51,28 @@
   overflow-y: auto;
 }
 
-.team-card {
-  background: #F5EBE0;
-  color: #22336A;
+.team-cards {
+  background: #f3e7d3;
+  color: #252b2f;
+  height: 71px;
   border-radius: 5px;
-  margin: 4px 0;
+  margin-bottom: 16px;
   padding: 6px 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   cursor: pointer;
-  border: 2px solid #22336A;
-  font-size: 18px;
+  border: 4px solid #6096ba;
+  font-size: 20px;
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.team-card:hover,
-.team-card:focus {
-  background: #e4d3b8;
+.team-cards:hover,
+.team-cards:focus {
   transform: translateY(-1px);
-}
-
-.arrow {
-  font-weight: bold;
-  font-size: 18px;
+  background: #6096ba;
+  border: 4px solid #f3e7d3;
+  color: #f5ebe0;
 }
 
 .task-due-card {
@@ -77,7 +81,8 @@
   align-items: center;
   margin: 4px 0;
   padding: 4px 0;
-  border-bottom: 1px solid #F5EBE0;
+  border-bottom: 1px solid #f3e7d3 !important;
+  margin-bottom: 20px;
 }
 
 .task-due-card:last-child {
@@ -90,64 +95,83 @@
 }
 
 .task-team {
-  font-weight: bold;
-  font-size: 16px;
-  color: #F5EBE0;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .task-name {
-  font-size: 14px;
-  color: #ffffff !important;
+  color: #f3e7d3 !important;
+  font-family: "SF Pro Rounded";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .task-date {
   text-align: center;
-  font-size: 14px;
-  color: #F5EBE0;
+  font-size: 20px;
+  color: #f3e7d3;
 }
 
 .task-date strong {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 700;
+}
+
+.task-day {
+  font-size: 18px;
+  margin-top: -2px;
 }
 
 .progress-section {
   margin-top: 15px;
-  background: #F5EBE0;
-  padding: 16px;
+  background: #f3e7d3;
+  padding: 13px;
+  padding-top: 0px;
   border-radius: 8px;
-  border: 2px solid #22336A;
+  border: 4px solid #22336a;
 }
 
 .progress-section h3 {
-  font-size: 22px;
-  font-weight: 600;
+  color: #22336a;
   text-align: center;
-  margin-bottom: 10px;
+  font-family: "SF Pro Rounded";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-top: 13px;
+  margin-bottom: 9px;
 }
 
 .progress-bar {
-  margin: 10px 0 16px;
+  margin: 0px 31px 13px;
 }
 
 .label {
-  font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 4px;
+  color: #22336a;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   display: block;
-  color: #22336A;
 }
 
 .bar-bg {
-  background: #ddd;
-  border: 2px solid #22336A;
+  background: #f5ebe0;
+  border: 2px solid #22336a;
   border-radius: 10px;
   overflow: hidden;
-  height: 18px;
+  height: 36px;
 }
 
 .bar-fill {
-  background: linear-gradient(90deg, #6096BA, #4a6fa3);
+  background: #51905a;
   height: 100%;
   width: 0%;
   transition: width 0.4s ease-in-out;

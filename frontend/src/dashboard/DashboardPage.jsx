@@ -3,12 +3,20 @@ import "./DashboardPage.css";
 import { db } from "../Firebase";
 import TeamDetailsModal from "../teams-page/TeamDetailsModal";
 import { observeMyTeams } from "../TeamsService";
-import { collection, query, where, onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { useOutletContext } from "react-router-dom";
+import { IoChevronForward } from "react-icons/io5";
 
 export default function DashboardPage() {
   const { currentUser } = useOutletContext();
-
   const [teams, setTeams] = useState([]);
   const [tasksDue, setTasksDue] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -92,11 +100,11 @@ export default function DashboardPage() {
               teams.map((team) => (
                 <div
                   key={team.id}
-                  className="team-card"
+                  className="team-cards"
                   onClick={() => setSelectedTeam(team)}
                 >
                   {team.name}
-                  <span className="arrow">›</span>
+                  <IoChevronForward size={20} />
                 </div>
               ))
             )}
@@ -114,7 +122,9 @@ export default function DashboardPage() {
               tasksDue.map((task) => {
                 const dateObj = task.due ? new Date(task.due) : null;
                 const month = dateObj
-                  ? dateObj.toLocaleString("en-US", { month: "short" }).toUpperCase()
+                  ? dateObj
+                      .toLocaleString("en-US", { month: "short" })
+                      .toUpperCase()
                   : "—";
                 const day = dateObj ? dateObj.getDate() : "";
                 const taskTitle =
@@ -128,7 +138,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="task-date">
                       <strong>{month}</strong>
-                      <div>{day}</div>
+                      <div className="task-day">{day}</div>
                     </div>
                   </div>
                 );
@@ -146,21 +156,25 @@ export default function DashboardPage() {
         ) : (
           <>
             <div className="progress-bar">
-              <span className="label">POINTS: {points} / {pointsGoal}</span>
+              <span className="label">
+                POINTS: {points} / {pointsGoal}
+              </span>
               <div className="bar-bg">
                 <div
                   className="bar-fill"
-                  style={{ width: `${pointsPct}%`, backgroundColor: "#6aa6ff" }}
+                  style={{ width: `${pointsPct}%`, backgroundColor: "#51905a" }}
                 />
               </div>
             </div>
 
             <div className="progress-bar">
-              <span className="label">BADGES: {badges.length} / {badgeGoal}</span>
+              <span className="label">
+                BADGES: {badges.length} / {badgeGoal}
+              </span>
               <div className="bar-bg">
                 <div
                   className="bar-fill"
-                  style={{ width: `${badgePct}%`, backgroundColor: "#f9a825" }}
+                  style={{ width: `${badgePct}%`, backgroundColor: "#51905a" }}
                 />
               </div>
             </div>
