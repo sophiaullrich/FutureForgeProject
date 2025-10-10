@@ -1,3 +1,4 @@
+// TasksPage.jsx
 import React, { useState, useEffect } from "react";
 import "./TasksPage.css";
 import { IoCheckboxOutline, IoSquareOutline } from "react-icons/io5";
@@ -92,9 +93,7 @@ export default function TasksPage() {
       const visible = all.filter(
         (t) =>
           (t.assignedEmails || []).includes(myEmail) ||
-          (t.type === "team" &&
-            !!selectedTeam &&
-            t.team === selectedTeam)
+          (t.type === "team" && !!selectedTeam && t.team === selectedTeam)
       );
       setTasks(visible);
     });
@@ -102,7 +101,7 @@ export default function TasksPage() {
     return () => unsub();
   }, [currentUser, selectedTeam]);
 
-  // --- Toggle done
+  // --- Toggle done (still via API)
   const handleTaskToggle = async (taskId, currentDone) => {
     if (!currentUser) return;
     try {
@@ -120,11 +119,10 @@ export default function TasksPage() {
     }
   };
 
-  // --- Create task
+  // --- Create task (minimal change: add assignedEmails + timestamp)
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
 
-    // keep ISO in the DB; format only for display
     const dueISO = taskData.due ? new Date(taskData.due).toISOString() : null;
     if (!taskData.name || !dueISO) {
       alert("Task name and due date are required");
@@ -138,30 +136,34 @@ export default function TasksPage() {
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
       assignedUsers: [],
       type: taskData.type, // "private" | "team"
+      // NEW ↓ ensures your filter and ordering work with the API path
+      assignedEmails: [],                 // <-- added
+      timestamp: new Date().toISOString() // <-- added
     };
 
     if (taskData.type === "private") {
-      payload.assignedUsers = [
-        {
-          uid: currentUser.uid,
-          email: (currentUser.email || "").toLowerCase(),
-          displayName: currentUser.displayName || currentUser.email,
-        },
-      ];
+      const me = {
+        uid: currentUser.uid,
+        email: (currentUser.email || "").toLowerCase(),
+        displayName: currentUser.displayName || currentUser.email,
+      };
+      payload.assignedUsers = [me];
+      payload.assignedEmails = [me.email]; // <-- keep in sync
     } else if (taskData.type === "team") {
       // single assignee from dropdown; extend to multi if needed
-      const selected = teamMembers.find(
-        (m) => m.email === taskData.assignedUsers?.[0]?.email
-      );
-      if (selected) {
-        payload.assignedUsers = [
-          {
-            uid: selected.uid,
-            email: (selected.email || "").toLowerCase(),
-            displayName: selected.displayName || selected.email,
-          },
-        ];
-      }
+      const emailFromModal = (taskData.assignedUsers?.[0]?.email || "").toLowerCase();
+      const selected =
+        teamMembers.find((m) => m.email === emailFromModal) || null;
+
+      const userObj = selected || {
+        uid: taskData.assignedUsers?.[0]?.uid || null,
+        email: emailFromModal,
+        displayName:
+          taskData.assignedUsers?.[0]?.displayName || emailFromModal || "",
+      };
+
+      payload.assignedUsers = [userObj];
+      payload.assignedEmails = [userObj.email]; // <-- keep in sync
     }
 
     try {
@@ -179,14 +181,14 @@ export default function TasksPage() {
         throw new Error(j.error || `HTTP ${res.status}`);
       }
       setShowTaskModal(false);
-      // no manual refresh needed — onSnapshot will pick up the new doc
+      // onSnapshot will pick it up
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Failed to create task: " + error.message);
     }
   };
 
-  // --- Delete task
+  // --- Delete task (via API)
   const handleDeleteTask = async (taskId) => {
     if (!currentUser) return;
     try {
@@ -203,16 +205,19 @@ export default function TasksPage() {
     }
   };
 
-  // --- Display formatter: accepts ISO or your older "DD MON YYYY"
+  // --- Display formatter
   const formatDate = (val) => {
     if (!val) return "—";
     const s = String(val);
-    // if it already looks like "20 OCT 2025", just show it
     if (/[A-Z]{3}/.test(s) && !s.includes("T")) return s;
     const d = new Date(s);
     if (Number.isNaN(d.getTime())) return s;
     return d
-      .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
       .toUpperCase();
   };
 
@@ -246,7 +251,10 @@ export default function TasksPage() {
         {activeTab === "teamTasks" && (
           <div style={{ margin: "10px 20px" }}>
             <label>Select Team: </label>
-            <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+            <select
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+            >
               {teams.map((team) => (
                 <option key={team.id} value={team.name}>
                   {team.name}
@@ -256,13 +264,21 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div className={`tasks-table ${activeTab === "teamTasks" ? "team-tasks" : "my-tasks"}`}>
+        <div
+          className={`tasks-table ${
+            activeTab === "teamTasks" ? "team-tasks" : "my-tasks"
+          }`}
+        >
           <div className="table-header">
             <div className="header-cell">Done?</div>
             <div className="header-cell">Task Name</div>
             <div className="header-cell">Due Date</div>
-            {activeTab === "teamTasks" && <div className="header-cell">Assigned To</div>}
-            {activeTab === "teamTasks" && <div className="header-cell">Team</div>}
+            {activeTab === "teamTasks" && (
+              <div className="header-cell">Assigned To</div>
+            )}
+            {activeTab === "teamTasks" && (
+              <div className="header-cell">Team</div>
+            )}
             <div className="header-cell">Actions</div>
           </div>
 
@@ -275,22 +291,30 @@ export default function TasksPage() {
               <div
                 className="table-cell checkbox-cell"
                 onClick={(e) => {
-                  e.stopPropagation(); // don't open detail modal
+                  e.stopPropagation();
                   handleTaskToggle(task.id, task.done);
                 }}
                 role="button"
                 aria-label={task.done ? "Mark as not done" : "Mark as done"}
                 title={task.done ? "Mark as not done" : "Mark as done"}
               >
-                {task.done ? <IoCheckboxOutline size={33} /> : <IoSquareOutline size={33} />}
+                {task.done ? (
+                  <IoCheckboxOutline size={33} />
+                ) : (
+                  <IoSquareOutline size={33} />
+                )}
               </div>
 
               <div className="table-cell task-name-cell">{task.name}</div>
-              <div className="table-cell due-date-cell">{formatDate(task.due)}</div>
+              <div className="table-cell due-date-cell">
+                {formatDate(task.due)}
+              </div>
 
               {activeTab === "teamTasks" && (
                 <div className="table-cell team-cell">
-                  {(task.assignedUsers || []).map((u) => u.displayName).join(", ")}
+                  {(task.assignedUsers || [])
+                    .map((u) => u.displayName)
+                    .join(", ")}
                 </div>
               )}
               {activeTab === "teamTasks" && (
@@ -301,7 +325,10 @@ export default function TasksPage() {
                 className="table-cell actions-cell"
                 onClick={(e) => e.stopPropagation()}
               >
-                <button className="delete-btn" onClick={() => handleDeleteTask(task.id)}>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteTask(task.id)}
+                >
                   Delete
                 </button>
               </div>
@@ -331,10 +358,7 @@ export default function TasksPage() {
       )}
 
       {detailTask && (
-        <TaskDetailModal
-          task={detailTask}
-          onClose={() => setDetailTask(null)}
-        />
+        <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />
       )}
     </div>
   );
