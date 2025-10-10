@@ -9,8 +9,12 @@ import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
-const API_URL = `${BASE_URL}/tasks`;
+
+const API_URL =
+  process.env.NODE_ENV === "development"
+    ? "/api/tasks"                   // dev with Vercel dev or CRA proxy
+    : "/api/tasks";                  // production on Vercel
+
 
 export default function TasksPage() {
   const { currentUser } = useOutletContext();
