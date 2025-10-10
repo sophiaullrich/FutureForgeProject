@@ -9,7 +9,8 @@ import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
-const API_URL = "http://localhost:5001/tasks";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
+const API_URL = `${BASE_URL}/tasks`;
 
 export default function TasksPage() {
   const { currentUser } = useOutletContext();

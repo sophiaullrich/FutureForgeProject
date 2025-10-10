@@ -26,7 +26,8 @@ import {
 import "./chat.css";
 import { useLocation } from "react-router-dom";
 
-const BACKEND_URL = "http://localhost:5001/api/chat/messages";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
+const BACKEND_URL = `${BASE_URL}/api/chat/messages`;
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);

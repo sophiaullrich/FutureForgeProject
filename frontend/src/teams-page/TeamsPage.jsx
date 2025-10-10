@@ -20,7 +20,8 @@ import {
 
 import { auth } from "../Firebase";
 
-const CHAT_BACKEND_URL = "http://localhost:5001/api/chat";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
+const CHAT_BACKEND_URL = `${BASE_URL}/api/chat`;
 
 export default function TeamsPage() {
   // ui state

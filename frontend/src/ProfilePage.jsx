@@ -4,6 +4,8 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001";
+
 function ProfilePage() {
   const defaultImg = "/profileImages/defaultImage.png";
   const profileImages = [
@@ -70,7 +72,7 @@ function ProfilePage() {
 
       try {
         const token = await user.getIdToken();
-        const res = await fetch("http://localhost:5001/api/profile/me", {
+        const res = await fetch(`${BASE_URL}/api/profile/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -116,7 +118,7 @@ function ProfilePage() {
   const patchProfile = async (update) => {
     try {
       const token = await getToken();
-      await fetch("http://localhost:5001/api/profile/me", {
+      await fetch(`${BASE_URL}/api/profile/me`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(update),
