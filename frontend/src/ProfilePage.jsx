@@ -4,9 +4,8 @@ import "./ProfilePage.css";
 import { FaGoogle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { IoPencilSharp, IoCloseSharp } from "react-icons/io5";
 
-// Use same-origin in prod; still works locally with Next/Vercel dev.
-// If you set NEXT_PUBLIC_API_BASE_URL, we'll trim any trailing slash and still default to same-origin.
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "";
+// Force same-origin so production never calls localhost
+const BASE_URL = "";
 
 function ProfilePage() {
   const defaultImg = "/profileImages/defaultImage.png";
