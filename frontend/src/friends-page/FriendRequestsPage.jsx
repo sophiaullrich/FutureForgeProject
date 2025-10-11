@@ -16,15 +16,17 @@ export default function FriendRequestsPage() {
   }
 
   // load requests when page opens
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+  }, []);
 
   // accept a friend request
   async function handleAccept(userId) {
-    const req = incoming.find(r => r.from.id === userId);
+    const req = incoming.find((r) => r.from.id === userId);
     if (!req) return;
     const prev = incoming;
     // remove request from list
-    setIncoming(prev.filter(r => r.id !== req.id));
+    setIncoming(prev.filter((r) => r.id !== req.id));
     try {
       await FriendsService.accept(req.id);
       setToast("friend added");
@@ -37,11 +39,11 @@ export default function FriendRequestsPage() {
 
   // decline a friend request
   async function handleDecline(userId) {
-    const req = incoming.find(r => r.from.id === userId);
+    const req = incoming.find((r) => r.from.id === userId);
     if (!req) return;
     const prev = incoming;
     // remove request from list
-    setIncoming(prev.filter(r => r.id !== req.id));
+    setIncoming(prev.filter((r) => r.id !== req.id));
     try {
       await FriendsService.decline(req.id);
       setToast("request declined");
@@ -55,13 +57,13 @@ export default function FriendRequestsPage() {
   // render page
   return (
     <div className="friends-page">
-      <h1>friend requests</h1>
+      <h1>Friend Requests</h1>
 
       <div role="list" className="list">
         {incoming.length === 0 ? (
-          <div className="empty">no incoming requests</div>
+          <div className="empty">No Incoming Requests</div>
         ) : (
-          incoming.map(r => (
+          incoming.map((r) => (
             <UserCard
               key={r.id}
               user={{ id: r.from.id, name: r.from.name, pendingIncoming: true }}

@@ -1,26 +1,35 @@
 /* FriendsPage.css */
 
 .friends-page {
-  background: #efe4cf; 
+  background: #f3e7d3;
   min-height: 100vh;
   padding: 28px 24px 40px;
-  font-family: 'Helvetica Neue', sans-serif;
-  color: #22336A;
+  font-family: "SF Pro Rounded", "Calibri" sans-serif;
+  color: #22336a;
+}
+
+.friends-page h1 {
+  font-family: "SF Pro Rounded", "Calibri" sans-serif;
+  color: #252b2f;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .friends-header {
-  font-size: 2rem;
-  font-weight: bold;
+  font-weight: 400;
   margin-bottom: 1rem;
+  font-size: 20px;
+  font-family: "SF Pro Rounded", "Calibri" sans-serif;
 }
 
 .subhead {
   margin-top: 12px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2b2d63;
+  color: #22336a;
 }
-
 
 .friends-search {
   display: flex;
@@ -30,21 +39,34 @@
 .friends-search input {
   flex: 1;
   padding: 12px 14px;
-  border: 2px solid #2b2d63;
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 5px;
+  border: 2px solid #252b2f;
+  background: #f5ebe0;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 .friends-search button {
-  background: #2b2d63;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  background: #f5ebe0;
+  color: #22336a;
+  border: 2px solid #22336a;
+  border-radius: 5px;
   padding: 10px 16px;
   cursor: pointer;
   transition: background 0.2s;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 .friends-search button:hover {
-  background: #3a4a9e;
+  background: #22336a;
+  color: #f5ebe0;
+  border: 2px solid #f5ebe0;
 }
 
 /* Tabs */
@@ -55,24 +77,37 @@
 }
 .tab {
   padding: 8px 14px;
-  border: 2px solid #2b2d63;
-  border-radius: 20px;
-  background: #fff;
+  border: 2px solid #22336a;
+  border-radius: 5px !important;
+  background: #f5ebe0;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s, color 0.2s;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 .tab.active {
-  background: #2b2d63;
-  color: #fff;
+  background: #22336a;
+  color: #f5ebe0;
 }
+
 .badge {
-  margin-left: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  background: #2b2d63;
-  color: #fff;
+  margin-left: 8px;
+  padding: 5px 10px;
+  font-size: 16px;
+  background: #22336a;
+  color: #f5ebe0;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 /* Cards */
@@ -85,42 +120,101 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border: 2px solid #cfc8b6;
+  border: 2px solid #252b2f;
   border-radius: 12px;
-  background: #fff;
-  transition: box-shadow 0.2s, transform 0.05s;
+  background: #f5ebe0;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 .user-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 .avatar {
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  border: 1px solid #252b2f;
   display: grid;
   place-items: center;
-  background: #f2f2f2;
+  background: #f5ebe0;
   font-weight: 600;
 }
 .name {
+  font-size: 16px;
+  font-style: normal;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-weight: 600;
   flex: 1;
 }
+
+.sub {
+  font-size: 14px;
+  font-style: normal;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+}
+
 .actions {
   display: flex;
   gap: 8px;
 }
+
+.tag {
+  padding: 5px 15px;
+  font-size: 16px;
+  background: #22336a;
+  color: #f3e7d3;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
 .user-card button {
   padding: 8px 12px;
   border-radius: 8px;
-  border: 2px solid #2b2d63;
-  background: #fff;
+  border: 2px solid #252b2f;
+  background: #f3e7d3;
   cursor: pointer;
   font-weight: 600;
 }
-.user-card button.secondary {
-  background: #efe9d9;
+
+.user-card button:hover {
+  background: #252b2f;
+  color: #f3e7d3;
+  border: 2px solid #f3e7d3;
+}
+
+.user-card button.accept {
+  background: #f5ebe0;
+  color: #51905a;
+  border: 2px solid #51905a;
+}
+
+.user-card button.danger {
+  background: #f5ebe0;
+  color: #ac4750;
+  border: 2px solid #ac4750;
+}
+
+.user-card button.accept:hover {
+  background: #51905a;
+  color: #f5ebe0;
+  border: 2px solid #f5ebe0;
+}
+
+.user-card button.danger:hover {
+  background: #ac4750;
+  color: #f5ebe0;
+  border: 2px solid #f5ebe0;
 }
 
 /* Toast */
@@ -128,11 +222,11 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #2b2d63;
-  color: #fff;
+  background: #22336a;
+  color: #f5ebe0;
   padding: 12px 16px;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Demo buttons */
@@ -141,15 +235,15 @@
   gap: 10px;
 }
 .demo button {
-  background: #22336A;
-  color: #fff;
+  background: #22336a;
+  color: #f5ebe0;
   padding: 8px 14px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 .demo button:hover {
-  background: #3a4a9e;
+  background: #22336a8d;
 }
 .friends-page h1,
 .friends-page h2 {

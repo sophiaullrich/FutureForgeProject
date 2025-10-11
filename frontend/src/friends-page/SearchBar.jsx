@@ -14,12 +14,12 @@ export default function SearchBar({ onSearch, loading }) {
       className="friends-search"
     >
       <input
-        placeholder="search by name or email"
+        placeholder="Search by name or email"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
       <button type="submit" disabled={loading}>
-        {loading ? "searching…" : "search"}
+        {loading ? "Searching…" : "Search"}
       </button>
     </form>
   );
