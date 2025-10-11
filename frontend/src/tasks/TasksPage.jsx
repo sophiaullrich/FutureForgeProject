@@ -7,14 +7,24 @@ import { listProfiles } from "../teams-page/ProfileService";
 import TaskModal from "./TaskModal";
 import TaskDetailModal from "./TaskDetailModal";
 import { db } from "../Firebase";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
-const API_URL = "http://localhost:5001/tasks";
+const API_URL =
+  process.env.NODE_ENV === "development" ? "/api/tasks" : "/api/tasks";
 
 export default function TasksPage() {
   const { currentUser } = useOutletContext();
 
-  const [activeTab, setActiveTab] = useState("myTasks");
+  const [activeTab, setActiveTab] = useState("myTasks"); // myTasks | teamTasks
   const [tasks, setTasks] = useState([]);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [detailTask, setDetailTask] = useState(null);
@@ -23,24 +33,28 @@ export default function TasksPage() {
   const [profiles, setProfiles] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
 
+  // --- Load teams for the current user
   useEffect(() => {
     if (!currentUser) return;
-    const unsubscribe = observeMyTeams((teams) => {
-      setTeams(teams);
-      if (teams.length > 0 && !selectedTeam) setSelectedTeam(teams[0].name);
+    const unsub = observeMyTeams((tms) => {
+      setTeams(tms || []);
+      if ((tms || []).length > 0 && !selectedTeam) {
+        setSelectedTeam(tms[0].name);
+      }
     });
-    return () => unsubscribe();
+    return () => unsub?.();
   }, [currentUser]);
 
+  // --- Load all profiles
   useEffect(() => {
     if (!currentUser) return;
-    const fetchProfiles = async () => {
+    (async () => {
       const allProfiles = await listProfiles();
-      setProfiles(allProfiles);
-    };
-    fetchProfiles();
+      setProfiles(allProfiles || []);
+    })();
   }, [currentUser]);
 
+  // --- Compute teamMembers
   useEffect(() => {
     if (!currentUser) {
       setTeamMembers([]);
@@ -56,109 +70,106 @@ export default function TasksPage() {
           .filter(Boolean)
           .map((p) => ({
             uid: p.uid,
-            email: p.email,
-            displayName: p.displayName,
+            email: (p.email || "").toLowerCase(),
+            displayName: p.displayName || p.email || p.uid,
           }));
       }
     }
 
     const currentUserObj = {
       uid: currentUser.uid,
-      email: currentUser.email,
+      email: (currentUser.email || "").toLowerCase(),
       displayName: currentUser.displayName || currentUser.email,
     };
-
-    if (!members.some((m) => m.uid === currentUser.uid))
+    if (!members.some((m) => m.uid === currentUser.uid)) {
       members.push(currentUserObj);
+    }
+
     setTeamMembers(members);
   }, [profiles, teams, selectedTeam, currentUser]);
 
+  // --- Live Firestore listener
   useEffect(() => {
     if (!currentUser) return;
-    const userEmail = currentUser.email.toLowerCase();
 
     const q = query(collection(db, "tasks"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const visible = allTasks.filter(
+    const unsub = onSnapshot(q, (snapshot) => {
+      const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const myEmail = (currentUser.email || "").toLowerCase();
+
+      const visible = all.filter(
         (t) =>
-          t.assignedEmails?.includes(userEmail) ||
-          (t.type === "team" && teams.some((team) => team.name === t.team))
+          (t.assignedEmails || []).includes(myEmail) ||
+          (t.type === "team" && !!selectedTeam && t.team === selectedTeam)
       );
       setTasks(visible);
     });
 
-    return () => unsubscribe();
-  }, [currentUser, teams]);
+    return () => unsub();
+  }, [currentUser, selectedTeam]);
 
+  // --- ✅ Toggle task completion (Firestore direct)
   const handleTaskToggle = async (taskId, currentDone) => {
-    if (!currentUser) return;
+    console.log("Toggling task:", taskId);
     try {
-      const token = await currentUser.getIdToken();
-      await fetch(`${API_URL}/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ done: !currentDone }),
+      await updateDoc(doc(db, "tasks", taskId), {
+        done: !currentDone,
+        updatedAt: serverTimestamp(),
       });
     } catch (err) {
       console.error("Error updating task:", err);
     }
   };
 
+  // --- Create task (via API)
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
-    const dueDateISO = taskData.due
-      ? new Date(taskData.due).toISOString()
-      : null;
-    if (!taskData.name || !dueDateISO)
-      return alert("Task name and due date are required");
 
-    const formattedDate = new Date(dueDateISO)
-      .toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-      .toUpperCase();
+    const dueISO = taskData.due ? new Date(taskData.due).toISOString() : null;
+    if (!taskData.name || !dueISO) {
+      alert("Task name and due date are required");
+      return;
+    }
 
     const payload = {
-      name: taskData.name,
-      due: formattedDate,
+      name: taskData.name.trim(),
+      due: dueISO,
       description: taskData.description ?? "",
       team: taskData.type === "team" ? taskData.team || selectedTeam : "",
       assignedUsers: [],
       type: taskData.type,
+      assignedEmails: [],
+      done: false,
+      timestamp: new Date().toISOString(),
     };
 
     if (taskData.type === "private") {
-      payload.assignedUsers = [
-        {
-          uid: currentUser.uid,
-          email: currentUser.email.toLowerCase(),
-          displayName: currentUser.displayName || currentUser.email,
-        },
-      ];
+      const me = {
+        uid: currentUser.uid,
+        email: (currentUser.email || "").toLowerCase(),
+        displayName: currentUser.displayName || currentUser.email,
+      };
+      payload.assignedUsers = [me];
+      payload.assignedEmails = [me.email];
     } else if (taskData.type === "team") {
-      const selectedUser = teamMembers.find(
-        (m) => m.email === taskData.assignedUsers?.[0]?.email
-      );
-      if (selectedUser) {
-        payload.assignedUsers = [
-          {
-            uid: selectedUser.uid,
-            email: selectedUser.email.toLowerCase(),
-            displayName: selectedUser.displayName || selectedUser.email,
-          },
-        ];
-      }
+      const emailFromModal = (taskData.assignedUsers?.[0]?.email || "").toLowerCase();
+      const selected =
+        teamMembers.find((m) => m.email === emailFromModal) || null;
+
+      const userObj = selected || {
+        uid: taskData.assignedUsers?.[0]?.uid || null,
+        email: emailFromModal,
+        displayName:
+          taskData.assignedUsers?.[0]?.displayName || emailFromModal || "",
+      };
+
+      payload.assignedUsers = [userObj];
+      payload.assignedEmails = [userObj.email];
     }
 
     try {
       const token = await currentUser.getIdToken();
-      await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -166,6 +177,10 @@ export default function TasksPage() {
         },
         body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || `HTTP ${res.status}`);
+      }
       setShowTaskModal(false);
     } catch (error) {
       console.error("Error adding task:", error);
@@ -173,16 +188,11 @@ export default function TasksPage() {
     }
   };
 
+  // --- ✅ Delete task (Firestore direct)
   const handleDeleteTask = async (taskId) => {
-    if (!currentUser) return;
+    console.log("Deleting task:", taskId);
     try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch(`${API_URL}/${taskId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete task");
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      await deleteDoc(doc(db, "tasks", taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
     }
@@ -221,7 +231,9 @@ export default function TasksPage() {
   const filteredTasks =
     activeTab === "myTasks"
       ? tasks.filter((task) =>
-          task.assignedEmails?.includes(currentUser?.email?.toLowerCase())
+          (task.assignedEmails || []).includes(
+            (currentUser?.email || "").toLowerCase()
+          )
         )
       : tasks.filter((task) => task.team === selectedTeam);
 

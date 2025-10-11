@@ -19,11 +19,11 @@ const firebaseConfig = {
   measurementId: "G-PE3YGMH0W3",
 };
 
-// ✅ singleton app (prevents multiple Firebase instances)
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 
-// ✅ singletons exported everywhere
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
