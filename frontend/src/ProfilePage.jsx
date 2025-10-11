@@ -30,7 +30,7 @@ function ProfilePage() {
     photoURL: defaultImg,
     description: "",
     socials: { google: "", github: "", linkedin: "" },
-    interests: [],
+    interests: ["go bear!"],
     careerGoals: [],
   });
 
@@ -113,7 +113,7 @@ function ProfilePage() {
   }, [user]);
 
   // Helper to get token
-  const getToken = async () => (await getAuth().currentUser.getIdToken());
+  const getToken = async () => await getAuth().currentUser.getIdToken();
 
   // Generic PATCH function
   const patchProfile = async (update) => {
@@ -121,7 +121,10 @@ function ProfilePage() {
       const token = await getToken();
       await fetch(`${BASE_URL}/api/profile/me`, {
         method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(update),
       });
       setProfile((prev) => ({ ...prev, ...update }));
@@ -137,7 +140,8 @@ function ProfilePage() {
   };
 
   // Description handlers
-  const startEditDescription = () => setEditing({ ...editing, description: true });
+  const startEditDescription = () =>
+    setEditing({ ...editing, description: true });
   const cancelEditDescription = () => {
     setTemp({ ...temp, description: profile.description });
     setEditing({ ...editing, description: false });
@@ -182,7 +186,10 @@ function ProfilePage() {
   };
   const cancelEditGoals = () => setEditing({ ...editing, careerGoals: false });
   const saveGoals = () => {
-    const updated = temp.careerGoalsText.split("\n").map((g) => g.trim()).filter(Boolean);
+    const updated = temp.careerGoalsText
+      .split("\n")
+      .map((g) => g.trim())
+      .filter(Boolean);
     patchProfile({ careerGoals: updated });
     setTemp({ ...temp, careerGoalsText: updated.join("\n") });
     setEditing({ ...editing, careerGoals: false });
@@ -194,41 +201,69 @@ function ProfilePage() {
 
   return (
     <div className="profile-page">
-      <div className="top-header"><h1>My Profile</h1></div>
+      <div className="top-header">
+        <h1>My Profile</h1>
+      </div>
 
       <div className="profile-section">
         {/* Left - Image and Info */}
         <div className="profile-left">
           <div className="profile-img-container">
             <img src={profile.photoURL} alt="Profile" className="profile-img" />
-            {!showImageSelector && <IoPencilSharp className="edit-img-btn" onClick={() => setShowImageSelector(true)} />}
+            {!showImageSelector && (
+              <IoPencilSharp
+                className="edit-img-btn"
+                onClick={() => setShowImageSelector(true)}
+              />
+            )}
             {showImageSelector && (
               <div className="profile-images-selector">
                 {profileImages.map((img, idx) => (
-                  <img key={idx} src={img} alt={`Profile ${idx}`} className="profile-image-option" onClick={() => selectProfileImage(img)} />
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Profile ${idx}`}
+                    className="profile-image-option"
+                    onClick={() => selectProfileImage(img)}
+                  />
                 ))}
               </div>
             )}
           </div>
 
           <div className="profile-info">
-            <h2>{profile.displayName || `${profile.firstName} ${profile.lastName}`}</h2>
+            <h2>
+              {profile.displayName ||
+                `${profile.firstName} ${profile.lastName}`}
+            </h2>
             {editing.description ? (
               <div>
                 <textarea
                   value={temp.description}
                   placeholder="Write a short description..."
-                  onChange={(e) => setTemp({ ...temp, description: e.target.value })}
+                  onChange={(e) =>
+                    setTemp({ ...temp, description: e.target.value })
+                  }
                 />
                 <div className="profile-info-button-container">
-                  <button onClick={saveDescription} className="save-btn">Save</button>
-                  <button onClick={cancelEditDescription} className="cancel-btn">Cancel</button>
+                  <button onClick={saveDescription} className="save-btn">
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEditDescription}
+                    className="cancel-btn"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             ) : (
               <p className="desc-inline">
                 {profile.description || "Add a description..."}
-                <IoPencilSharp className="desc-inline-icon" onClick={startEditDescription} />
+                <IoPencilSharp
+                  className="desc-inline-icon"
+                  onClick={startEditDescription}
+                />
               </p>
             )}
           </div>
@@ -241,7 +276,12 @@ function ProfilePage() {
           onMouseLeave={() => setIsHoveringSocials(false)}
         >
           <div className="social-header">
-            {isHoveringSocials && !editing.socials && <IoPencilSharp className="socials-edit-icon" onClick={startEditSocials} />}
+            {isHoveringSocials && !editing.socials && (
+              <IoPencilSharp
+                className="socials-edit-icon"
+                onClick={startEditSocials}
+              />
+            )}
             <h4>Social Accounts</h4>
           </div>
 
@@ -253,7 +293,12 @@ function ProfilePage() {
                   type="text"
                   value={temp.socials.google}
                   placeholder="Gmail"
-                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, google: e.target.value } })}
+                  onChange={(e) =>
+                    setTemp({
+                      ...temp,
+                      socials: { ...temp.socials, google: e.target.value },
+                    })
+                  }
                 />
               </div>
               <div className="social-link">
@@ -262,7 +307,12 @@ function ProfilePage() {
                   type="text"
                   value={temp.socials.github}
                   placeholder="Github"
-                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, github: e.target.value } })}
+                  onChange={(e) =>
+                    setTemp({
+                      ...temp,
+                      socials: { ...temp.socials, github: e.target.value },
+                    })
+                  }
                 />
               </div>
               <div className="social-link">
@@ -271,12 +321,21 @@ function ProfilePage() {
                   type="text"
                   value={temp.socials.linkedin}
                   placeholder="Linkedin"
-                  onChange={(e) => setTemp({ ...temp, socials: { ...temp.socials, linkedin: e.target.value } })}
+                  onChange={(e) =>
+                    setTemp({
+                      ...temp,
+                      socials: { ...temp.socials, linkedin: e.target.value },
+                    })
+                  }
                 />
               </div>
               <div className="social-buttons">
-                <button onClick={saveSocials} className="save-btn">Save</button>
-                <button onClick={cancelEditSocials} className="cancel-btn">Cancel</button>
+                <button onClick={saveSocials} className="save-btn">
+                  Save
+                </button>
+                <button onClick={cancelEditSocials} className="cancel-btn">
+                  Cancel
+                </button>
               </div>
             </>
           ) : (
@@ -306,7 +365,10 @@ function ProfilePage() {
               {profile.interests.map((interest, idx) => (
                 <div key={idx} className="editable-interest-tag">
                   <span>{interest}</span>
-                  <IoCloseSharp className="delete-icon" onClick={() => deleteInterest(idx)} />
+                  <IoCloseSharp
+                    className="delete-icon"
+                    onClick={() => deleteInterest(idx)}
+                  />
                 </div>
               ))}
             </div>
@@ -315,11 +377,17 @@ function ProfilePage() {
                 type="text"
                 placeholder="Add new interest..."
                 value={temp.newInterest}
-                onChange={(e) => setTemp({ ...temp, newInterest: e.target.value })}
+                onChange={(e) =>
+                  setTemp({ ...temp, newInterest: e.target.value })
+                }
                 onKeyPress={(e) => e.key === "Enter" && addInterest()}
               />
               <button onClick={addInterest}>Add</button>
-              <button onClick={() => setEditing({ ...editing, interests: false })}>Save</button>
+              <button
+                onClick={() => setEditing({ ...editing, interests: false })}
+              >
+                Save
+              </button>
             </div>
           </div>
         ) : (
@@ -331,7 +399,10 @@ function ProfilePage() {
                 </div>
               ))}
             </div>
-            <IoPencilSharp className="interests-edit-icon" onClick={() => setEditing({ ...editing, interests: true })} />
+            <IoPencilSharp
+              className="interests-edit-icon"
+              onClick={() => setEditing({ ...editing, interests: true })}
+            />
           </>
         )}
       </div>
@@ -348,11 +419,17 @@ function ProfilePage() {
             <textarea
               className="editable-goals-textarea"
               value={temp.careerGoalsText}
-              onChange={(e) => setTemp({ ...temp, careerGoalsText: e.target.value })}
+              onChange={(e) =>
+                setTemp({ ...temp, careerGoalsText: e.target.value })
+              }
             />
             <div className="career-goals-buttons">
-              <button onClick={saveGoals} className="save-btn">Save</button>
-              <button onClick={cancelEditGoals} className="cancel-btn">Cancel</button>
+              <button onClick={saveGoals} className="save-btn">
+                Save
+              </button>
+              <button onClick={cancelEditGoals} className="cancel-btn">
+                Cancel
+              </button>
             </div>
           </div>
         ) : (
@@ -362,7 +439,9 @@ function ProfilePage() {
                 <li key={idx}>{goal}</li>
               ))}
             </ul>
-            {isHoveringGoals && <IoPencilSharp className="edit-icon" onClick={startEditGoals} />}
+            {isHoveringGoals && (
+              <IoPencilSharp className="edit-icon" onClick={startEditGoals} />
+            )}
           </div>
         )}
       </div>

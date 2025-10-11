@@ -10,17 +10,21 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-  doc
+  doc,
 } from "firebase/firestore";
+import { IoCloseCircleOutline, IoSearchSharp } from "react-icons/io5";
 
-const makeChatKey = ({ type, id }) => `${type}::${id}`; 
+const makeChatKey = ({ type, id }) => `${type}::${id}`;
 
-export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum }) {
+export function ForumModal({
+  showForumModal,
+  setShowForumModal,
+  setSelectedForum,
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [publicTeams, setPublicTeams] = useState([]);
   const [loadingTeams, setLoadingTeams] = useState(true);
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     if (!showForumModal) return;
@@ -100,19 +104,21 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
           onClick={() => setShowForumModal(false)}
           aria-label="Close"
         >
-          ×
+          <IoCloseCircleOutline size={45} />
         </button>
 
         <h2 className="forum-modal-title">Find Forums</h2>
-
-        <input
-          className="forum-search"
-          placeholder="Search public teams..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
-        {loadingTeams && <div className="forum-loading">Loading public teams…</div>}
+        <div className="search-box elevated">
+          <input
+            placeholder="Search public teams..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <IoSearchSharp className="search-icon" />
+        </div>
+        {loadingTeams && (
+          <div className="forum-loading">Loading public teams…</div>
+        )}
         {error && <div className="forum-error">{error}</div>}
 
         <div
@@ -120,8 +126,7 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "8px",
-            marginTop: "16px",
+            gap: "4px",
           }}
         >
           {filtered.map((forum) => (
@@ -143,7 +148,11 @@ export function ForumModal({ showForumModal, setShowForumModal, setSelectedForum
   );
 }
 
-export function JoinForumModal({ selectedForum, setSelectedForum, setShowForumModal }) {
+export function JoinForumModal({
+  selectedForum,
+  setSelectedForum,
+  setShowForumModal,
+}) {
   if (!selectedForum) return null;
 
   const handleJoin = async () => {
@@ -160,7 +169,6 @@ export function JoinForumModal({ selectedForum, setSelectedForum, setShowForumMo
       // Close modals
       setSelectedForum(null);
       setShowForumModal(false);
-
     } catch (e) {
       alert(e.message || "Failed to join forum.");
     }
@@ -169,11 +177,14 @@ export function JoinForumModal({ selectedForum, setSelectedForum, setShowForumMo
   return (
     <div className="modal-overlay">
       <div className="modal-content join-forum-modal">
-        <button className="modal-close" onClick={() => setSelectedForum(null)}>×</button>
+        <button className="closeButton" onClick={() => setSelectedForum(null)}>
+          <IoCloseCircleOutline size={45} />
+        </button>
         <h2>{selectedForum.name}</h2>
+        <h3>{selectedForum.description}</h3>
         <p>Would you like to join this forum?</p>
         <button className="join-forum-btn" onClick={handleJoin}>
-          Join
+          Join Forum
         </button>
       </div>
     </div>

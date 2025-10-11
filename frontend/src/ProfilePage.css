@@ -3,10 +3,9 @@
   height: 100%;
   margin: 0 auto;
   padding-left: 50px;
-  height: 100%;
   max-width: 1200px;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
-  overflow-x: visible;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  overflow-x: auto;
 }
 
 body {
@@ -225,7 +224,7 @@ body {
   margin-bottom: 10px;
   border-radius: 5px;
   min-width: 100px;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .profile-info textarea {
@@ -244,7 +243,7 @@ body {
   height: 38px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -476,7 +475,7 @@ body {
   border-radius: 5px;
   border: 2px solid #6096ba;
   background: #f3e7d3;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 16px;
 }
 
@@ -488,7 +487,7 @@ body {
   height: 38px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -514,7 +513,7 @@ body {
 
 .career-goals h3 {
   color: #252b2f;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
@@ -631,7 +630,7 @@ body {
   height: 38px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -648,7 +647,7 @@ body {
   height: 38px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -672,7 +671,7 @@ body {
   height: 38px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-weight: 700;
   transition: background-color 0.3s ease, color 0.3s ease;

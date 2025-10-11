@@ -5,7 +5,7 @@
   background: #f3e7d3;
   padding: 15px;
   padding-top: 46px;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   color: #22336a;
   overflow: hidden !important;
   box-sizing: border-box;
@@ -34,7 +34,7 @@
 .teams-section h3,
 .tasks-due-section h3 {
   color: #f3e7d3;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-weight: 500;
   margin-top: 0px;
@@ -95,7 +95,7 @@
 }
 
 .task-team {
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
@@ -104,7 +104,7 @@
 
 .task-name {
   color: #f3e7d3 !important;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
@@ -139,7 +139,7 @@
 .progress-section h3 {
   color: #22336a;
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 24px;
   font-style: normal;
   font-weight: 400;
@@ -154,7 +154,7 @@
 
 .label {
   color: #22336a;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
