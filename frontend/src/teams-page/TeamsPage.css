@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   background-color: #f8e9d2;
   color: #22336a;
 }
@@ -8,9 +8,9 @@ body {
 .teams-page-container {
   padding: 2rem;
   background-color: #f8e9d2;
-  min-height: 100vh;
-  max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  height: 100%;
 }
 
 .teams-header {
@@ -29,21 +29,73 @@ body {
 }
 
 .team-card {
-  background-color: #f5ebe0;
-  border: 2px solid #6096ba;
-  border-radius: 8px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  color: #22336a;
-  font-size: 1.1rem;
+  background: #f3e7d3;
+  color: #252b2f;
+  height: 71px;
+  border-radius: 5px;
+  margin-bottom: 16px;
+  padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+  border: 4px solid #6096ba;
+  text-align: right;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .team-card:hover {
-  background-color: #e4d3b8;
+  background-color: #6096ba;
+  border: 4px solid #f3e7d3;
+  color: #f3e7d3 !important;
+}
+
+.team-card h3 {
+  color: #252b2f;
+  text-align: right;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding-bottom: 12px;
+}
+
+.team-card:hover h3 {
+  color: #f3e7d3;
+  text-align: right;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.join-team-card {
+  border-radius: 5px;
+  border: 2px solid #22336a;
+  background: #f3e7d3;
+
+  height: 71px;
+  margin-bottom: 16px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.join-team-card h3 {
+  color: #252b2f;
+  text-align: right;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding-bottom: 12px;
 }
 
 .button-group {
@@ -54,7 +106,7 @@ body {
 }
 
 .styled-btn {
-  background-color: #22336a;
+  background-color: #22446a;
   color: #f5ebe0;
   padding: 10px 16px;
   font-size: 1rem;
@@ -103,13 +155,18 @@ body {
 }
 
 .join-modal {
-  background: #f8f6ef;
+  background: #f3e7d3;
   width: min(900px, 92vw);
-  border: 2px solid #2b2d63;
+  border: 4px solid #2b2d63;
   border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
   padding: 20px 24px 24px;
   position: relative;
+}
+
+.join-loading-modal {
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
 }
 
 .modal-close {
@@ -118,21 +175,26 @@ body {
   top: 10px;
   background: transparent;
   border: none;
-  font-size: 20px;
+  font-size: 45px;
   cursor: pointer;
-  color: #2b2d63;
+  color: #252b2f;
 }
 
 .join-title {
   margin: 6px 0 14px;
+  color: #252b2f;
   text-align: center;
-  font-size: 28px;
-  color: #2b2d63;
+  font-family: "SF Pro Rounded";
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .search-row {
   position: relative;
   margin-bottom: 10px;
+  background: #f5ebe0;
 }
 
 .search-icon {
@@ -145,9 +207,9 @@ body {
 .search-input {
   width: 100%;
   padding: 10px 12px 10px 36px;
-  border: 1.5px solid #2b2d63;
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 5px;
+  border: 4px solid #22336a;
+  background: #f3e7d3;
 }
 
 .filter-row {
@@ -183,52 +245,29 @@ body {
   padding-right: 4px;
 }
 
-.team-card {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-align: left;
-  gap: 12px;
-  background: #fff;
-  border: 2px solid #2b2d63;
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: transform 0.05s ease, box-shadow 0.15s ease;
-}
-
-.team-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-}
-
 .team-card-info {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 .team-name {
-  font-weight: 600;
-  color: #1c1f3b;
+  font-weight: 400;
+  color: #252b2f;
   margin-bottom: 6px;
-}
-.team-card-arrow {
-  font-size: 22px;
-  color: #2b2d63;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
 }
 
 .pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: inline-block;
 }
 .pill {
-  background: #2b2d63;
-  color: #fff;
-  border-radius: 18px;
+  background: #22336a;
+  color: #f3e7d3;
+  border-radius: 5px;
   padding: 4px 10px;
-  font-size: 12px;
-  line-height: 1;
+  font-size: 15px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .team-detail {
@@ -260,24 +299,39 @@ body {
 }
 
 .join-btn {
-  margin-top: 14px;
-  background: #2b2d63;
-  color: #fff;
-  border: none;
+  display: inline-flex;
+  justify-content: center;
+  box-sizing: border-box;
   padding: 10px 14px;
-  border-radius: 8px;
-  font-weight: 600;
   cursor: pointer;
+  color: #22336a;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border-radius: 5px;
+  border: 3px solid #22336a;
+  background: #f3e7d3;
+  height: 38px;
+  width: 225px;
+  align-items: center;
+}
+
+.join-btn:hover {
+  background: #22336a;
+  color: #f3e7d3;
+  border: 3px solid #f3e7d3;
 }
 
 .invite-modal {
-  background: #f8f6ef;
+  background: #f3e7d3;
   width: min(760px, 92vw);
   max-height: 85vh;
   overflow: auto;
-  border: 2px solid #2b2d63;
+  border: 4px solid #2b2d63;
   border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
   padding: 18px 20px 20px;
   position: relative;
   -webkit-overflow-scrolling: touch;
@@ -285,16 +339,18 @@ body {
 
 .invite-title {
   text-align: center;
-  color: #2b2d63;
-  font-size: 28px;
+  color: #252b2f;
+  font-size: 40px;
   margin: 2px 0 12px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 500;
 }
 
 .invite-form {
   border: 2px solid #2b2d63;
   border-radius: 10px;
   padding: 14px;
-  background: #efe9d9;
+  background: #f5ebe0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -312,11 +368,12 @@ body {
 }
 
 .invite-input {
-  background: #fff;
-  border: 1.5px solid #2b2d63;
+  background: #f3e7d3;
+  border: 1px solid #22336a;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .invite-link-btn {
@@ -324,31 +381,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #24306b;
-  color: #fff;
-  border: none;
+  background: #22336a;
+  color: #f3e7d3;
+  border: 2px solid #f3e7d3;
   border-radius: 8px;
   padding: 12px 14px;
-  font-weight: 600;
+  font-weight: 400;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
   cursor: pointer;
 }
 
-.invite-link-btn .arrow {
-  font-size: 22px;
-  line-height: 1;
+.invite-link-btn:hover {
+  background: #f3e7d3;
+  color: #22336a;
+  border: 2px solid #22336a;
 }
 
 .invite-help {
   grid-column: 1 / -1;
-  margin: 2px 2px 0;
-  font-size: 12px;
-  color: #4b4f6a;
+  margin: 2px 2px 0 2px;
+  font-size: 16px;
+  color: #22336a;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .pending-title {
-  color: #2b2d63;
+  color: #22336a;
   font-size: 18px;
   margin: 10px 0 8px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
 }
 
 .invites-list {
@@ -358,19 +421,44 @@ body {
 }
 
 .invite-row {
+  min-height: 69px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
-  border: 2px solid #cfc8b6;
-  border-radius: 10px;
-  padding: 12px 14px;
+  background: #f5ebe0;
+  color: #252b2f;
+  border: 1px solid #252b2f;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 8px;
+}
+
+.invite-row.selected {
+  background: #252b2f;
+  color: #f3e7d3;
+  border: 1px solid #f3e7d3;
 }
 
 .invite-left {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #252b2f;
+}
+
+.invite-left.selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #f3e7d3;
+  background: #252b2f;
+  border: 1px solid #f3e7d3;
 }
 
 .avatar-dot {
@@ -382,11 +470,14 @@ body {
 }
 
 .invite-name {
-  color: #1f2242;
-  font-weight: 600;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
 }
 .invite-status {
-  font-weight: 600;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
 }
 .invite-status.pending {
   color: #6b8cc9;
@@ -404,43 +495,63 @@ body {
 
 .resend-btn,
 .revoke-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 180px;
   padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
+  background: #f3e7d3;
+  border-radius: 5px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+  height: 38px;
   cursor: pointer;
 }
 
 .resend-btn {
-  background: #4c8c6b;
-  color: #fff;
+  border: 3px solid #51905a;
+  color: #ac4750;
 }
 .revoke-btn {
-  background: #b35353;
-  color: #fff;
+  border: 3px solid #ac4750;
+  color: #ac4750;
+}
+
+.revoke-btn:hover {
+  background: #ac4750;
+  color: #f3e7d3;
+  border: 3px solid #f3e7d3;
 }
 
 .create-modal {
-  background: #f8f6ef;
+  background: #f3e7d3;
   width: min(860px, 92vw);
-  border: 2px solid #2b2d63;
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  border: 4px solid #22336a;
+  border-radius: 5px;
   padding: 22px 24px 26px;
   position: relative;
 }
 
 .create-title {
+  color: #252b2f;
   text-align: center;
-  color: #2b2d63;
-  font-size: 28px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
   margin: 4px 0 18px;
 }
 
 .form-label {
-  color: #1f2242;
-  font-weight: 600;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   margin: 10px 0 6px;
   display: block;
 }
@@ -448,9 +559,10 @@ body {
 .form-input,
 .form-textarea {
   width: 100%;
-  background: #fff;
-  border: 1.5px solid #2b2d63;
-  border-radius: 8px;
+  background: #f5ebe0;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  border: 1px solid #252b2f;
+  border-radius: 5px;
   padding: 10px 12px;
   font-size: 14px;
 }
@@ -468,19 +580,19 @@ body {
 .search-row {
   position: relative;
   margin: 8px 0 12px;
+  background: #f5ebe0;
 }
 .search-icon {
   position: absolute;
   left: 12px;
   top: 50%;
-  transform: translateY(-50%);
 }
 .search-input {
   width: 100%;
   padding: 10px 12px 10px 36px;
-  border: 1.5px solid #2b2d63;
+  border: 1px solid #252b2f;
   border-radius: 8px;
-  background: #fff;
+  background: #f5ebe0;
 }
 
 .member-list {
@@ -488,6 +600,9 @@ body {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
+  border-radius: 5px;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
 }
 
 .member-row {
@@ -496,58 +611,71 @@ body {
   gap: 10px;
   width: 100%;
   text-align: left;
-  background: #fff;
-  border: 2px solid #cfc8b6;
+  background: #f5ebe0;
+  border: 1px solid #252b2f;
   border-radius: 10px;
   padding: 12px 14px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease, transform 0.05s ease,
-    border-color 0.15s ease;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
-.member-row:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-}
 .member-row.active {
-  border-color: #2b2d63;
-  background: #efe9d9;
-}
-.member-name {
-  color: #1f2242;
-  font-weight: 600;
+  border-color: #f3e7d3;
+  background: #252b2f;
+  color: #f3e7d3;
 }
 
 .primary-cta {
-  width: 100%;
-  display: block;
+  align-items: center;
+  width: 255px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 3px solid #22336a;
+  background: #f3e7d3;
+  color: #22336a;
   text-align: center;
-  background: #24306b;
-  color: #fff;
-  border: 2px solid #2b2d63;
-  border-radius: 10px;
-  padding: 12px 16px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
   font-weight: 700;
+  line-height: normal;
+  display: block;
+  padding: 3px;
   cursor: pointer;
+  margin: 0 auto;
+}
+
+.primary-cta:hover {
+  border: 3px solid #f3e7d3;
+  background: #22336a;
+  color: #f3e7d3;
 }
 
 .teams-page {
-  background: #efe4cf;
-  min-height: 100vh;
-  padding: 28px 24px 40px;
+  padding-left: 33px;
 }
 
 .your-teams-panel {
-  background: #1f2227;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  background: #252b2f;
+  border-radius: 8px;
+  padding: 25px;
   margin-bottom: 22px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 260px;
 }
 
 .panel-title {
-  color: #e9e9ea;
-  font-weight: 600;
+  color: #f3e7d3;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   margin-bottom: 10px;
 }
 
@@ -566,34 +694,30 @@ body {
 .teams-actions {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 28px;
   margin-top: 10px;
 }
 
 .action-tile {
+  height: 86px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   padding: 16px 18px;
   background: transparent;
-  border: 2px solid #2b2d63;
+  border: 2px solid #22336a;
   border-radius: 12px;
-  color: #2b2d63;
+  color: #22336a;
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: transform 0.05s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .action-tile:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-  background: #efe9d9;
-}
-
-.chevron {
-  font-size: 22px;
-  line-height: 1;
+  background: #22336a;
+  color: #f3e7d3;
 }
 
 .modal-backdrop {
@@ -606,13 +730,12 @@ body {
 }
 
 .details-modal {
-  background: #efe9d9;
-  border: 2px solid #2b2d63;
-  border-radius: 12px;
+  background: #f3e7d3;
+  border: 4px solid #6096ba;
+  border-radius: 5px;
   width: min(880px, 92vw);
   padding: 22px 26px 26px;
   position: relative;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .modal-x {
@@ -623,20 +746,28 @@ body {
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: #2b2d63;
+  color: #252b2f;
 }
 
 .details-title {
-  text-align: center;
-  font-size: 32px;
-  color: #1d213f;
   margin: 4px 0 2px;
+  color: #252b2f;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 .details-sub {
-  text-align: center;
-  color: #3b3f63;
-  opacity: 0.8;
   margin: 0 0 14px;
+  color: #252b2f;
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .details-top {
@@ -653,9 +784,13 @@ body {
 }
 
 .card-title {
-  color: #1d213f;
-  font-weight: 700;
   margin: 0 0 8px;
+  color: #252b2f;
+  font-family: "SF Pro Rounded";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 .card-title.center {
   text-align: center;
@@ -676,12 +811,12 @@ body {
 }
 
 .member-chip {
-  border: 2px solid #c9c3b5;
-  border-radius: 8px;
-  background: #fff;
   padding: 8px 10px;
-  font-size: 14px;
-  color: #1f2242;
+  font-size: 16px;
+  color: #252b2f;
+  border-radius: 5px;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
 }
 
 .progress-bar-wrap {
@@ -689,49 +824,91 @@ body {
 }
 .progress-bar-track {
   width: 100%;
-  height: 18px;
-  border: 2px solid #2b2d63;
+  height: 36px;
   border-radius: 10px;
-  background: #fff;
+  border: 2px solid #252b2f;
+  background: #f5ebe0;
 }
 .progress-bar-fill {
   height: 100%;
-  background: #2b2d63;
-  border-radius: 8px 0 0 8px;
+  background: #51905a;
+  border-radius: 8px;
 }
 
 .tasks-section {
   margin-top: 10px;
 }
 .tasks-card {
-  background: #faf9f6;
-  border: 2px solid #2b2d63;
-  border-radius: 10px;
   padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
 }
+
 .tasks-head {
   display: grid;
   grid-template-columns: 90px 1fr 120px 1fr;
-  font-weight: 700;
-  color: #2b2d63;
+  color: #252b2f;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
   margin-bottom: 8px;
+  padding: 5px;
 }
+
 .tasks-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  grid-template-columns: 90px 1fr 120px 1fr;
+  overflow-y: auto;
 }
+
 .task-row {
   display: grid;
   grid-template-columns: 90px 1fr 120px 1fr;
   align-items: center;
-  background: #fff;
-  border: 1px solid #e3dcc9;
-  border-radius: 8px;
-  padding: 10px 12px;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  padding: 17px 12px;
 }
-.task-name {
-  color: #1f2242;
+
+/* Center the first column (header + rows) */
+.tasks-head > :first-child,
+.task-row > :first-child {
+  justify-self: center;
+}
+
+/* Cell wrapper to keep alignment tidy */
+.check-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.check-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: left;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  color: #252b2f;
+}
+
+.team-task-name {
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .due {
@@ -748,39 +925,33 @@ body {
 }
 
 .primary-outline-btn {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
   margin: 16px auto 0;
-  width: min(360px, 80%);
-  background: #e7eefb;
-  color: #2b2d63;
-  border: 3px solid #98b0d8;
-  border-radius: 10px;
-  font-weight: 700;
+  width: min(255px, 80%);
+  height: 38px;
+  background: #f3e7d3;
+  border: 3px solid #6096ba;
+  border-radius: 5px;
   padding: 12px 14px;
   cursor: pointer;
-}
-.primary-outline-btn:hover {
-  filter: brightness(0.98);
+  color: #6096ba;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 
-.invite-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  border: 1px solid var(--card-border);
-  border-radius: 0.75rem;
-  padding: 0.9rem 1rem;
-  background: var(--panel);
-  cursor: pointer;
+.primary-outline-btn:hover {
+  background: #6096ba;
+  color: #f3e7d3;
+  border: 3px solid #f3e7d3;
 }
-.invite-row + .invite-row {
-  margin-top: 0.75rem;
-}
-.invite-row.selected {
-  background: #1d2330;
-  color: #e9ecf2;
-}
+
 .invite-status.pending {
   color: #7aa0c2;
 }
@@ -806,7 +977,7 @@ body {
   background: rgba(0, 0, 0, 0.25);
 }
 .overlay-card {
-  background: #fffaf2;
+  background: #f3e7d3;
   border: 2px solid #5da066;
   border-radius: 12px;
   padding: 16px 22px;
@@ -826,22 +997,8 @@ body {
   border-radius: 10px;
   padding: 8px 18px;
   background: #5da066;
-  color: #fff;
+  color: #f3e7d3;
   cursor: pointer;
-}
-
-.invite-row.selected {
-  background: #1d2330;
-  color: #ffffff;
-}
-.invite-row.selected {
-  background: #e2d9c4;
-  border-color: #2b2d63;
-  color: #1f2242;
-}
-.invite-row.selected .invite-name,
-.invite-row.selected .invite-status {
-  color: #1f2242;
 }
 
 .invite-mode-toggle {
@@ -849,46 +1006,48 @@ body {
   justify-content: center;
   gap: 12px;
   margin-bottom: 16px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .invite-mode-toggle button {
-  background-color: #efe9d9;
-  color: #2b2d63;
-  border: 2px solid #2b2d63;
+  background-color: #f3e7d3;
+  color: #22336a;
+  border: 2px solid #22336a;
   border-radius: 10px;
   padding: 10px 18px;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 400;
+  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .invite-mode-toggle button:hover {
-  background-color: #e0d3bd;
+  background-color: #22336a;
+  color: #f3e7d3;
+  border: 2px solid #f3e7d3;
 }
 .invite-mode-toggle button.active {
-  background-color: #2b2d63;
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #22336a;
+  color: #f3e7d3;
 }
 
 .select-team-label {
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   display: block;
   margin-bottom: 6px;
-  font-weight: 600;
-  color: #2b2d63;
-  font-size: 16px;
+  font-weight: 400;
+  color: #252b2f;
+  font-size: 20px;
 }
 
 .select-team-dropdown {
   width: 100%;
   max-width: 320px;
-  font-size: 14px;
-  background: #fff;
-  border: 2px solid #2b2d63;
+  font-size: 18px;
+  background: #f5ebe0;
+  border: 2px solid #252b2f;
   border-radius: 10px;
   padding: 10px 14px;
-  color: #2b2d63;
+  color: #252b2f;
   appearance: none;
   outline: none;
   margin-bottom: 18px;
@@ -915,19 +1074,19 @@ body {
 .search-row {
   position: relative;
   margin: 8px 0 10px;
+  background: #f5ebe0;
 }
 .search-icon {
   position: absolute;
   left: 12px;
   top: 50%;
-  transform: translateY(-50%);
 }
 .search-input {
   width: 100%;
   padding: 10px 12px 10px 36px;
-  border: 1.5px solid #2b2d63;
+  border: 1.5px solid #22336a;
   border-radius: 8px;
-  background: #fff;
+  background: #f5ebe0;
   font-size: 14px;
 }
 .invite-modal {
@@ -941,33 +1100,14 @@ body {
   gap: 12px;
 }
 
-.invite-modal .invite-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border: 2px solid #cfc8b6;
-  border-radius: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: box-shadow 0.15s ease, transform 0.05s ease,
-    border-color 0.15s ease;
-}
-.invite-modal .invite-row:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-}
-.invite-modal .invite-row.selected {
-  background: #e2d9c4;
-  border-color: #2b2d63;
-  color: #1f2242;
-}
-
 .invite-modal .invite-left {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #f3e7d3;
 }
 .invite-modal .avatar-dot {
   width: 28px;
@@ -977,27 +1117,26 @@ body {
   border: 1px solid #c9c3b5;
 }
 .invite-modal .invite-name {
-  color: #1f2242;
-  font-weight: 600;
+  color: #22336a;
+  font-weight: 400;
 }
 .invite-modal .invite-status {
-  font-weight: 600;
+  font-weight: 400;
 }
 .invite-modal .invite-status.pending {
-  color: #6b8cc9;
+  color: #6096ba;
 }
 .invite-modal .invite-status.declined {
-  color: #b35353;
+  color: #ac4750;
 }
 .invite-modal .invite-row.selected {
-  background: #e2d9c4;
-  border-color: #2b2d63;
-  color: #1f2242;
-  box-shadow: 0 0 0 3px rgba(43, 45, 99, 0.25);
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  border-radius: 5px;
+  border: 1px solid #f3e7d3;
+  background: #252b2f;
+  color: #f3e7d3;
 }
 .invite-modal .invite-row:hover:not(.selected) {
-  background: #f1ede1;
+  background: #f3e7d3;
 }
 /* Capitalize headings + labels in Teams/Create/Invite modals */
 .teams-header,
@@ -1019,4 +1158,80 @@ body {
 .create-modal input::placeholder,
 .create-modal textarea::placeholder {
   text-transform: capitalize;
+}
+
+.invite-row.selected,
+.invite-modal .invite-row.selected {
+  background: #252b2f; /* light sand instead of dark blue/purple */
+  color: #f3e7d3; /* readable dark text */
+  border-color: #f3e7d3; /* deep blue border */
+}
+
+.invite-row.selected .invite-left,
+.invite-row.selected .invite-name,
+.invite-row.selected .invite-status,
+.invite-modal .invite-row.selected .invite-left,
+.invite-modal .invite-row.selected .invite-name,
+.invite-modal .invite-row.selected .invite-status {
+  color: #f3e7d3;
+}
+
+.invite-row.selected .invite-status.pending,
+.invite-row.selected .invite-status.declined,
+.invite-modal .invite-row.selected .invite-status.pending,
+.invite-modal .invite-row.selected .invite-status.declined {
+  color: #f3e7d3;
+}
+
+/* Unselected rows inside modal should stay dark on light backgrounds */
+.invite-modal .invite-left {
+  color: #252b2f;
+}
+
+/* Constrain the modal and enable an internal flex layout */
+.details-modal {
+  max-height: 85vh; /* keep the modal on-screen */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Let the tasks area take the leftover space */
+.tasks-section {
+  flex: 1 1 auto;
+  min-height: 0; /* critical so child can actually shrink */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card becomes a column container: header fixed, body scrolls */
+.tasks-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Keep the header fixed height */
+.tasks-head {
+  flex: 0 0 auto;
+}
+
+/* Make ONLY the body scroll */
+.tasks-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px; /* room for scrollbar */
+}
+
+/* (Optional) nicer scrollbar just for tasks list */
+.tasks-body::-webkit-scrollbar {
+  width: 8px;
+}
+.tasks-body::-webkit-scrollbar-thumb {
+  background: #c9c3b5;
+  border-radius: 8px;
+}
+.tasks-body::-webkit-scrollbar-track {
+  background: transparent;
 }

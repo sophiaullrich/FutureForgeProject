@@ -2,7 +2,12 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import AddTaskModal from "../AddTaskModal";
-import { listProfiles } from "./ProfileService"; 
+import { listProfiles } from "./ProfileService";
+import {
+  IoCloseCircleOutline,
+  IoCheckboxOutline,
+  IoSquareOutline,
+} from "react-icons/io5";
 
 export default function TeamDetailsModal({ team, onClose, onDelete }) {
   // tasks
@@ -37,9 +42,9 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
           if (!p.uid && p.id) map[p.id] = name;
         }
         const members = (team?.members || []).map((m) => {
-          if (typeof m === "string")
-            return { uid: m, name: map[m] || m };
-          if (m?.uid) return { uid: m.uid, name: m.name || map[m.uid] || m.uid };
+          if (typeof m === "string") return { uid: m, name: map[m] || m };
+          if (m?.uid)
+            return { uid: m.uid, name: m.name || map[m.uid] || m.uid };
           return { uid: String(m), name: String(m) };
         });
         if (isMounted) {
@@ -101,12 +106,12 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
       return val.name || uidToName[val.uid] || val.uid || "";
     }
     return uidToName[val] || String(val);
-    };
+  };
 
   return (
     <div className="details-modal">
-      <button className="modal-x" onClick={onClose} aria-label="close">
-        ✕
+      <button className="modal-close" onClick={onClose} aria-label="close">
+        <IoCloseCircleOutline size={45} />
       </button>
 
       {/* title and description */}
@@ -122,7 +127,12 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
               <div style={{ opacity: 0.6, padding: 8 }}>no members</div>
             ) : (
               memberNames.map(({ uid, name }) => (
-                <input key={uid} className="member-chip" value={name} readOnly />
+                <input
+                  key={uid}
+                  className="member-chip"
+                  value={name}
+                  readOnly
+                />
               ))
             )}
           </div>
@@ -142,7 +152,12 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
               />
             </div>
             <div
-              style={{ textAlign: "center", marginTop: 6, color: "#2b2d63", fontWeight: 600 }}
+              style={{
+                textAlign: "center",
+                marginTop: 6,
+                color: "#2b2d63",
+                fontWeight: 600,
+              }}
             >
               {progressPct}%
             </div>
@@ -155,27 +170,42 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
         <div className="card-title">team tasks</div>
         <div className="tasks-card">
           <div className="tasks-head">
-            <span>done?</span>
-            <span>task name</span>
-            <span>due date</span>
-            <span>assigned to</span>
+            <span>Done?</span>
+            <span>Task Name</span>
+            <span>Due Date</span>
+            <span>Assigned To</span>
           </div>
           <div className="tasks-body">
             {tasks.length === 0 ? (
-              <div className="tasks-empty">no tasks yet.</div>
+              <div className="tasks-empty">No Tasks Yet</div>
             ) : (
               tasks.map((t, i) => {
                 const d = formatDue(t.dueDate);
                 return (
                   <div className="task-row" key={`${t.name}-${i}`}>
-                    <span>
-                      <input
-                        type="checkbox"
-                        checked={!!t.done}
-                        onChange={() => toggleDone(i)}
-                      />
+                    <span className="check-cell">
+                      <button
+                        className="check-btn"
+                        type="button"
+                        role="checkbox"
+                        aria-checked={!!t.done}
+                        onClick={() => toggleDone(i)}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            toggleDone(i);
+                          }
+                        }}
+                        title={t.done ? "Mark as not done" : "Mark as done"}
+                      >
+                        {t.done ? (
+                          <IoCheckboxOutline size={28} />
+                        ) : (
+                          <IoSquareOutline size={28} />
+                        )}
+                      </button>
                     </span>
-                    <span className="task-name">{t.name}</span>
+                    <span className="team-task-name">{t.name}</span>
                     <span className="due">
                       <strong className="due-mon">{d.mon}</strong>
                       <span className="due-day">{d.day}</span>
@@ -191,12 +221,15 @@ export default function TeamDetailsModal({ team, onClose, onDelete }) {
 
       {/* buttons */}
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button className="primary-outline-btn" onClick={() => setShowAddModal(true)}>
-          add new task
+        <button
+          className="primary-outline-btn"
+          onClick={() => setShowAddModal(true)}
+        >
+          Add New Task
         </button>
         {onDelete && (
           <button className="revoke-btn" onClick={onDelete}>
-            delete team (owner)
+            Delete Team (Owner)
           </button>
         )}
       </div>
