@@ -67,7 +67,11 @@ export default function TaskModal({
             </div>
             <div className="popup-field">
               <label>Due Date</label>
-              <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+              <input
+                type="date"
+                value={due}
+                onChange={(e) => setDue(e.target.value)}
+              />
             </div>
             <div className="popup-field">
               <label>Team</label>
@@ -81,7 +85,10 @@ export default function TaskModal({
             </div>
             <div className="popup-field">
               <label>Assign To</label>
-              <select value={member} onChange={(e) => setMember(e.target.value)}>
+              <select
+                value={member}
+                onChange={(e) => setMember(e.target.value)}
+              >
                 {teamMembers.map((m) => (
                   <option key={m.email} value={m.email}>
                     {m.displayName}
@@ -98,7 +105,11 @@ export default function TaskModal({
             </div>
             <div className="popup-field">
               <label>Due Date</label>
-              <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+              <input
+                type="date"
+                value={due}
+                onChange={(e) => setDue(e.target.value)}
+              />
             </div>
           </>
         )}
@@ -140,7 +151,7 @@ export default function TaskModal({
           <button className="popup-submit-btn" onClick={handleSubmit}>
             Add Task
           </button>
-          <button className="popup-submit-btn" onClick={onClose}>
+          <button className="popup-btn-cancel" onClick={onClose}>
             Cancel
           </button>
         </div>

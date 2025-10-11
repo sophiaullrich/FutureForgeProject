@@ -54,7 +54,11 @@ export default function TasksPage() {
         members = (team.members || [])
           .map((uid) => profiles.find((p) => p.uid === uid))
           .filter(Boolean)
-          .map((p) => ({ uid: p.uid, email: p.email, displayName: p.displayName }));
+          .map((p) => ({
+            uid: p.uid,
+            email: p.email,
+            displayName: p.displayName,
+          }));
       }
     }
 
@@ -64,7 +68,8 @@ export default function TasksPage() {
       displayName: currentUser.displayName || currentUser.email,
     };
 
-    if (!members.some((m) => m.uid === currentUser.uid)) members.push(currentUserObj);
+    if (!members.some((m) => m.uid === currentUser.uid))
+      members.push(currentUserObj);
     setTeamMembers(members);
   }, [profiles, teams, selectedTeam, currentUser]);
 
@@ -92,7 +97,10 @@ export default function TasksPage() {
       const token = await currentUser.getIdToken();
       await fetch(`${API_URL}/${taskId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ done: !currentDone }),
       });
     } catch (err) {
@@ -102,12 +110,18 @@ export default function TasksPage() {
 
   const handleAddTask = async (taskData) => {
     if (!currentUser) return;
-    const dueDateISO = taskData.due ? new Date(taskData.due).toISOString() : null;
+    const dueDateISO = taskData.due
+      ? new Date(taskData.due).toISOString()
+      : null;
     if (!taskData.name || !dueDateISO)
       return alert("Task name and due date are required");
 
     const formattedDate = new Date(dueDateISO)
-      .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
       .toUpperCase();
 
     const payload = {
@@ -146,7 +160,10 @@ export default function TasksPage() {
       const token = await currentUser.getIdToken();
       await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
       setShowTaskModal(false);
@@ -170,13 +187,35 @@ export default function TasksPage() {
       console.error("Error deleting task:", err);
     }
   };
+  const dueParts = (date) => {
+    if (!date) return { mon: "—", day: "" };
+    const months = [
+      "JAN",
+      "FEB",
+      "MAR",
+      "APR",
+      "MAY",
+      "JUN",
+      "JUL",
+      "AUG",
+      "SEP",
+      "OCT",
+      "NOV",
+      "DEC",
+    ];
 
-  const formatDate = (date) => {
-    if (!date) return "—";
-    const parsedDate = new Date(date);
-    return parsedDate
-      .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-      .toUpperCase();
+    // already like "16 JUN 2024"
+    const m = String(date).match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+    if (m) return { mon: m[2].toUpperCase(), day: m[1] };
+
+    // try native parse
+    const d = new Date(date);
+    if (!isNaN(d)) {
+      return { mon: months[d.getMonth()], day: String(d.getDate()) };
+    }
+
+    // fallback: just show raw
+    return { mon: String(date).slice(0, 3).toUpperCase(), day: "" };
   };
 
   const filteredTasks =
@@ -207,7 +246,10 @@ export default function TasksPage() {
         {activeTab === "teamTasks" && (
           <div style={{ margin: "10px 20px" }}>
             <label>Select Team: </label>
-            <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+            <select
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+            >
               {teams.map((team) => (
                 <option key={team.id} value={team.name}>
                   {team.name}
@@ -217,49 +259,83 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div className={`tasks-table ${activeTab === "teamTasks" ? "team-tasks" : "my-tasks"}`}>
+        <div
+          className={`tasks-table ${
+            activeTab === "teamTasks" ? "team-tasks" : "my-tasks"
+          }`}
+        >
           <div className="table-header">
             <div className="header-cell">Done?</div>
             <div className="header-cell">Task Name</div>
             <div className="header-cell">Due Date</div>
-            {activeTab === "teamTasks" && <div className="header-cell">Assigned To</div>}
-            {activeTab === "teamTasks" && <div className="header-cell">Team</div>}
+            {activeTab === "teamTasks" && (
+              <div className="header-cell">Assigned To</div>
+            )}
+            {activeTab === "teamTasks" && (
+              <div className="header-cell">Team</div>
+            )}
             <div className="header-cell">Actions</div>
           </div>
 
-          {filteredTasks.map((task) => (
-            <div key={task.id} className="table-row" onClick={() => setDetailTask(task)}>
+          {filteredTasks.map((task) => {
+            const d = dueParts(task.due);
+            return (
               <div
-                className="table-cell checkbox-cell"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTaskToggle(task.id, task.done);
-                }}
+                key={task.id}
+                className="table-row"
+                onClick={() => setDetailTask(task)}
               >
-                {task.done ? <IoCheckboxOutline size={33} /> : <IoSquareOutline size={33} />}
-              </div>
-              <div className="table-cell task-name-cell">{task.name}</div>
-              <div className="table-cell due-date-cell">{formatDate(task.due)}</div>
-              {activeTab === "teamTasks" && (
-                <div className="table-cell team-cell">
-                  {task.assignedUsers?.map((u) => u.displayName).join(", ")}
+                <div
+                  className="table-cell checkbox-cell"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTaskToggle(task.id, task.done);
+                  }}
+                >
+                  {task.done ? (
+                    <IoCheckboxOutline size={33} />
+                  ) : (
+                    <IoSquareOutline size={33} />
+                  )}
                 </div>
-              )}
-              {activeTab === "teamTasks" && <div className="table-cell team-cell">{task.team}</div>}
-              <div className="table-cell actions-cell" onClick={(e) => e.stopPropagation()}>
-                <button className="delete-btn" onClick={() => handleDeleteTask(task.id)}>
-                  Delete
-                </button>
+                <div className="table-cell task-name-cell">{task.name}</div>
+                <div className="table-cell due-date-cell">
+                  <div className="due">
+                    <strong className="due-mon">{d.mon}</strong>
+                    <span className="due-day">{d.day}</span>
+                  </div>
+                </div>
+                {activeTab === "teamTasks" && (
+                  <div className="table-cell team-cell">
+                    {task.assignedUsers?.map((u) => u.displayName).join(", ")}
+                  </div>
+                )}
+                {activeTab === "teamTasks" && (
+                  <div className="table-cell team-cell">{task.team}</div>
+                )}
+                <div
+                  className="table-cell actions-cell"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       <button
         className="add-task-btn"
         onClick={() =>
-          currentUser ? setShowTaskModal(true) : alert("Please login to add a task")
+          currentUser
+            ? setShowTaskModal(true)
+            : alert("Please login to add a task")
         }
       >
         Add New Task
@@ -276,7 +352,12 @@ export default function TasksPage() {
         />
       )}
 
-      {detailTask && <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />}
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          onClose={() => setDetailTask(null)}
+        />
+      )}
     </div>
   );
 }

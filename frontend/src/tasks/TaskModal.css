@@ -26,6 +26,11 @@
 .task-popup-form h2 {
   text-align: center;
   margin-bottom: 15px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  margin-top: -1px;
+  color: #252b2f;
+  font-weight: 700;
 }
 
 .popup-fields-row {
@@ -42,18 +47,21 @@
 }
 
 .popup-field label {
-  font-size: 14px;
-  color: #6096BA;
+  font-size: 20px;
+  color: #6096ba;
   margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .popup-field input,
 .popup-field select,
 .popup-field textarea {
   padding: 6px;
-  font-size: 14px;
-  border: 1px solid #ccc;
+  font-size: 16px;
+  border: 1px solid #252b2f;
   border-radius: 4px;
+  background-color: #f5ebe0;
+  color: #252b2f;
 }
 
 .popup-field textarea {
@@ -73,8 +81,8 @@
 
 .popup-submit-btn {
   background: none;
-  color: #6096BA;
-  border: 2px solid #6096BA;
+  color: #6096ba;
+  border: 2px solid #6096ba;
   padding: 8px 16px;
   font-size: 16px;
   font-weight: bold;
@@ -83,6 +91,22 @@
 }
 
 .popup-submit-btn:hover {
-  background: #6096BA;
-  color: white;
+  background: #6096ba;
+  color: #f3e7d3;
+}
+
+.popup-btn-cancel {
+  background: none;
+  color: #ac4750;
+  border: 2px solid #ac4750;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-btn-cancel:hover {
+  background: #ac4750;
+  color: #f3e7d3;
 }
