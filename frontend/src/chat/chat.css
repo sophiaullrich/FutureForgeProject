@@ -2,8 +2,9 @@ body,
 html {
   height: 100%;
   margin: 0;
-  background: #f9ecd7;
+  background: #f3e7d3;
   overflow: hidden;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
 }
 
 .chat-app {
@@ -12,11 +13,10 @@ html {
   align-items: flex-start;
   justify-content: center;
   background: #f3e7d3;
-  padding-top: 40px;
 }
 
 .chat-sidebar {
-  width: 420px;
+  width: 80%;
   max-width: 95vw;
   background: #f3e7d3;
   border-radius: 0;
@@ -29,34 +29,38 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
   margin-top: 0;
 }
 
 .sidebar-title {
-  color: #fff;
-  font-size: 1.5rem; /* Match button text size */
-  font-weight: bold;
+  color: #f3e7d3;
   margin: 0;
   flex: 1;
-  text-align: left;
+  text-align: right;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .sidebar-arrow {
   font-size: 2rem; /* Larger arrow */
   margin-left: 0.7rem;
-  color: #fff;
+  color: #f3e7d3;
 }
 
 .search-box.elevated {
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 5px;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
+  color: #252b2f80;
   padding: 0 8px;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   position: relative;
+  width: 100%;
 }
 
 .search-box.elevated input {
@@ -70,42 +74,44 @@ html {
 
 .search-icon {
   position: absolute;
-  left: 14px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #888;
-  font-size: 1.2rem;
+  color: #252b2f;
+  font-size: 1.5rem;
   z-index: 1;
 }
 
 .chat-list {
   overflow-y: auto;
+  margin: 13px;
 }
 
 .chat-item {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: #f5ebe0;
+  height: 85px;
+  color: #252b2f;
   border-radius: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 25px;
   padding: 12px 18px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
   cursor: pointer;
-  transition: box-shadow 0.15s;
-  border: 1px solid #f0e6d2;
+  border: 2px solid #252b2f;
 }
 
 .chat-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  background: #252b2f;
+  color: #f5ebe0;
+  border: 2px solid #f5ebe0;
 }
 
 .chat-avatar {
-  width: 38px;
-  height: 38px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   margin-right: 16px;
   flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
 }
 
 .chat-info {
@@ -114,10 +120,10 @@ html {
 }
 
 .chat-name {
-  font-size: 1.05rem;
+  font-size: 24px;
   margin: 0 0 2px 0;
-  color: #222;
-  font-weight: 600;
+  color: #252b2f;
+  font-weight: 500;
   letter-spacing: 0.1px;
 }
 
@@ -161,14 +167,13 @@ html {
 }
 
 .chat-modal-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #222;
-  text-align: center;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e8ddc8;
-  overflow: hidden;
+  font-size: 32px;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  color: #252b2f;
+  text-align: start;
+  padding-bottom: 1rem;
   white-space: nowrap;
   text-overflow: ellipsis;
   padding-right: 48px;
@@ -217,39 +222,48 @@ html {
 }
 
 .message .chat-avatar-bubble {
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .bubble {
   display: inline-block;
   padding: 10px 14px;
-  border-radius: 16px;
   max-width: 72%;
   word-wrap: break-word;
   line-height: 1.3;
   box-sizing: border-box;
-  font-family: inherit;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 14px;
+  border-radius: 10px;
 }
 
 .bubble.received {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid #e8ddc8;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
   margin-left: 0;
   margin-right: auto;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .bubble.sent {
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: #fff;
-  border: 0;
   margin-left: auto;
   margin-right: 0;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .message.received .chat-avatar-bubble {
@@ -272,12 +286,14 @@ html {
 }
 
 .chat-timestamp {
+  color: rgba(37, 43, 47, 0.5);
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   text-align: center;
-  color: #8a8375;
-  font-size: 0.9rem;
   margin: 12px 0 8px 0;
-  font-family: inherit;
-  font-weight: 500;
   flex-shrink: 0;
   width: 100%;
   position: relative;
@@ -309,8 +325,8 @@ html {
 }
 
 .message.chat-avatar-bubble {
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -328,15 +344,14 @@ html {
   width: calc(100% - 4rem);
   max-width: 820px;
   height: 48px;
-  background: #fff;
-  border-radius: 28px;
   padding: 0 56px 0 18px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border: 1.5px solid #d4c9b4;
   box-sizing: border-box;
   margin: 0 auto;
   display: flex;
   align-items: center;
+  border-radius: 10px;
+  border: 1px solid #252b2f;
+  background: #f5ebe0;
 }
 
 .chat-input {
@@ -349,7 +364,7 @@ html {
   text-align: left;
   padding: 0;
   box-sizing: border-box;
-  color: #333;
+  color: #252b2f;
 }
 
 .chat-send-inside {
@@ -360,20 +375,13 @@ html {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid #222;
-  background: #fff;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
   box-sizing: border-box;
-}
-
-.chat-send-inside:hover {
-  background: #f5f5f5;
-  border-color: #4e54c8;
-  color: #4e54c8;
 }
 
 .modal-close {
@@ -385,8 +393,8 @@ html {
   font-size: 2.2rem;
   color: #222;
   cursor: pointer;
-  width: 38px;
-  height: 38px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -436,68 +444,93 @@ html {
 
 .forum-modal,
 .join-forum-modal {
-  max-width: 400px;
+  width: min(880px, 92vw);
   margin: 0 auto;
-  background: #f9ecd7;
-  border-radius: 16px;
+  border-radius: 5px;
+  border: 5px solid #6096ba;
+  background: #f3e7d3;
   padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+.forum-modal-title {
+  color: #252b2f;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 35px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
 .forum-list {
   width: 100%;
-  margin-top: 1rem;
+  margin-top: -10px;
 }
 
 .forum-list-item {
   width: 100%;
   margin: 8px 0;
   padding: 16px;
-  background: #fff;
-  border: 1px solid #d4c9b4;
+  background: #f5ebe0;
+  border: 2px solid #252b2f;
   border-radius: 8px;
-  font-size: 1.1rem;
   cursor: pointer;
+  color: #252b2f;
   text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  height: 85px;
 }
 
 .join-forum-btn {
   margin-top: 1.5rem;
-  padding: 12px 32px;
-  background: #0b93f6;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-/* Center and enlarge the Find Forums button */
-.forum-bar-btn {
-  display: flex;
+  padding: 5px;
+  height: 38px;
   align-items: center;
   justify-content: center;
-  background: #232323;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 0.9rem 2.5rem;
-  margin: 28px auto 24px auto; /* Center horizontally with auto margins */
+  display: flex;
+  width: 255px;
+  color: #22336a;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border-radius: 5px;
+  border: 3px solid #22336a;
+  background: #f3e7d3;
   cursor: pointer;
-  width: 275px; /* Make it wider */
-  max-width: 90%;
-  min-width: 220px;
-  transition: background 0.2s;
-  font-size: 1.5rem; /* Larger text */
-  box-shadow: none;
+  margin-top: 0;
 }
 
-.forum-bar-btn:hover,
-.forum-bar-btn:focus {
-  background: #181717;
+.join-forum-modal h2 {
+  color: #252b2f;
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 2px;
+}
+
+.join-forum-modal h3 {
+  color: rgba(37, 43, 47, 0.5);
+  text-align: center;
+  font-family: "SF Pro Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 2px;
+  margin-bottom: 7px;
 }
 
 .chat-dot {
@@ -507,4 +540,145 @@ html {
   margin-left: 8px;
   border-radius: 50%;
   background-color: #22336a;
+}
+
+/* Make the children inherit color from the button */
+.sidebar-title,
+.sidebar-arrow {
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.forum-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  background: #252b2f;
+  color: #f3e7d3;
+  border: 2px solid #f3e7d3;
+  border-radius: 5px;
+  padding: 0.9rem 2.5rem;
+  margin: 28px auto 24px;
+  cursor: pointer;
+  width: 38%;
+  max-width: 90%;
+  min-width: 220px;
+  font-size: 1.5rem;
+  box-shadow: none;
+}
+
+.forum-bar-btn:hover,
+.forum-bar-btn:focus {
+  background: #f3e7d3;
+  color: #252b2f;
+  border-color: #252b2f;
+}
+
+.chat-name,
+.chat-preview,
+.chat-dot {
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.chat-item:hover .chat-name,
+.chat-item:hover .chat-preview {
+  color: #f5ebe0;
+}
+
+/* Change the unread dot color on hover */
+.chat-item:hover .chat-dot {
+  background-color: #6096ba;
+}
+
+.join-forum-modal {
+  position: relative;
+}
+
+/* the close button inside the modal */
+.join-forum-modal .closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  width: auto;
+  height: auto;
+  cursor: pointer;
+  color: #252b2f;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.join-forum-modal .closeButton svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+  pointer-events: none;
+}
+
+.chat-modal-large .closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px;
+  margin: 0;
+  line-height: 0;
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #252b2f;
+  cursor: pointer;
+}
+
+.chat-modal-large .closeButton svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+  pointer-events: none;
+}
+
+.chat-send-inside {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%); /* keep it vertically centered */
+
+  width: 40px;
+  height: 40px;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #252b2f;
+  cursor: pointer;
+}
+
+/* icon sizing only */
+.chat-send-inside svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+  pointer-events: none;
 }
