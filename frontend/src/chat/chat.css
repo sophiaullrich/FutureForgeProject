@@ -513,7 +513,7 @@ html {
 .join-forum-modal h2 {
   color: #252b2f;
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 30px;
   font-style: normal;
   font-weight: 500;
@@ -524,7 +524,7 @@ html {
 .join-forum-modal h3 {
   color: rgba(37, 43, 47, 0.5);
   text-align: center;
-  font-family: "SF Pro Rounded";
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   font-size: 20px;
   font-style: normal;
   font-weight: 400;

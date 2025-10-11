@@ -1,5 +1,5 @@
 .loginBody {
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -22,7 +22,7 @@ form {
 
 .formCont {
   background-color: #252b2f;
-  font-family: "SF Pro Rounded", Arial, sans-serif;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
   border-radius: 10px;
   width: 500px;
   height: 600px;

@@ -1,122 +1,121 @@
 .titleCont {
-    display: flex;
-    width: 455.4px;
-    height: 165px;
-    flex-shrink: 0;
-    margin: 0 auto
+  display: flex;
+  width: 455.4px;
+  height: 165px;
+  flex-shrink: 0;
+  margin: 0 auto;
 }
 
 .resetBody {
-    font-family: "SF Pro Rounded", Arial, sans-serif;
-    padding: 0;
-    box-sizing: border-box;
-    display: block;
-    margin: 0 auto;
+  font-family: "SF Pro Rounded", Arial, sans-serif;
+  padding: 0;
+  box-sizing: border-box;
+  display: block;
+  margin: 0 auto;
 }
 
 .formCont {
-    display: block;
-    margin: 0 auto;
-    width: 500px;
-    height: 320px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    background: #252B2F;
+  display: block;
+  margin: 0 auto;
+  width: 500px;
+  height: 320px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #252b2f;
 }
 
 .formCont h1 {
-    flex-shrink: 0;
-    color: #F5EBE0;
-    text-align: center;
-    font-family: "SF Pro Rounded";
-    font-size: 36px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-align: center;
+  flex-shrink: 0;
+  color: #f5ebe0;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
 }
 
 .formCont label {
-    color: #F5EBE0;
-    font-family: "SF Pro Rounded";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    margin-left: 28px;
-    margin-bottom: 9px;
+  color: #f5ebe0;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-left: 28px;
+  margin-bottom: 9px;
 }
 
 .emailInput {
-    width: 460px;
-    height: 38px;
-    flex-shrink: 0;
-    border-radius: 5px;
-    background: #F3E7D3;
-    margin-left: 22px;
-    margin-bottom: 18px;
-    color: #252B2F;
-    font-family: "SF Pro Rounded";
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-decoration-line: underline;
-    text-decoration-style: solid;
-    text-decoration-skip-ink: auto;
-    text-decoration-thickness: auto;
-    text-underline-offset: auto;
-    text-underline-position: from-font;
-    border: none;
+  width: 460px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: #f3e7d3;
+  margin-left: 22px;
+  margin-bottom: 18px;
+  color: #252b2f;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
+  border: none;
 }
 
 .resetBtn {
-    width: 255px;
-    height: 38px;
-    flex-shrink: 0;
-    border-radius: 5px;
-    border: 3px solid #6096BA;
-    background: #F3E7D3;
-    color: #6096BA;
-    text-align: center;
-    font-family: "SF Pro Rounded";
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    align-self: center;
-    margin-bottom: 23px;
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 3px solid #6096ba;
+  background: #f3e7d3;
+  color: #6096ba;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  align-self: center;
+  margin-bottom: 23px;
 }
 
 .resetBtn:hover {
-    border: 3px solid #F3E7D3;
-    background: #6096BA;
-    color: #F3E7D3;
+  border: 3px solid #f3e7d3;
+  background: #6096ba;
+  color: #f3e7d3;
 }
 
 .cancelBtn {
-    width: 255px;
-    height: 38px;
-    flex-shrink: 0;
-    border-radius: 5px;
-    text-align: center;
-    font-family: "SF Pro Rounded";
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    border: 3px solid #AC4750;
-    background: #F3E7D3;
-    color: #AC4750;
-    align-items: center;
-    display: block;
-    margin: 0 auto;
-
+  width: 255px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  text-align: center;
+  font-family: "SF Pro Rounded", "Calibri", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border: 3px solid #ac4750;
+  background: #f3e7d3;
+  color: #ac4750;
+  align-items: center;
+  display: block;
+  margin: 0 auto;
 }
 
 .cancelBtn:hover {
-    border-radius: 5px;
-    border: 3px solid #F3E7D3;
-    background: #AC4750;
-    color: #F3E7D3;
+  border-radius: 5px;
+  border: 3px solid #f3e7d3;
+  background: #ac4750;
+  color: #f3e7d3;
 }
