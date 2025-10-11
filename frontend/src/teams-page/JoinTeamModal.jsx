@@ -15,13 +15,14 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../Firebase";
 import { searchPublicTeamsByName } from "./TeamsService";
+import { IoCloseCircleOutline } from "react-icons/io5";
 
 export default function JoinTeamModal({ onClose }) {
   const [loading, setLoading] = useState(true);
 
   // lists
   const [publicTeams, setPublicTeams] = useState([]);
-  const [inviteTeams, setInviteTeams] = useState([]); 
+  const [inviteTeams, setInviteTeams] = useState([]);
 
   // search state
   const [search, setSearch] = useState("");
@@ -34,7 +35,7 @@ export default function JoinTeamModal({ onClose }) {
   const uid = user?.uid || null;
   const emailLower = (user?.email || "").trim().toLowerCase();
 
-  // load: public and invites 
+  // load: public and invites
   useEffect(() => {
     let alive = true;
 
@@ -47,8 +48,12 @@ export default function JoinTeamModal({ onClose }) {
       try {
         //  Public teams (both shapes)
         const [pubSnapA, pubSnapB] = await Promise.all([
-          getDocs(query(collection(db, "teams"), where("isPublic", "==", true))),
-          getDocs(query(collection(db, "teams"), where("visibility", "==", "public"))),
+          getDocs(
+            query(collection(db, "teams"), where("isPublic", "==", true))
+          ),
+          getDocs(
+            query(collection(db, "teams"), where("visibility", "==", "public"))
+          ),
         ]);
         const byId = new Map();
         [...pubSnapA.docs, ...pubSnapB.docs].forEach((d) =>
@@ -73,7 +78,6 @@ export default function JoinTeamModal({ onClose }) {
           return out;
         };
 
-
         let teamIdsFromMirror = [];
         try {
           const mirrorQ = query(
@@ -85,7 +89,6 @@ export default function JoinTeamModal({ onClose }) {
             .map((d) => d.get("teamId"))
             .filter(Boolean);
         } catch (_) {}
-
 
         let teamIdsFromCG = [];
         if (teamIdsFromMirror.length === 0) {
@@ -101,7 +104,9 @@ export default function JoinTeamModal({ onClose }) {
           } catch (_) {}
         }
 
-        const teamIds = teamIdsFromMirror.length ? teamIdsFromMirror : teamIdsFromCG;
+        const teamIds = teamIdsFromMirror.length
+          ? teamIdsFromMirror
+          : teamIdsFromCG;
         const invited = teamIds.length ? await fetchTeamsByIds(teamIds) : [];
         if (alive) setInviteTeams(invited);
       } catch (e) {
@@ -118,7 +123,7 @@ export default function JoinTeamModal({ onClose }) {
     };
   }, [uid, emailLower]);
 
-  //  debounced search for public teams by name 
+  //  debounced search for public teams by name
   useEffect(() => {
     let alive = true;
     const run = async () => {
@@ -157,7 +162,7 @@ export default function JoinTeamModal({ onClose }) {
 
   if (loading) {
     return (
-      <div className="join-modal">
+      <div className="join-loading-modal">
         <div style={{ padding: 16 }}>Loading teams…</div>
       </div>
     );
@@ -165,7 +170,7 @@ export default function JoinTeamModal({ onClose }) {
 
   if (error) {
     return (
-      <div className="join-modal">
+      <div className="join-loading-modal">
         <div style={{ padding: 16, color: "red" }}>{error}</div>
       </div>
     );
@@ -182,8 +187,8 @@ export default function JoinTeamModal({ onClose }) {
   return (
     <div className="modal-backdrop">
       <div className="join-modal">
-        <button className="modal-close" onClick={onClose} aria-label="close">
-          ✕
+        <button className="modal-x" onClick={onClose} aria-label="close">
+          <IoCloseCircleOutline size={45} />
         </button>
         <h2 className="join-title">Join a Team</h2>
 
@@ -214,7 +219,7 @@ export default function JoinTeamModal({ onClose }) {
             {rows.map((t) => (
               <div
                 key={`${t._kind}:${t.id}`}
-                className="team-card"
+                className="join-team-card"
                 style={{ justifyContent: "space-between" }}
               >
                 <div className="team-card-info">
@@ -232,7 +237,7 @@ export default function JoinTeamModal({ onClose }) {
                   onClick={() => handleJoin(t.id)}
                   aria-label={`join ${t.name || "team"}`}
                 >
-                  Join
+                  Join Team
                 </button>
               </div>
             ))}

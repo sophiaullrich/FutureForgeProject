@@ -18,7 +18,7 @@ function Signup() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState("");
-  const defaultProfilePic = "/defaultImage.png"
+  const defaultProfilePic = "/defaultImage.png";
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ function Signup() {
         <h1>Sign Up</h1>
         <form onSubmit={handleSignup}>
           <label htmlFor="fname" className={styles.formLabel}>
-            Firstname
+            First Name
           </label>
           <input
             type="text"

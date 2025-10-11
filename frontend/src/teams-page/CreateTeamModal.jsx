@@ -1,6 +1,7 @@
 // CreateTeamModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { listProfiles } from "./ProfileService";
+import { IoCloseCircleOutline } from "react-icons/io5";
 
 export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
   // form fields
@@ -83,7 +84,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
     <div className="modal-backdrop">
       <div className="create-modal">
         <button className="modal-close" onClick={onClose} aria-label="close">
-          ✕
+          <IoCloseCircleOutline size={45} />
         </button>
         <h2 className="create-title">Create Team</h2>
 
@@ -129,7 +130,9 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
           </label>
         </div>
 
-        <label className="form-label">Add Members (From Registered Users)</label>
+        <label className="form-label">
+          Add Members (From Registered Users)
+        </label>
         <div className="search-row">
           <span className="search-icon">🔎</span>
           <input
@@ -140,7 +143,10 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
           />
         </div>
 
-        <div className="member-list" style={{ maxHeight: 240, overflowY: "auto" }}>
+        <div
+          className="member-list"
+          style={{ maxHeight: 240, overflowY: "auto" }}
+        >
           {loading ? (
             <div className="tasks-empty">loading users…</div>
           ) : loadError ? (
@@ -162,9 +168,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
                   title={p.email}
                 >
                   <span className="avatar-dot" />
-                  <span className="member-name">
-                    {p.displayName || p.email || uid}
-                  </span>
+                  <span>{p.displayName || p.email || uid}</span>
                   <span className="member-sub">{p.email}</span>
                 </button>
               );
@@ -173,7 +177,7 @@ export default function CreateTeamModal({ onClose, onCreate, onAddMembers }) {
         </div>
 
         <button className="primary-cta" onClick={handleCreate}>
-          create team
+          Create Team
         </button>
       </div>
     </div>

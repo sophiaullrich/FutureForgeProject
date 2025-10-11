@@ -39,7 +39,7 @@ function LandingPage() {
       <div className={styles.landingBody}>
         <img src={logoHead} alt="Go Bear Head" className={styles.bodyLogo} />
         <div className={styles.bodyTitle}>
-          <h1>Go bear AUT Research and Development Project</h1>
+          <h1>Go Bear AUT Research and Development Project</h1>
         </div>
         <div className={styles.cta}>
           <p>

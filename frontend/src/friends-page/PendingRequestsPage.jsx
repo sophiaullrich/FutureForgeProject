@@ -16,14 +16,16 @@ export default function PendingRequestsPage() {
   }
 
   // load once on page open
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+  }, []);
 
   // cancel a pending request
   async function handleCancel(userId) {
-    const req = outgoing.find(r => r.to.id === userId);
+    const req = outgoing.find((r) => r.to.id === userId);
     if (!req) return;
     const prev = outgoing;
-    setOutgoing(prev.filter(r => r.id !== req.id)); // optimistic update
+    setOutgoing(prev.filter((r) => r.id !== req.id)); // optimistic update
     try {
       await FriendsService.cancel(req.id);
       setToast("request canceled");
@@ -36,13 +38,13 @@ export default function PendingRequestsPage() {
   // page layout
   return (
     <div className="friends-page">
-      <h1>pending requests</h1>
+      <h1>Pending Requests</h1>
 
       <div role="list" className="list">
         {outgoing.length === 0 ? (
-          <div className="empty">no pending requests</div>
+          <div className="empty">No Pending Requests</div>
         ) : (
-          outgoing.map(r => (
+          outgoing.map((r) => (
             <UserCard
               key={r.id}
               user={{ id: r.to.id, name: r.to.name, pendingOutgoing: true }}

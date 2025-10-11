@@ -6,17 +6,17 @@ import InviteMembersModal from "./InviteMembersModal";
 import JoinTeamModal from "./JoinTeamModal";
 import TeamDetailsModal from "./TeamDetailsModal";
 import "./TeamsPage.css";
-
+import { IoChevronForward } from "react-icons/io5";
 
 import {
   observeMyTeams,
   observeMyInvites,
   createTeam,
   inviteMember,
-  joinPublicTeam, 
+  joinPublicTeam,
   deleteTeam,
   addMembers,
-} from "./TeamsService"; 
+} from "./TeamsService";
 
 import { auth } from "../Firebase";
 
@@ -62,7 +62,7 @@ export default function TeamsPage() {
     setModal("details");
   };
 
-  // create team 
+  // create team
   const handleAddTeam = async ({ name, description, visibility }) => {
     const teamId = await createTeam({ name, description, visibility });
     return teamId;
@@ -80,7 +80,7 @@ export default function TeamsPage() {
     setModal(null);
   };
 
-  // join public team 
+  // join public team
   const handleJoinTeam = async ({ teamId }) => {
     await joinPublicTeam({ teamId });
     setModal(null);
@@ -98,12 +98,12 @@ export default function TeamsPage() {
 
   return (
     <div className="teams-page">
-      <section className="your-teams-panel">
+      <div className="your-teams-panel">
         <div className="panel-title">Your Teams</div>
         <div className="teams-grid">
           {teams.length === 0 ? (
             <div className="team-card" style={{ justifyContent: "center" }}>
-              You haven’t joined any teams yet.
+              You haven't joined any teams yet.
             </div>
           ) : (
             teams.map((team) => (
@@ -115,22 +115,22 @@ export default function TeamsPage() {
             ))
           )}
         </div>
-      </section>
+      </div>
 
       <div className="teams-actions">
         <button onClick={() => setModal("create")} className="action-tile">
           <span>Create Team</span>
-          <span className="chevron">›</span>
+          <IoChevronForward size={20} />
         </button>
 
         <button onClick={() => setModal("invite")} className="action-tile">
           <span>Invite Members</span>
-          <span className="chevron">›</span>
+          <IoChevronForward size={20} />
         </button>
 
         <button onClick={() => setModal("join")} className="action-tile">
           <span>Join a Team</span>
-          <span className="chevron">›</span>
+          <IoChevronForward size={20} />
         </button>
       </div>
 

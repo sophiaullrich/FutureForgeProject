@@ -19,15 +19,24 @@ export default function MakeFriendsPage() {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   // data state
-  const [results, setResults] = useState([]);   // search results
-  const [friends, setFriends] = useState([]);   // confirmed friends
+  const [results, setResults] = useState([]); // search results
+  const [friends, setFriends] = useState([]); // confirmed friends
   const [incoming, setIncoming] = useState([]); // requests to me
   const [outgoing, setOutgoing] = useState([]); // requests from me
 
   // refresh helpers
-  const refreshFriends  = useCallback(async () => setFriends(await FriendsService.listFriends()), []);
-  const refreshIncoming = useCallback(async () => setIncoming(await FriendsService.listIncoming()), []);
-  const refreshOutgoing = useCallback(async () => setOutgoing(await FriendsService.listOutgoing()), []);
+  const refreshFriends = useCallback(
+    async () => setFriends(await FriendsService.listFriends()),
+    []
+  );
+  const refreshIncoming = useCallback(
+    async () => setIncoming(await FriendsService.listIncoming()),
+    []
+  );
+  const refreshOutgoing = useCallback(
+    async () => setOutgoing(await FriendsService.listOutgoing()),
+    []
+  );
   const refreshAll = useCallback(async () => {
     await Promise.all([refreshFriends(), refreshIncoming(), refreshOutgoing()]);
   }, [refreshFriends, refreshIncoming, refreshOutgoing]);
@@ -81,7 +90,9 @@ export default function MakeFriendsPage() {
   // ---- actions ----
   async function handleAdd(userId) {
     const prev = results;
-    setResults(prev.map((u) => (u.id === userId ? { ...u, pendingOutgoing: true } : u)));
+    setResults(
+      prev.map((u) => (u.id === userId ? { ...u, pendingOutgoing: true } : u))
+    );
     try {
       await FriendsService.sendRequest(userId);
       await refreshOutgoing();
@@ -141,7 +152,11 @@ export default function MakeFriendsPage() {
     setFriends(prev.filter((f) => f.id !== userId)); // optimistic
     try {
       await FriendsService.unfriend(userId);
-      await Promise.all([refreshFriends(), refreshIncoming(), refreshOutgoing()]);
+      await Promise.all([
+        refreshFriends(),
+        refreshIncoming(),
+        refreshOutgoing(),
+      ]);
       setToast("removed from friends");
     } catch (e) {
       console.error("unfriend failed:", e);
@@ -153,11 +168,24 @@ export default function MakeFriendsPage() {
   // pick list based on tab
   const tabList = useMemo(() => {
     if (tab === "friends")
-      return friends.map((f) => ({ id: f.id, name: f.name, email: f.email, isFriend: true }));
+      return friends.map((f) => ({
+        id: f.id,
+        name: f.name,
+        email: f.email,
+        isFriend: true,
+      }));
     if (tab === "requests")
-      return incoming.map((r) => ({ id: r.from.id, name: r.from.name, pendingIncoming: true }));
+      return incoming.map((r) => ({
+        id: r.from.id,
+        name: r.from.name,
+        pendingIncoming: true,
+      }));
     if (tab === "pending")
-      return outgoing.map((r) => ({ id: r.to.id, name: r.to.name, pendingOutgoing: true }));
+      return outgoing.map((r) => ({
+        id: r.to.id,
+        name: r.to.name,
+        pendingOutgoing: true,
+      }));
     return [];
   }, [tab, friends, incoming, outgoing]);
 
@@ -165,7 +193,7 @@ export default function MakeFriendsPage() {
   if (!authReady) {
     return (
       <div className="friends-page">
-        <h1>make friends</h1>
+        <h1>Make Friends</h1>
         <div className="empty">Loading your account…</div>
       </div>
     );
@@ -175,8 +203,10 @@ export default function MakeFriendsPage() {
   if (authReady && !isSignedIn) {
     return (
       <div className="friends-page">
-        <h1>make friends</h1>
-        <div className="empty">Please sign in to search and manage friends.</div>
+        <h1>Make Friends</h1>
+        <div className="empty">
+          Please sign in to search and manage friends.
+        </div>
       </div>
     );
   }
@@ -184,13 +214,13 @@ export default function MakeFriendsPage() {
   // main page ui
   return (
     <div className="friends-page">
-      <h1>make friends</h1>
+      <h1>Make Friends</h1>
 
       <SearchBar onSearch={handleSearch} loading={loading} />
 
       {results.length > 0 && (
         <>
-          <h2 className="subhead">search results</h2>
+          <h2 className="subhead">Search Results</h2>
           <div role="list" className="list">
             {results.map((u) => (
               <UserCard
@@ -211,7 +241,7 @@ export default function MakeFriendsPage() {
 
       <div role="list" className="list">
         {tabList.length === 0 ? (
-          <div className="empty">no items yet</div>
+          <div className="empty">No items yet</div>
         ) : (
           tabList.map((u) => (
             <UserCard

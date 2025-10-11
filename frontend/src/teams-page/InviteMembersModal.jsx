@@ -3,9 +3,15 @@ import React, { useState, useEffect, useMemo } from "react";
 import { listProfiles } from "./ProfileService";
 import { auth, db } from "../Firebase";
 import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore";
+import { IoCloseCircleOutline, IoChevronForward } from "react-icons/io5";
 
 export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", linkedin: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    linkedin: "",
+  });
   const [mode, setMode] = useState("internal"); // internal and external
   const [profiles, setProfiles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -75,7 +81,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
       alert(
         /permission/i.test(String(err?.message))
           ? "Insufficient permissions: only the team owner can invite, or check your Firestore rules."
-          : err?.message || "failed to create invite."
+          : err?.message || "Failed to create invite."
       );
       return;
     }
@@ -86,8 +92,10 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
         await setDoc(notifRef, {
           userId: selectedUser.id,
           type: "invite",
-          title: "new team invite",
-          message: `You’ve been invited to join the team "${teamObj?.name || "a team"}".`,
+          title: "New team invite",
+          message: `You've been invited to join the team "${
+            teamObj?.name || "a team"
+          }".`,
           teamId: selectedTeamId,
           read: false,
           timestamp: serverTimestamp(),
@@ -99,7 +107,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
       try {
         await navigator.clipboard.writeText(link);
       } catch {
-        console.log("Clipboard failed. here’s your link:", link);
+        console.log("Clipboard failed. here's your link:", link);
       }
     }
 
@@ -116,10 +124,12 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
   return (
     <div className="modal-backdrop">
       <div className="invite-modal" role="dialog" aria-modal="true">
-        <button className="modal-close" onClick={onClose} aria-label="close">✕</button>
-        <h2 className="invite-title">invite members</h2>
+        <button className="modal-close" onClick={onClose} aria-label="close">
+          <IoCloseCircleOutline size={45} />
+        </button>
+        <h2 className="invite-title">Invite Members</h2>
 
-        <label className="select-team-label">select a team:</label>
+        <label className="select-team-label">Select a Team:</label>
         <select
           className="select-team-dropdown"
           value={selectedTeamId}
@@ -141,7 +151,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               setForm((f) => ({ ...f, email: "" }));
             }}
           >
-            invite existing user
+            Invite Existing User
           </button>
           <button
             className={mode === "external" ? "active" : ""}
@@ -150,7 +160,7 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
               setSelectedUser(null);
             }}
           >
-            invite by link
+            Invite By Link
           </button>
         </div>
 
@@ -194,8 +204,8 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
             onClick={handleInvite}
             disabled={mode === "internal" ? !selectedUser : !form.email.trim()}
           >
-            <span>send invite</span>
-            <span className="arrow">›</span>
+            <span>Send Invite</span>
+            <IoChevronForward size={20} />
           </button>
 
           <p className="invite-help">
@@ -207,13 +217,13 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
 
         {mode === "internal" && (
           <>
-            <h3 className="pending-title">select a user to invite</h3>
+            <h3 className="pending-title">Select a User to Invite</h3>
 
             <div className="search-row">
               <span className="search-icon">🔎</span>
               <input
                 className="search-input"
-                placeholder="search by name or email…"
+                placeholder="Search by name or email…"
                 value={userQuery}
                 onChange={(e) => setUserQuery(e.target.value)}
               />
@@ -242,7 +252,9 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                           {user.displayName || user.email}
                         </span>
                       </div>
-                      <span className="invite-status pending">{user.email}</span>
+                      <span className="invite-status pending">
+                        {user.email}
+                      </span>
                     </div>
                   );
                 })
@@ -263,8 +275,13 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
 
               {inviteLink && (
                 <div className="overlay-email-preview">
-                  <p><strong>email preview:</strong></p>
-                  <p><em>subject:</em> you've been invited to join a team on gobearai</p>
+                  <p>
+                    <strong>email preview:</strong>
+                  </p>
+                  <p>
+                    <em>subject:</em> you've been invited to join a team on
+                    gobearai
+                  </p>
                   <p>
                     <em>body:</em> click the link to join the team: <br />
                     <code>{inviteLink}</code>
@@ -273,7 +290,10 @@ export default function InviteMembersModal({ onClose, teams = [], onInvite }) {
                 </div>
               )}
 
-              <button className="overlay-ok" onClick={() => setShowSentOverlay(false)}>
+              <button
+                className="overlay-ok"
+                onClick={() => setShowSentOverlay(false)}
+              >
                 ok
               </button>
             </div>
